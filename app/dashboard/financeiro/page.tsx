@@ -430,7 +430,7 @@ export default function FinanceiroPage() {
                           </Badge>
                         </Table.TableCell>
                         <Table.TableCell className="px-3 py-4 font-semibold">
-                          {record.descricao?.length > 30
+                          {record.descricao != null && record.descricao?.length > 30
                             ? record.descricao?.substring(0, 30) + "..."
                             : record.descricao || "—"}
                         </Table.TableCell>
