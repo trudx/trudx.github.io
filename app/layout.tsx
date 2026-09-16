@@ -23,10 +23,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-
 export const metadata: Metadata = {
   title: "trudx | Sistema de trabalho para freelancers",
-  description: "Clientes, tarefas, agenda e financeiro sob uma única ordem, para quem toca o negócio sozinho.",
+  description:
+    "Clientes, tarefas, agenda e financeiro sob uma única ordem, para quem toca o negócio sozinho.",
   applicationName: "trudx",
   appleWebApp: {
     capable: true,

@@ -18,13 +18,16 @@ export function TasksZoomSetting() {
             Zoom da aba Tarefas
           </Label>
           <p className="text-xs text-muted-foreground">
-            Reduz a escala do Kanban no computador para caber mais colunas. Padrão: {TASKS_ZOOM_DEFAULT}%. Fica salvo
-            neste dispositivo.
+            Reduz a escala do Kanban no computador para caber mais colunas. Padrão:{" "}
+            {TASKS_ZOOM_DEFAULT}%. Fica salvo neste dispositivo.
           </p>
         </div>
 
         <Select.SelectRoot value={String(zoom)} onValueChange={(value) => setZoom(Number(value))}>
-          <Select.SelectTrigger id="settings-tasks-zoom" className="h-11 w-full bg-background sm:w-32">
+          <Select.SelectTrigger
+            id="settings-tasks-zoom"
+            className="h-11 w-full bg-background sm:w-32"
+          >
             <Select.SelectValue>{`${zoom}%`}</Select.SelectValue>
           </Select.SelectTrigger>
           <Select.SelectContent>

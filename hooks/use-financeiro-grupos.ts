@@ -25,12 +25,16 @@ const SELECT_COLUMNS = "id,user_id,nome,termos,created_at";
 /** Nome é obrigatório só quando há mais de uma palavra — com uma só, a palavra já é o nome. */
 function normalizeGrupoInput(termos: string[], nome: string) {
   const normalizedTermos = [...new Set(termos.map((termo) => termo.trim()).filter(Boolean))];
-  if (normalizedTermos.length === 0) return { error: "Informe ao menos uma palavra para agrupar" } as const;
+  if (normalizedTermos.length === 0)
+    return { error: "Informe ao menos uma palavra para agrupar" } as const;
   if (normalizedTermos.length > 1 && !nome.trim()) {
     return { error: "Dê um nome ao card quando usar mais de uma palavra" } as const;
   }
 
-  return { termos: normalizedTermos, nome: normalizedTermos.length > 1 ? nome.trim() : null } as const;
+  return {
+    termos: normalizedTermos,
+    nome: normalizedTermos.length > 1 ? nome.trim() : null,
+  } as const;
 }
 
 export function useFinanceiroGrupos() {
@@ -105,7 +109,11 @@ export function useFinanceiroGrupos() {
 
     try {
       const userId = await getAuthenticatedUserId();
-      await patch(TABLE, { termos: normalized.termos, nome: normalized.nome }, { id, user_id: userId });
+      await patch(
+        TABLE,
+        { termos: normalized.termos, nome: normalized.nome },
+        { id, user_id: userId },
+      );
 
       setGrupos((current) =>
         current.map((grupo) =>

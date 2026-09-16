@@ -38,7 +38,11 @@ import { exportFinanceiroToCsv } from "@/lib/financeiro-csv";
 import { formatDate } from "@/lib/format-date";
 import { normalizeText } from "@/lib/normalize-text";
 
-const tipoLabels: Record<FinanceiroTipo, string> = { gasto: "Gasto", gasto_fixo: "Gasto fixo", ganho: "Ganho" };
+const tipoLabels: Record<FinanceiroTipo, string> = {
+  gasto: "Gasto",
+  gasto_fixo: "Gasto fixo",
+  ganho: "Ganho",
+};
 const tipoStyles: Record<FinanceiroTipo, string> = {
   gasto: "border-rose-200 bg-rose-50 text-rose-800",
   gasto_fixo: "border-amber-200 bg-amber-50 text-amber-800",
@@ -99,8 +103,14 @@ export default function FinanceiroPage() {
     const valorMax = valorAlvo !== null ? valorAlvo * 1.1 : null;
 
     return records.filter((record) => {
-      if (normalizedSearch && !normalizeText(record.descricao ?? "").includes(normalizedSearch)) return false;
-      if (valorMin !== null && valorMax !== null && (record.valor < valorMin || record.valor > valorMax)) return false;
+      if (normalizedSearch && !normalizeText(record.descricao ?? "").includes(normalizedSearch))
+        return false;
+      if (
+        valorMin !== null &&
+        valorMax !== null &&
+        (record.valor < valorMin || record.valor > valorMax)
+      )
+        return false;
       return true;
     });
   }, [records, descricaoBusca, valorBusca]);
@@ -137,7 +147,9 @@ export default function FinanceiroPage() {
 
   function handleExport() {
     const toExport =
-      selectedIds.size > 0 ? filteredRecords.filter((record) => selectedIds.has(record.id)) : filteredRecords;
+      selectedIds.size > 0
+        ? filteredRecords.filter((record) => selectedIds.has(record.id))
+        : filteredRecords;
     exportFinanceiroToCsv(
       toExport,
       clients,
@@ -215,7 +227,11 @@ export default function FinanceiroPage() {
               <Upload />
               Importar OFX
             </Button>
-            <Button type="button" className="h-8 px-3 text-xs font-medium" onClick={() => setIsFormOpen(true)}>
+            <Button
+              type="button"
+              className="h-8 px-3 text-xs font-medium"
+              onClick={() => setIsFormOpen(true)}
+            >
               <Plus />
               Novo lançamento
             </Button>
@@ -223,7 +239,11 @@ export default function FinanceiroPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <FinanceiroSaldoCard linhas={saldoLinhas} isLoading={isLoadingSaldo} onOpen={() => setIsSaldoOpen(true)} />
+          <FinanceiroSaldoCard
+            linhas={saldoLinhas}
+            isLoading={isLoadingSaldo}
+            onOpen={() => setIsSaldoOpen(true)}
+          />
           <div className="rounded-2xl border bg-background p-5">
             <p className="text-xs font-semibold text-muted-foreground">Saldo do período filtrado</p>
             <p
@@ -239,7 +259,9 @@ export default function FinanceiroPage() {
               onValueChange={(value) => setTipoFilter(value as FinanceiroTipo | "all")}
             >
               <Select.SelectTrigger className="h-10 w-full bg-background">
-                <Select.SelectValue>{tipoFilter === "all" ? "Todos" : tipoLabels[tipoFilter]}</Select.SelectValue>
+                <Select.SelectValue>
+                  {tipoFilter === "all" ? "Todos" : tipoLabels[tipoFilter]}
+                </Select.SelectValue>
               </Select.SelectTrigger>
               <Select.SelectContent>
                 <Select.SelectItem value="all">Todos</Select.SelectItem>
@@ -321,7 +343,12 @@ export default function FinanceiroPage() {
                   {selectedIds.size > 0 ? "Exportar selecionados" : "Exportar Excel"}
                 </Button>
                 {selectedIds.size > 0 && (
-                  <Button type="button" variant="destructive" size="sm" onClick={() => setIsBulkDeleteOpen(true)}>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setIsBulkDeleteOpen(true)}
+                  >
                     <Trash2 />
                     Excluir selecionados
                   </Button>
@@ -370,14 +397,17 @@ export default function FinanceiroPage() {
                     <Table.TableCell colSpan={8} className="h-40 text-center">
                       <p className="font-semibold">Nenhum lançamento encontrado</p>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Ajuste o período/tipo/busca, cadastre um lançamento ou importe um extrato OFX.
+                        Ajuste o período/tipo/busca, cadastre um lançamento ou importe um extrato
+                        OFX.
                       </p>
                     </Table.TableCell>
                   </Table.TableRow>
                 ) : (
                   filteredRecords.map((record) => {
                     const client = clients.find((candidate) => candidate.id === record.cliente_id);
-                    const banco = bancosState.bancos.find((candidate) => candidate.id === record.banco_id);
+                    const banco = bancosState.bancos.find(
+                      (candidate) => candidate.id === record.banco_id,
+                    );
                     return (
                       <Table.TableRow
                         key={record.id}
@@ -399,7 +429,11 @@ export default function FinanceiroPage() {
                             {tipoLabels[record.tipo]}
                           </Badge>
                         </Table.TableCell>
-                        <Table.TableCell className="px-3 py-4 font-semibold">{record.descricao?.length > 30 ? record.descricao?.substring(0, 30) + "..." : record.descricao || "—"}</Table.TableCell>
+                        <Table.TableCell className="px-3 py-4 font-semibold">
+                          {record.descricao?.length > 30
+                            ? record.descricao?.substring(0, 30) + "..."
+                            : record.descricao || "—"}
+                        </Table.TableCell>
                         <Table.TableCell className="px-3 py-4 text-muted-foreground">
                           {client?.name ?? "—"}
                         </Table.TableCell>
@@ -485,7 +519,9 @@ export default function FinanceiroPage() {
           onOpenChange={(open) => {
             if (!open) setDeletingRecord(null);
           }}
-          onConfirm={() => (deletingRecord ? handleDeleteRecord(deletingRecord.id) : Promise.resolve(false))}
+          onConfirm={() =>
+            deletingRecord ? handleDeleteRecord(deletingRecord.id) : Promise.resolve(false)
+          }
         />
         <DeleteFinanceiroDialog
           open={isBulkDeleteOpen}

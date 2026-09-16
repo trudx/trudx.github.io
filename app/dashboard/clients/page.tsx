@@ -27,7 +27,15 @@ function isActive(status: string) {
 }
 
 export default function ClientsPage() {
-  const { clients, isLoading, isSaving, deletingClientId, createClient, updateClient, deleteClient } = useClients();
+  const {
+    clients,
+    isLoading,
+    isSaving,
+    deletingClientId,
+    createClient,
+    updateClient,
+    deleteClient,
+  } = useClients();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ClientStatus | "all">("active");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -38,9 +46,13 @@ export default function ClientsPage() {
     const query = search.trim().toLowerCase();
     return clients.filter((client) => {
       const matchesSearch =
-        !query || [client.name, client.contact, client.status].some((value) => value.toLowerCase().includes(query));
+        !query ||
+        [client.name, client.contact, client.status].some((value) =>
+          value.toLowerCase().includes(query),
+        );
       const matchesStatus =
-        statusFilter === "all" || (statusFilter === "active" ? isActive(client.status) : !isActive(client.status));
+        statusFilter === "all" ||
+        (statusFilter === "active" ? isActive(client.status) : !isActive(client.status));
 
       return matchesSearch && matchesStatus;
     });
@@ -65,7 +77,9 @@ export default function ClientsPage() {
         <div>
           <p className="trudx-kicker mb-1.5 text-muted-foreground">Gestão</p>
           <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Clientes</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Gerencie os contatos da sua carteira em um só lugar.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Gerencie os contatos da sua carteira em um só lugar.
+          </p>
         </div>
         <Button type="button" onClick={openCreateDialog} className="h-8 px-3 text-xs font-medium">
           <Plus />
@@ -78,7 +92,12 @@ export default function ClientsPage() {
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <StatCard label="Total de clientes" value={clients.length} icon={<UsersRound />} tone="neutral" />
+            <StatCard
+              label="Total de clientes"
+              value={clients.length}
+              icon={<UsersRound />}
+              tone="neutral"
+            />
             <StatCard
               label="Clientes ativos"
               value={activeCount}
@@ -110,9 +129,16 @@ export default function ClientsPage() {
                 value={statusFilter}
                 onValueChange={(value) => setStatusFilter(value as ClientStatus | "all")}
               >
-                <Select.SelectTrigger aria-label="Filtrar por status" className="h-11 w-full bg-background sm:w-40">
+                <Select.SelectTrigger
+                  aria-label="Filtrar por status"
+                  className="h-11 w-full bg-background sm:w-40"
+                >
                   <Select.SelectValue>
-                    {statusFilter === "all" ? "Todos" : statusFilter === "active" ? "Ativos" : "Inativos"}
+                    {statusFilter === "all"
+                      ? "Todos"
+                      : statusFilter === "active"
+                        ? "Ativos"
+                        : "Inativos"}
                   </Select.SelectValue>
                 </Select.SelectTrigger>
                 <Select.SelectContent>
@@ -163,11 +189,21 @@ export default function ClientsPage() {
                   filteredClients.map((client) => {
                     const active = isActive(client.status);
                     return (
-                      <Table.TableRow key={client.id} onClick={() => openEditDialog(client)} className="cursor-pointer">
-                        <Table.TableCell className="px-3 py-4 font-semibold">{client.name}</Table.TableCell>
-                        <Table.TableCell className="px-3 py-4 text-muted-foreground">{client.contact}</Table.TableCell>
+                      <Table.TableRow
+                        key={client.id}
+                        onClick={() => openEditDialog(client)}
+                        className="cursor-pointer"
+                      >
+                        <Table.TableCell className="px-3 py-4 font-semibold">
+                          {client.name}
+                        </Table.TableCell>
+                        <Table.TableCell className="px-3 py-4 text-muted-foreground">
+                          {client.contact}
+                        </Table.TableCell>
                         <Table.TableCell className="px-3 py-4">
-                          <Badge variant={active ? "secondary" : "outline"}>{active ? "Ativo" : "Inativo"}</Badge>
+                          <Badge variant={active ? "secondary" : "outline"}>
+                            {active ? "Ativo" : "Inativo"}
+                          </Badge>
                         </Table.TableCell>
                         <Table.TableCell className="px-3 py-4 text-muted-foreground">
                           {formatTimestamp(client.created_at)}
@@ -216,7 +252,9 @@ export default function ClientsPage() {
         client={editingClient}
         isSaving={isSaving}
         onOpenChange={setIsFormOpen}
-        onSubmit={(input) => (editingClient ? updateClient(editingClient.id, input) : createClient(input))}
+        onSubmit={(input) =>
+          editingClient ? updateClient(editingClient.id, input) : createClient(input)
+        }
       />
       <DeleteClientDialog
         open={Boolean(deletingClient)}
@@ -225,7 +263,9 @@ export default function ClientsPage() {
         onOpenChange={(open) => {
           if (!open) setDeletingClient(null);
         }}
-        onConfirm={() => (deletingClient ? deleteClient(deletingClient.id) : Promise.resolve(false))}
+        onConfirm={() =>
+          deletingClient ? deleteClient(deletingClient.id) : Promise.resolve(false)
+        }
       />
     </section>
   );

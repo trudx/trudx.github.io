@@ -5,7 +5,14 @@ import { DashboardHero, OverviewDetailDialog, OverviewMetricCard } from "./_comp
 
 //* Libraries Imports
 import { useState } from "react";
-import { CalendarCheck, CalendarClock, CircleAlert, TrendingDown, TrendingUp, UserPlus } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarClock,
+  CircleAlert,
+  TrendingDown,
+  TrendingUp,
+  UserPlus,
+} from "lucide-react";
 
 //* Hooks Imports
 import { useClients } from "@/hooks/use-clients";
@@ -64,7 +71,9 @@ export default function DashboardPage() {
   const totalGastos = gastos.reduce((sum, record) => sum + record.valor, 0);
 
   // `created_at` é timestamp completo; comparar só a parte da data evita erro de fuso.
-  const clientesRecentes = clients.filter((client) => client.created_at.slice(0, 10) >= seteDiasAtras);
+  const clientesRecentes = clients.filter(
+    (client) => client.created_at.slice(0, 10) >= seteDiasAtras,
+  );
 
   const tarefasHoje = tasks.filter((task) => task.due_date === hojeIso);
   const tarefasAmanha = tasks.filter((task) => task.due_date === amanhaIso);

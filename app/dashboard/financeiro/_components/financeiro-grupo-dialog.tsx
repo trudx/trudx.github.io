@@ -83,7 +83,9 @@ export function FinanceiroGrupoDialog({
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
 
-        <div className={`min-w-0 rounded-xl border bg-muted p-4 ${!isHidden && total < 0 ? "text-rose-700" : "text-foreground"}`}>
+        <div
+          className={`min-w-0 rounded-xl border bg-muted p-4 ${!isHidden && total < 0 ? "text-rose-700" : "text-foreground"}`}
+        >
           <p className="text-xs font-semibold uppercase tracking-[0.12em] opacity-75">Total</p>
           <p className="mt-1 text-2xl font-black tracking-[-0.04em]">{formatValor(total)}</p>
           <p className="mt-1 text-xs opacity-75">
@@ -161,7 +163,9 @@ export function FinanceiroGrupoDialog({
                       className="flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm"
                     >
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{record.descricao || "Sem descrição"}</p>
+                        <p className="truncate font-medium">
+                          {record.descricao || "Sem descrição"}
+                        </p>
                         <p className="text-xs text-muted-foreground">{formatDate(record.data)}</p>
                       </div>
                       <p

@@ -6,21 +6,32 @@ import { cn } from "@/lib/utils";
 import { ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
 
 function BreadcrumbRoot({ className, ...props }: React.ComponentProps<"nav">) {
-  return <nav aria-label="breadcrumb" data-slot="breadcrumb" className={cn(className)} {...props} />;
+  return (
+    <nav aria-label="breadcrumb" data-slot="breadcrumb" className={cn(className)} {...props} />
+  );
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
   return (
     <ol
       data-slot="breadcrumb-list"
-      className={cn("flex flex-wrap items-center gap-1.5 text-sm wrap-break-word text-muted-foreground", className)}
+      className={cn(
+        "flex flex-wrap items-center gap-1.5 text-sm wrap-break-word text-muted-foreground",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
-  return <li data-slot="breadcrumb-item" className={cn("inline-flex items-center gap-1", className)} {...props} />;
+  return (
+    <li
+      data-slot="breadcrumb-item"
+      className={cn("inline-flex items-center gap-1", className)}
+      {...props}
+    />
+  );
 }
 
 function BreadcrumbLink({ className, render, ...props }: useRender.ComponentProps<"a">) {

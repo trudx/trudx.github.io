@@ -72,9 +72,14 @@ export function useBancos() {
       toast.success("Banco cadastrado");
       return true;
     } catch (error) {
-      toast.error(isUniqueViolation(error) ? "Esse banco já está cadastrado" : "Não foi possível cadastrar o banco", {
-        description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
-      });
+      toast.error(
+        isUniqueViolation(error)
+          ? "Esse banco já está cadastrado"
+          : "Não foi possível cadastrar o banco",
+        {
+          description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
+        },
+      );
       console.error("Erro ao criar banco:", error);
       return false;
     } finally {

@@ -45,16 +45,20 @@ const modules: ModuleItem[] = [
     index: "01",
     icon: UsersRound,
     title: "Clientes",
-    description: "Cadastre, edite e busque sua carteira de clientes, com indicadores de quem está ativo ou inativo.",
-    image: "https://images.unsplash.com/photo-1758518730384-be3d205838e8?auto=format&fit=crop&q=80&w=800",
+    description:
+      "Cadastre, edite e busque sua carteira de clientes, com indicadores de quem está ativo ou inativo.",
+    image:
+      "https://images.unsplash.com/photo-1758518730384-be3d205838e8?auto=format&fit=crop&q=80&w=800",
     alt: "Aperto de mão profissional entre dois parceiros de negócio",
   },
   {
     index: "02",
     icon: KanbanSquare,
     title: "Tarefas",
-    description: "Um Kanban com colunas que você mesmo configura, e arrasta e solta pra acompanhar cada entrega.",
-    image: "https://images.unsplash.com/photo-1611224885990-ab7363d1f2a9?auto=format&fit=crop&q=80&w=800",
+    description:
+      "Um Kanban com colunas que você mesmo configura, e arrasta e solta pra acompanhar cada entrega.",
+    image:
+      "https://images.unsplash.com/photo-1611224885990-ab7363d1f2a9?auto=format&fit=crop&q=80&w=800",
     alt: "Post-its organizados em colunas de tarefa a fazer, em andamento e concluída",
   },
   {
@@ -63,7 +67,8 @@ const modules: ModuleItem[] = [
     title: "Financeiro",
     description:
       "Extrato de gastos, gastos fixos recorrentes e ganhos — inclusive importando o extrato do seu banco em OFX.",
-    image: "https://images.unsplash.com/photo-1767424412548-1a1ac7f4b9bc?auto=format&fit=crop&q=80&w=800",
+    image:
+      "https://images.unsplash.com/photo-1767424412548-1a1ac7f4b9bc?auto=format&fit=crop&q=80&w=800",
     alt: "Telas com gráficos de análise financeira",
   },
 ];
@@ -109,7 +114,8 @@ const steps: StepItem[] = [
   {
     number: "01",
     title: "Crie sua conta",
-    description: "Menos de 1 minuto, com e-mail e senha. Sem cartão de crédito, sem confirmação por telefone.",
+    description:
+      "Menos de 1 minuto, com e-mail e senha. Sem cartão de crédito, sem confirmação por telefone.",
   },
   {
     number: "02",
@@ -120,7 +126,8 @@ const steps: StepItem[] = [
   {
     number: "03",
     title: "Organize o resto",
-    description: "Suba tarefas pro Kanban, marque compromissos na agenda e controle o financeiro no mesmo lugar.",
+    description:
+      "Suba tarefas pro Kanban, marque compromissos na agenda e controle o financeiro no mesmo lugar.",
   },
 ];
 
@@ -160,7 +167,8 @@ const faqItems: FaqItem[] = [
   },
   {
     question: "Preciso cadastrar cartão de crédito?",
-    answer: "Não. Você cria a conta só com e-mail e senha — sem cartão, sem boleto, sem Pix pra liberar acesso.",
+    answer:
+      "Não. Você cria a conta só com e-mail e senha — sem cartão, sem boleto, sem Pix pra liberar acesso.",
   },
   {
     question: "Vai continuar grátis no futuro?",
@@ -196,7 +204,11 @@ export function LandingPage() {
             >
               Entrar
             </Button>
-            <Button render={<Link href="/signup" />} variant="foreground" className="h-9 px-4 text-xs font-semibold">
+            <Button
+              render={<Link href="/signup" />}
+              variant="foreground"
+              className="h-9 px-4 text-xs font-semibold"
+            >
               Criar conta
             </Button>
           </div>
@@ -218,9 +230,9 @@ export function LandingPage() {
               <div className="mt-9 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start">
                 <BrandMark className="size-14" />
                 <p className="max-w-md text-base leading-7 text-muted-foreground">
-                  O <span className="font-semibold text-foreground">trudx</span> reúne clientes, tarefas, agenda e
-                  financeiro sob uma única ordem — feito pra quem toca o negócio sozinho e não quer pagar mensalidade de
-                  ferramenta corporativa.
+                  O <span className="font-semibold text-foreground">trudx</span> reúne clientes,
+                  tarefas, agenda e financeiro sob uma única ordem — feito pra quem toca o negócio
+                  sozinho e não quer pagar mensalidade de ferramenta corporativa.
                 </p>
               </div>
 
@@ -242,7 +254,11 @@ export function LandingPage() {
                 >
                   Já tenho conta
                 </Button>
-                <InstallAppButton variant="ghost" size="lg" className="h-10 px-4 text-xs font-semibold" />
+                <InstallAppButton
+                  variant="ghost"
+                  size="lg"
+                  className="h-10 px-4 text-xs font-semibold"
+                />
               </div>
 
               <p className="mt-8 flex items-center gap-2 border-t pt-4 text-xs text-muted-foreground">
@@ -262,7 +278,9 @@ export function LandingPage() {
                 <div className="relative flex h-full flex-col justify-between gap-12 px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
                   <div>
                     <p className="trudx-kicker text-background/60">Plano único</p>
-                    <p className="mt-5 text-7xl leading-none font-semibold tracking-[-0.03em]">R$ 0</p>
+                    <p className="mt-5 text-7xl leading-none font-semibold tracking-[-0.03em]">
+                      R$ 0
+                    </p>
                     <p className="mt-3 text-xs text-background/70">Para sempre · Sem cartão</p>
                   </div>
 
@@ -293,7 +311,9 @@ export function LandingPage() {
               { icon: Wallet, label: "Financeiro" },
             ].map(({ icon: Icon, label }, index) => (
               <div key={label} className="flex items-center gap-6">
-                {index > 0 ? <BrandMark boxed={false} className="size-3 text-background/50" /> : null}
+                {index > 0 ? (
+                  <BrandMark boxed={false} className="size-3 text-background/50" />
+                ) : null}
                 <span className="flex items-center gap-2 text-xs font-semibold">
                   <Icon className="size-3.5" strokeWidth={2.5} />
                   {label}
@@ -313,8 +333,9 @@ export function LandingPage() {
               Feito pra quem toca o negócio sozinho
             </h2>
             <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
-              A maioria das ferramentas obriga você a escolher entre pagar caro, perder horas configurando ou aceitar um
-              app raso demais. Aqui a proposta é outra: tudo que importa, sem custo e sem barreira.
+              A maioria das ferramentas obriga você a escolher entre pagar caro, perder horas
+              configurando ou aceitar um app raso demais. Aqui a proposta é outra: tudo que importa,
+              sem custo e sem barreira.
             </p>
           </div>
 
@@ -330,7 +351,9 @@ export function LandingPage() {
                   </span>
                   <span className="text-sm font-semibold text-foreground/25">{index}</span>
                 </div>
-                <h3 className="mt-7 text-xl leading-tight text-foreground font-semibold tracking-[-0.03em]">{title}</h3>
+                <h3 className="mt-7 text-xl leading-tight text-foreground font-semibold tracking-[-0.03em]">
+                  {title}
+                </h3>
                 <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
               </article>
             ))}
@@ -358,8 +381,12 @@ export function LandingPage() {
                   {number}
                 </span>
                 <div className="mt-6 border-t pt-5">
-                  <h3 className="text-xl leading-tight text-foreground font-semibold tracking-[-0.03em]">{title}</h3>
-                  <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">{description}</p>
+                  <h3 className="text-xl leading-tight text-foreground font-semibold tracking-[-0.03em]">
+                    {title}
+                  </h3>
+                  <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">
+                    {description}
+                  </p>
                 </div>
               </article>
             ))}
@@ -399,7 +426,9 @@ export function LandingPage() {
                 <div className="px-5 py-8 lg:px-8 lg:py-10">
                   <div className="flex items-center gap-3">
                     <Icon className="size-4 text-foreground" strokeWidth={2.4} />
-                    <h3 className="text-xl text-foreground font-semibold tracking-[-0.03em]">{title}</h3>
+                    <h3 className="text-xl text-foreground font-semibold tracking-[-0.03em]">
+                      {title}
+                    </h3>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
                 </div>
@@ -418,8 +447,8 @@ export function LandingPage() {
               Pra quem responde por tudo
             </h2>
             <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
-              Se você cobra por projeto, atende cliente final e responde do orçamento à entrega, o trudx foi desenhado
-              pra você.
+              Se você cobra por projeto, atende cliente final e responde do orçamento à entrega, o
+              trudx foi desenhado pra você.
             </p>
           </div>
 
@@ -430,7 +459,9 @@ export function LandingPage() {
                 className="flex min-h-[7.5rem] flex-col justify-between gap-4 border-r border-b p-5 transition-colors hover:bg-muted lg:p-7"
               >
                 <Icon className="size-4 text-foreground" strokeWidth={2.3} />
-                <span className="text-sm leading-tight text-foreground font-semibold tracking-[-0.03em]">{label}</span>
+                <span className="text-sm leading-tight text-foreground font-semibold tracking-[-0.03em]">
+                  {label}
+                </span>
               </div>
             ))}
           </div>
@@ -444,7 +475,9 @@ export function LandingPage() {
             <div className="relative">
               <p className="trudx-kicker text-background/60">Plano único</p>
               <p className="mt-8 text-7xl leading-none font-semibold tracking-[-0.03em]">R$ 0</p>
-              <p className="mt-4 text-xs text-background/70">Para sempre · Sem cobrança escondida</p>
+              <p className="mt-4 text-xs text-background/70">
+                Para sempre · Sem cobrança escondida
+              </p>
 
               <Button
                 render={<Link href="/signup" />}
@@ -492,7 +525,9 @@ export function LandingPage() {
                 className="group border-b border-foreground/20 data-[open]:bg-background"
               >
                 <Collapsible.CollapsibleTrigger className="flex w-full items-center gap-5 py-5 text-left outline-none sm:gap-8">
-                  <span className="text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                   <span className="flex-1 text-lg leading-tight text-foreground sm:text-xl font-semibold tracking-[-0.03em]">
                     {item.question}
                   </span>
@@ -527,7 +562,10 @@ export function LandingPage() {
         />
 
         <div className="relative mx-auto max-w-[92rem] px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
-          <Badge variant="default" className="h-7 gap-2 bg-background px-3 text-xs font-semibold text-foreground">
+          <Badge
+            variant="default"
+            className="h-7 gap-2 bg-background px-3 text-xs font-semibold text-foreground"
+          >
             <BrandMark boxed={false} className="size-3" />
             100% grátis
           </Badge>

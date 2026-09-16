@@ -27,7 +27,11 @@ export function AuthShell({ kicker, title, description, children }: AuthShellPro
       <header className="border-b">
         <nav className="mx-auto flex max-w-[92rem] items-center justify-between px-5 py-3.5 sm:px-8 lg:px-12">
           <AuthBrand />
-          <Button render={<Link href="/" />} variant="ghost" className="h-9 gap-2 px-3 text-xs font-semibold">
+          <Button
+            render={<Link href="/" />}
+            variant="ghost"
+            className="h-9 gap-2 px-3 text-xs font-semibold"
+          >
             <ArrowLeft className="size-4" />
             Voltar
           </Button>
@@ -59,7 +63,9 @@ export function AuthShell({ kicker, title, description, children }: AuthShellPro
         </section>
 
         <section className="flex items-center justify-center px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
-          <div className="w-full max-w-sm rounded-xl border bg-card p-6 shadow-sm sm:p-8">{children}</div>
+          <div className="w-full max-w-sm rounded-xl border bg-card p-6 shadow-sm sm:p-8">
+            {children}
+          </div>
         </section>
       </div>
 

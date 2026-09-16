@@ -36,7 +36,10 @@ export function PeriodFilterControl({ value, onChange }: PeriodFilterControlProp
             size="xs"
             className={cn(value.mode === "month" && "bg-accent font-bold text-accent-foreground")}
             onClick={() =>
-              onChange({ mode: "month", month: value.mode === "range" ? value.start.slice(0, 7) : value.month })
+              onChange({
+                mode: "month",
+                month: value.mode === "range" ? value.start.slice(0, 7) : value.month,
+              })
             }
           >
             Mês
@@ -73,7 +76,9 @@ export function PeriodFilterControl({ value, onChange }: PeriodFilterControlProp
           <Input
             type="month"
             value={value.month}
-            onChange={(event) => event.target.value && onChange({ mode: "month", month: event.target.value })}
+            onChange={(event) =>
+              event.target.value && onChange({ mode: "month", month: event.target.value })
+            }
             className="h-10 flex-1 bg-background"
           />
           <Button
@@ -91,14 +96,18 @@ export function PeriodFilterControl({ value, onChange }: PeriodFilterControlProp
           <Input
             type="date"
             value={value.start}
-            onChange={(event) => onChange({ mode: "range", start: event.target.value, end: value.end })}
+            onChange={(event) =>
+              onChange({ mode: "range", start: event.target.value, end: value.end })
+            }
             className="h-10 bg-background"
             aria-label="Data inicial"
           />
           <Input
             type="date"
             value={value.end}
-            onChange={(event) => onChange({ mode: "range", start: value.start, end: event.target.value })}
+            onChange={(event) =>
+              onChange({ mode: "range", start: value.start, end: event.target.value })
+            }
             className="h-10 bg-background"
             aria-label="Data final"
           />

@@ -80,7 +80,9 @@ export function TaskFormDialog({
             {isEditing ? "Editar tarefa" : "Nova tarefa"}
           </Dialog.DialogTitle>
           <Dialog.DialogDescription>
-            {isEditing ? "Atualize os detalhes da tarefa." : "Planeje uma nova tarefa para o seu fluxo de trabalho."}
+            {isEditing
+              ? "Atualize os detalhes da tarefa."
+              : "Planeje uma nova tarefa para o seu fluxo de trabalho."}
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -125,7 +127,8 @@ export function TaskFormDialog({
               >
                 <Select.SelectTrigger className="h-11 w-full bg-background">
                   <Select.SelectValue>
-                    {columns.find((column) => column.id === form.column_id)?.name ?? "Selecione uma coluna"}
+                    {columns.find((column) => column.id === form.column_id)?.name ??
+                      "Selecione uma coluna"}
                   </Select.SelectValue>
                 </Select.SelectTrigger>
                 <Select.SelectContent>
@@ -150,7 +153,11 @@ export function TaskFormDialog({
               >
                 <Select.SelectTrigger className="h-11 w-full bg-background">
                   <Select.SelectValue>
-                    {form.priority === "low" ? "Baixa" : form.priority === "medium" ? "Média" : "Urgente"}
+                    {form.priority === "low"
+                      ? "Baixa"
+                      : form.priority === "medium"
+                        ? "Média"
+                        : "Urgente"}
                   </Select.SelectValue>
                 </Select.SelectTrigger>
                 <Select.SelectContent>
@@ -221,7 +228,12 @@ export function TaskFormDialog({
             />
           </div>
           <Dialog.DialogFooter className="mt-6 border-t-0 bg-transparent p-0">
-            <Button type="button" variant="outline" disabled={isSaving} onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSaving}
+              onClick={() => onOpenChange(false)}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSaving || !form.column_id}>

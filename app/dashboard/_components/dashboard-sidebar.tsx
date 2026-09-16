@@ -10,7 +10,15 @@ import { ThemeToggle } from "./theme-toggle";
 //* Libraries Imports
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, KanbanSquare, LayoutDashboard, LogOut, Settings, UsersRound, Wallet } from "lucide-react";
+import {
+  CalendarDays,
+  KanbanSquare,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  UsersRound,
+  Wallet,
+} from "lucide-react";
 
 //* Hooks Imports
 import { useLogout } from "@/hooks/use-logout";
@@ -41,7 +49,9 @@ export function DashboardSidebar() {
         aria-label="Ir para a visão geral"
       >
         <BrandMark className="size-6 rounded-md" />
-        <span className="text-[0.8rem] font-semibold tracking-[-0.01em] text-foreground">trudx</span>
+        <span className="text-[0.8rem] font-semibold tracking-[-0.01em] text-foreground">
+          trudx
+        </span>
         <span className="ml-auto rounded-sm bg-muted px-1.5 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
           Free
         </span>
@@ -67,7 +77,9 @@ export function DashboardSidebar() {
                 isActive && "bg-accent font-medium text-foreground hover:bg-accent",
               )}
             >
-              <Icon className={cn("size-3.5 text-muted-foreground", isActive && "text-foreground")} />
+              <Icon
+                className={cn("size-3.5 text-muted-foreground", isActive && "text-foreground")}
+              />
               <span>{label}</span>
             </Button>
           );

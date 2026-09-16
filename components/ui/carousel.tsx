@@ -136,7 +136,10 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
 
   return (
     <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
-      <div className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)} {...props} />
+      <div
+        className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
+        {...props}
+      />
     </div>
   );
 }
@@ -149,7 +152,11 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"
-      className={cn("min-w-0 shrink-0 grow-0 basis-full", orientation === "horizontal" ? "pl-4" : "pt-4", className)}
+      className={cn(
+        "min-w-0 shrink-0 grow-0 basis-full",
+        orientation === "horizontal" ? "pl-4" : "pt-4",
+        className,
+      )}
       {...props}
     />
   );
@@ -170,7 +177,9 @@ function CarouselPrevious({
       size={size}
       className={cn(
         "absolute touch-manipulation rounded-full",
-        orientation === "horizontal" ? "inset-y-0 -left-12 my-auto" : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+        orientation === "horizontal"
+          ? "inset-y-0 -left-12 my-auto"
+          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
       disabled={!canScrollPrev}
@@ -198,7 +207,9 @@ function CarouselNext({
       size={size}
       className={cn(
         "absolute touch-manipulation rounded-full",
-        orientation === "horizontal" ? "inset-y-0 -right-12 my-auto" : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+        orientation === "horizontal"
+          ? "inset-y-0 -right-12 my-auto"
+          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
       disabled={!canScrollNext}
@@ -211,7 +222,15 @@ function CarouselNext({
   );
 }
 
-export { type CarouselApi, CarouselRoot, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, useCarousel };
+export {
+  type CarouselApi,
+  CarouselRoot,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  useCarousel,
+};
 
 const Carousel = {
   CarouselRoot,

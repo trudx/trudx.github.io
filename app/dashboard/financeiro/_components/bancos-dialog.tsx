@@ -39,7 +39,8 @@ export function BancosDialog({
   const [preset, setPreset] = useState("");
   const [nomeCustom, setNomeCustom] = useState("");
 
-  const nomeParaSalvar = nomeCustom.trim() || BANCOS_BRASILEIROS.find((banco) => banco.codigo === preset)?.nome || "";
+  const nomeParaSalvar =
+    nomeCustom.trim() || BANCOS_BRASILEIROS.find((banco) => banco.codigo === preset)?.nome || "";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,7 +54,9 @@ export function BancosDialog({
     <Dialog.DialogRoot open={open} onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-background p-6 sm:max-w-lg sm:p-8">
         <Dialog.DialogHeader>
-          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">Bancos</Dialog.DialogTitle>
+          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
+            Bancos
+          </Dialog.DialogTitle>
           <Dialog.DialogDescription>
             Cadastre os bancos que você usa pra anexar aos lançamentos e importações.
           </Dialog.DialogDescription>
@@ -71,7 +74,8 @@ export function BancosDialog({
             >
               <Select.SelectTrigger className="h-11 w-full bg-background">
                 <Select.SelectValue>
-                  {BANCOS_BRASILEIROS.find((banco) => banco.codigo === preset)?.nome ?? "Selecione..."}
+                  {BANCOS_BRASILEIROS.find((banco) => banco.codigo === preset)?.nome ??
+                    "Selecione..."}
                 </Select.SelectValue>
               </Select.SelectTrigger>
               <Select.SelectContent>
@@ -112,7 +116,10 @@ export function BancosDialog({
             </li>
           )}
           {bancos.map((banco) => (
-            <li key={banco.id} className="flex items-center gap-3 rounded-lg border bg-background p-3">
+            <li
+              key={banco.id}
+              className="flex items-center gap-3 rounded-lg border bg-background p-3"
+            >
               <p className="min-w-0 flex-1 truncate text-sm font-medium">{banco.nome}</p>
               <Button
                 type="button"

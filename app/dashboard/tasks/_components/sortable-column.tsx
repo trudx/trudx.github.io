@@ -23,10 +23,18 @@ type SortableColumnProps = {
   onDelete: (id: string) => Promise<boolean>;
 };
 
-export function SortableColumn({ column, taskCount, isSaving, onRename, onDelete }: SortableColumnProps) {
+export function SortableColumn({
+  column,
+  taskCount,
+  isSaving,
+  onRename,
+  onDelete,
+}: SortableColumnProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(column.name);
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: column.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: column.id,
+  });
   const style = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     transition,

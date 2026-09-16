@@ -31,23 +31,35 @@ export function DeleteTaskDialog({
     <Dialog.DialogRoot open={open} onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="bg-background p-8 sm:max-w-md">
         <Dialog.DialogHeader>
-          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">Excluir tarefa?</Dialog.DialogTitle>
+          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
+            Excluir tarefa?
+          </Dialog.DialogTitle>
           <Dialog.DialogDescription>
             Essa ação removerá <strong>{taskTitle}</strong> e não pode ser desfeita.
           </Dialog.DialogDescription>
           {/* O tempo registrado some junto (FK em cascade) e sai dos totais do dia/semana/mês. */}
           {loggedSeconds > 0 && (
             <Dialog.DialogDescription className="text-destructive">
-              Essa tarefa tem <strong>{formatDuration(loggedSeconds)}</strong> de tempo registrado, que também será
-              excluído dos seus totais.
+              Essa tarefa tem <strong>{formatDuration(loggedSeconds)}</strong> de tempo registrado,
+              que também será excluído dos seus totais.
             </Dialog.DialogDescription>
           )}
         </Dialog.DialogHeader>
         <Dialog.DialogFooter className="mt-4 border-t-0 bg-transparent p-0">
-          <Button type="button" variant="outline" disabled={isDeleting} onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isDeleting}
+            onClick={() => onOpenChange(false)}
+          >
             Cancelar
           </Button>
-          <Button type="button" variant="destructive" disabled={isDeleting} onClick={() => void handleConfirm()}>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isDeleting}
+            onClick={() => void handleConfirm()}
+          >
             {isDeleting ? "Excluindo..." : "Excluir tarefa"}
           </Button>
         </Dialog.DialogFooter>

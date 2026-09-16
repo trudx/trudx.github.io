@@ -37,10 +37,13 @@ export type FinanceiroInput = {
   fitid?: string | null;
 };
 
-export type PeriodFilter = { mode: "month"; month: string } | { mode: "range"; start: string; end: string };
+export type PeriodFilter =
+  | { mode: "month"; month: string }
+  | { mode: "range"; start: string; end: string };
 
 const TABLE = "financeiro";
-const SELECT_COLUMNS = "id,user_id,data,tipo,valor,descricao,cliente_id,gasto_fixo_id,banco_id,fitid,created_at";
+const SELECT_COLUMNS =
+  "id,user_id,data,tipo,valor,descricao,cliente_id,gasto_fixo_id,banco_id,fitid,created_at";
 
 function pad(value: number) {
   return String(value).padStart(2, "0");
@@ -65,7 +68,8 @@ export function getPeriodRange(period: PeriodFilter) {
 export function getLastDaysPeriod(days: number): PeriodFilter {
   const end = new Date();
   const start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - (days - 1));
-  const toIso = (date: Date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const toIso = (date: Date) =>
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   return { mode: "range", start: toIso(start), end: toIso(end) };
 }
 
@@ -112,7 +116,8 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
   }, [periodFilter]);
 
   const records = useMemo(
-    () => (tipoFilter === "all" ? allRecords : allRecords.filter((record) => record.tipo === tipoFilter)),
+    () =>
+      tipoFilter === "all" ? allRecords : allRecords.filter((record) => record.tipo === tipoFilter),
     [allRecords, tipoFilter],
   );
 
@@ -134,7 +139,9 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
       return true;
     } catch (error) {
       toast.error(
-        isUniqueViolation(error) ? "Esse lançamento já foi importado" : "Não foi possível cadastrar o lançamento",
+        isUniqueViolation(error)
+          ? "Esse lançamento já foi importado"
+          : "Não foi possível cadastrar o lançamento",
         {
           description: isUniqueViolation(error)
             ? "Essa transação do extrato já está no financeiro."
@@ -167,7 +174,9 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
         data.map((record) => duplicateKey(record.data, record.valor, record.descricao ?? "")),
       );
 
-      return inputs.filter((input) => existingKeys.has(duplicateKey(input.data, input.valor, input.descricao)));
+      return inputs.filter((input) =>
+        existingKeys.has(duplicateKey(input.data, input.valor, input.descricao)),
+      );
     } catch (error) {
       toast.error("Não foi possível checar lançamentos duplicados", {
         description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
@@ -185,19 +194,29 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
 
     try {
       const userId = await getAuthenticatedUserId();
-      const rows = inputs.map((input) => ({ ...input, descricao: input.descricao.trim() || null, user_id: userId }));
-      const data = await upsertIgnoring<{ id: string }>(TABLE, rows, { onConflict: "user_id,fitid", select: "id" });
+      const rows = inputs.map((input) => ({
+        ...input,
+        descricao: input.descricao.trim() || null,
+        user_id: userId,
+      }));
+      const data = await upsertIgnoring<{ id: string }>(TABLE, rows, {
+        onConflict: "user_id,fitid",
+        select: "id",
+      });
 
       await fetchRecords();
 
       const inserted = data.length;
       const skipped = rows.length - inserted;
-      toast.success(`${inserted} lançamento${inserted === 1 ? "" : "s"} importado${inserted === 1 ? "" : "s"}`, {
-        description:
-          skipped > 0
-            ? `${skipped} já estava${skipped === 1 ? "" : "m"} no financeiro e ${skipped === 1 ? "foi ignorado" : "foram ignorados"}.`
-            : undefined,
-      });
+      toast.success(
+        `${inserted} lançamento${inserted === 1 ? "" : "s"} importado${inserted === 1 ? "" : "s"}`,
+        {
+          description:
+            skipped > 0
+              ? `${skipped} já estava${skipped === 1 ? "" : "m"} no financeiro e ${skipped === 1 ? "foi ignorado" : "foram ignorados"}.`
+              : undefined,
+        },
+      );
       return { inserted, skipped };
     } catch (error) {
       toast.error("Não foi possível importar os lançamentos", {
@@ -242,7 +261,9 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
 
       const idSet = new Set(ids);
       setAllRecords((current) => current.filter((record) => !idSet.has(record.id)));
-      toast.success(`${ids.length} lançamento${ids.length === 1 ? "" : "s"} excluído${ids.length === 1 ? "" : "s"}`);
+      toast.success(
+        `${ids.length} lançamento${ids.length === 1 ? "" : "s"} excluído${ids.length === 1 ? "" : "s"}`,
+      );
       return true;
     } catch (error) {
       toast.error("Não foi possível excluir os lançamentos", {

@@ -9,7 +9,9 @@ export function AuthBrand({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
       <BrandMark />
-      <span className="text-xl leading-none text-foreground font-semibold tracking-[-0.03em]">trudx</span>
+      <span className="text-xl leading-none text-foreground font-semibold tracking-[-0.03em]">
+        trudx
+      </span>
     </div>
   );
 }

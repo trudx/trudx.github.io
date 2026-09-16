@@ -60,9 +60,12 @@ export function ManageColumnsDialog({
     <Dialog.DialogRoot open={open} onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-background p-6 sm:max-w-lg sm:p-8">
         <Dialog.DialogHeader>
-          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">Gerenciar colunas</Dialog.DialogTitle>
+          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
+            Gerenciar colunas
+          </Dialog.DialogTitle>
           <Dialog.DialogDescription>
-            Organize as etapas do seu fluxo. Colunas com tarefas precisam ser esvaziadas antes de serem excluídas.
+            Organize as etapas do seu fluxo. Colunas com tarefas precisam ser esvaziadas antes de
+            serem excluídas.
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
         <div className="flex gap-2">
@@ -75,13 +78,20 @@ export function ManageColumnsDialog({
             placeholder="Nome da nova coluna"
             aria-label="Nome da nova coluna"
           />
-          <Button type="button" disabled={isSaving || !newColumnName.trim()} onClick={() => void addColumn()}>
+          <Button
+            type="button"
+            disabled={isSaving || !newColumnName.trim()}
+            onClick={() => void addColumn()}
+          >
             <Plus />
             Adicionar
           </Button>
         </div>
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={columns.map((column) => column.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={columns.map((column) => column.id)}
+            strategy={verticalListSortingStrategy}
+          >
             <ul className="space-y-2">
               {columns.map((column) => (
                 <SortableColumn

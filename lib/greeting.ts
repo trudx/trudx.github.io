@@ -7,13 +7,21 @@ const greetingsByPeriod: Record<GreetingPeriod, ((name: string) => string)[]> = 
     (name) => `Boa madrugada, ${name}`,
     (name) => `Silêncio bom pra trabalhar, ${name}?`,
   ],
-  manha: [(name) => `Bom dia, ${name}`, (name) => `Hora do café, ${name}?`, (name) => `Começando o dia, ${name}?`],
+  manha: [
+    (name) => `Bom dia, ${name}`,
+    (name) => `Hora do café, ${name}?`,
+    (name) => `Começando o dia, ${name}?`,
+  ],
   tarde: [
     (name) => `Boa tarde, ${name}`,
     (name) => `Como vai a tarde, ${name}?`,
     (name) => `De volta ao trabalho, ${name}?`,
   ],
-  noite: [(name) => `Boa noite, ${name}`, (name) => `Fechando o dia, ${name}?`, (name) => `Últimos ajustes, ${name}?`],
+  noite: [
+    (name) => `Boa noite, ${name}`,
+    (name) => `Fechando o dia, ${name}?`,
+    (name) => `Últimos ajustes, ${name}?`,
+  ],
 };
 
 export function getGreetingPeriod(date: Date): GreetingPeriod {

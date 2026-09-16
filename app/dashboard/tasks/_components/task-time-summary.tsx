@@ -27,7 +27,12 @@ type TaskTimeSummaryProps = {
  * cards re-renderizem por segundo — não o quadro inteiro, que estaria brigando com o dnd-kit no
  * meio de um arrasto.
  */
-export function TaskTimeSummary({ totais, totaisAtualizadosEm, isRunning, isLoading }: TaskTimeSummaryProps) {
+export function TaskTimeSummary({
+  totais,
+  totaisAtualizadosEm,
+  isRunning,
+  isLoading,
+}: TaskTimeSummaryProps) {
   // O baseline anda junto do valor pra que, quando ele muda (cronômetro novo, ou totais relidos do
   // servidor), a sobra do ciclo anterior não apareça no intervalo entre o render e o primeiro tick.
   const [tick, setTick] = useState({ baseline: totaisAtualizadosEm, segundos: 0 });
@@ -73,7 +78,11 @@ export function TaskTimeSummary({ totais, totaisAtualizadosEm, isRunning, isLoad
               <Skeleton className="mt-4 h-9 w-28" />
             ) : (
               <p className="mt-4 text-3xl font-black tracking-[-0.06em] text-foreground tabular-nums">
-                {seconds === 0 ? "—" : isRunning ? formatStopwatch(seconds) : formatDuration(seconds)}
+                {seconds === 0
+                  ? "—"
+                  : isRunning
+                    ? formatStopwatch(seconds)
+                    : formatDuration(seconds)}
               </p>
             )}
           </div>

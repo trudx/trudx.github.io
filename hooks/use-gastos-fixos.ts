@@ -100,7 +100,11 @@ export function useGastosFixos() {
 
     try {
       const userId = await getAuthenticatedUserId();
-      await patch("gastos_fixos", { ...input, descricao: input.descricao.trim() || null }, { id: id, user_id: userId });
+      await patch(
+        "gastos_fixos",
+        { ...input, descricao: input.descricao.trim() || null },
+        { id: id, user_id: userId },
+      );
       await fetchGastosFixos();
       toast.success("Gasto fixo atualizado");
       return true;
@@ -117,7 +121,9 @@ export function useGastosFixos() {
 
   async function toggleAtivo(id: string, ativo: boolean) {
     const previousGastosFixos = gastosFixos;
-    setGastosFixos((current) => current.map((gasto) => (gasto.id === id ? { ...gasto, ativo } : gasto)));
+    setGastosFixos((current) =>
+      current.map((gasto) => (gasto.id === id ? { ...gasto, ativo } : gasto)),
+    );
 
     try {
       const userId = await getAuthenticatedUserId();

@@ -55,7 +55,9 @@ export function LoginForm() {
     <form className="w-full space-y-6" onSubmit={handleSubmit}>
       <div className="border-b pb-5">
         <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Entrar</h1>
-        <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">Acesse sua conta para continuar.</p>
+        <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">
+          Acesse sua conta para continuar.
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -106,7 +108,10 @@ export function LoginForm() {
 
       <p className="text-center text-xs text-muted-foreground">
         Não tem conta?{" "}
-        <Link href="/signup" className="font-semibold text-foreground underline-offset-4 hover:underline">
+        <Link
+          href="/signup"
+          className="font-semibold text-foreground underline-offset-4 hover:underline"
+        >
           Cadastre-se
         </Link>
       </p>

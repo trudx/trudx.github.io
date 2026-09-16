@@ -1,35 +1,57 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
-  "files": {
-    "includes": [
-      "app/**",
-      "components/**",
-      "hooks/**",
-      "lib/**",
-      "biome.json",
-      "eslint.config.mjs",
-      "next.config.ts",
-      "postcss.config.mjs"
-    ]
-  },
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "css": {
     "parser": {
       "tailwindDirectives": true
     }
   },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!dist", "!coverage", "!node_modules"]
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 120
+    "lineWidth": 100,
+    "formatWithErrors": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "none",
+      "correctness": {
+        "noUnusedImports": "warn",
+        "noUnusedVariables": "warn",
+        "noUndeclaredVariables": "error"
+      },
+      "style": {
+        "useConst": "error"
+      },
+      "suspicious": {
+        "noVar": "error",
+        "noExplicitAny": "warn"
+      }
+    }
   },
   "javascript": {
     "formatter": {
-      "arrowParentheses": "always",
-      "bracketSpacing": true,
       "quoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "all"
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
     }
   }
 }

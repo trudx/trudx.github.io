@@ -28,7 +28,8 @@ export function useHorizontalScroll<T extends HTMLElement>() {
     const element = ref.current;
     if (!element) return;
     const canScrollLeft = element.scrollLeft > EDGE_TOLERANCE;
-    const canScrollRight = element.scrollLeft + element.clientWidth < element.scrollWidth - EDGE_TOLERANCE;
+    const canScrollRight =
+      element.scrollLeft + element.clientWidth < element.scrollWidth - EDGE_TOLERANCE;
     setEdges((current) =>
       current.canScrollLeft === canScrollLeft && current.canScrollRight === canScrollRight
         ? current

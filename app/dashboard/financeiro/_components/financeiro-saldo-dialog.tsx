@@ -20,7 +20,11 @@ type FinanceiroSaldoDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: FinanceiroSaldoDialogProps) {
+export function FinanceiroSaldoDialog({
+  linhas,
+  bancos,
+  onOpenChange,
+}: FinanceiroSaldoDialogProps) {
   const { isHidden, formatValor } = useFinanceiroPrivacy();
   const { ganhos, saidas, saldo } = resumirLinhas(linhas);
   const porBanco = agruparPorBanco(linhas, bancos);
@@ -29,14 +33,18 @@ export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: Financei
     <Dialog.DialogRoot open onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-background p-6 sm:max-w-lg sm:p-8">
         <Dialog.DialogHeader className="min-w-0">
-          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">Saldo por banco</Dialog.DialogTitle>
+          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
+            Saldo por banco
+          </Dialog.DialogTitle>
           <Dialog.DialogDescription>
             Ganhos, saídas e saldo acumulados até hoje, em cada banco.
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
 
         <div className="min-w-0 rounded-xl border bg-muted p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] opacity-75">Saldo total</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] opacity-75">
+            Saldo total
+          </p>
           <p
             className={`mt-1 text-2xl font-black tracking-[-0.04em] ${!isHidden && saldo < 0 ? "text-rose-700" : "text-foreground"}`}
           >
@@ -50,8 +58,8 @@ export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: Financei
 
         {porBanco.length === 0 ? (
           <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-            Você ainda não cadastrou nenhum banco e não há lançamentos. Use o botão <strong>Bancos</strong> para
-            começar.
+            Você ainda não cadastrou nenhum banco e não há lançamentos. Use o botão{" "}
+            <strong>Bancos</strong> para começar.
           </p>
         ) : (
           <div className="min-w-0 overflow-x-auto">
@@ -75,7 +83,9 @@ export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: Financei
               <Table.TableBody>
                 {porBanco.map((banco) => (
                   <Table.TableRow key={banco.bancoId ?? "sem-banco"}>
-                    <Table.TableCell className="px-3 py-3 font-semibold">{banco.nome}</Table.TableCell>
+                    <Table.TableCell className="px-3 py-3 font-semibold">
+                      {banco.nome}
+                    </Table.TableCell>
                     <Table.TableCell className="px-3 py-3 text-right text-emerald-700">
                       {formatValor(banco.ganhos)}
                     </Table.TableCell>
@@ -96,8 +106,8 @@ export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: Financei
 
         {bancos.length === 0 && porBanco.length > 0 && (
           <p className="text-xs text-muted-foreground">
-            Nenhum banco cadastrado ainda — todos os lançamentos estão em &quot;Sem banco&quot;. Cadastre seus bancos
-            pelo botão <strong>Bancos</strong> para ver a quebra.
+            Nenhum banco cadastrado ainda — todos os lançamentos estão em &quot;Sem banco&quot;.
+            Cadastre seus bancos pelo botão <strong>Bancos</strong> para ver a quebra.
           </p>
         )}
 

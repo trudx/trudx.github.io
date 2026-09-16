@@ -41,7 +41,8 @@ type ImportOfxDialogProps = {
 
 function sumIncluded(groups: OfxGroup[], review: Record<string, OfxReviewState>) {
   return groups.reduce(
-    (sum, group) => (review[group.key]?.include ? sum + group.valor * group.transactions.length : sum),
+    (sum, group) =>
+      review[group.key]?.include ? sum + group.valor * group.transactions.length : sum,
     0,
   );
 }
@@ -90,13 +91,18 @@ export function ImportOfxDialog({
       setGroups(parsedGroups);
       setReview(
         Object.fromEntries(
-          parsedGroups.map((group) => [group.key, { include: true, tipo: group.tipoSugerido, cliente_id: null }]),
+          parsedGroups.map((group) => [
+            group.key,
+            { include: true, tipo: group.tipoSugerido, cliente_id: null },
+          ]),
         ),
       );
     } catch (error) {
       toast.error("Não foi possível ler esse arquivo OFX", {
         description:
-          error instanceof Error ? error.message : "Confira se o arquivo exportado pelo banco não está corrompido.",
+          error instanceof Error
+            ? error.message
+            : "Confira se o arquivo exportado pelo banco não está corrompido.",
       });
       console.error("Erro ao processar OFX:", error);
     } finally {
@@ -190,9 +196,9 @@ export function ImportOfxDialog({
                 Lançamentos parecidos já existem
               </Dialog.DialogTitle>
               <Dialog.DialogDescription>
-                Encontramos {duplicates.length} lançamento{duplicates.length === 1 ? "" : "s"} com a mesma data, valor e
-                descrição de algo que já está no seu extrato. Selecione os que quer importar mesmo assim, ou ignore
-                todos.
+                Encontramos {duplicates.length} lançamento{duplicates.length === 1 ? "" : "s"} com a
+                mesma data, valor e descrição de algo que já está no seu extrato. Selecione os que
+                quer importar mesmo assim, ou ignore todos.
               </Dialog.DialogDescription>
             </>
           ) : (
@@ -201,8 +207,8 @@ export function ImportOfxDialog({
                 Importar extrato OFX
               </Dialog.DialogTitle>
               <Dialog.DialogDescription>
-                Selecione o arquivo exportado pelo seu banco. Transações parecidas são agrupadas para você revisar de
-                uma vez.
+                Selecione o arquivo exportado pelo seu banco. Transações parecidas são agrupadas
+                para você revisar de uma vez.
               </Dialog.DialogDescription>
             </>
           )}
@@ -217,7 +223,9 @@ export function ImportOfxDialog({
                   onCheckedChange={(checked) => toggleDuplicate(index, checked === true)}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{duplicate.descricao || "Sem descrição"}</p>
+                  <p className="truncate text-sm font-medium">
+                    {duplicate.descricao || "Sem descrição"}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDate(duplicate.data)} · {formatValor(duplicate.valor)} ·{" "}
                     {duplicate.tipo === "gasto" ? "Saída" : "Ganho"}
@@ -249,7 +257,8 @@ export function ImportOfxDialog({
               >
                 <Select.SelectTrigger className="h-10 w-full bg-background sm:max-w-xs">
                   <Select.SelectValue>
-                    {bancos.find((banco) => banco.id === bancoId)?.nome ?? "Não quero informar o banco"}
+                    {bancos.find((banco) => banco.id === bancoId)?.nome ??
+                      "Não quero informar o banco"}
                   </Select.SelectValue>
                 </Select.SelectTrigger>
                 <Select.SelectContent>
@@ -269,7 +278,9 @@ export function ImportOfxDialog({
                   <TrendingUp className="size-4" />
                   <span className="text-xs font-bold uppercase tracking-[0.1em]">Ganhos</span>
                 </div>
-                <p className="mt-1 text-lg font-black text-emerald-800">+{formatValor(totalGanhos)}</p>
+                <p className="mt-1 text-lg font-black text-emerald-800">
+                  +{formatValor(totalGanhos)}
+                </p>
               </div>
               <div className="rounded-lg border border-rose-200 bg-rose-50 p-3">
                 <div className="flex items-center gap-2 text-rose-800">
@@ -324,12 +335,19 @@ export function ImportOfxDialog({
           </Button>
           {duplicates ? (
             <>
-              <Button type="button" variant="outline" disabled={isSaving} onClick={() => void handleIgnoreDuplicates()}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSaving}
+                onClick={() => void handleIgnoreDuplicates()}
+              >
                 Ignorar duplicados
               </Button>
               <Button
                 type="button"
-                disabled={isSaving || (pendingUniqueInputs.length === 0 && selectedDuplicates.size === 0)}
+                disabled={
+                  isSaving || (pendingUniqueInputs.length === 0 && selectedDuplicates.size === 0)
+                }
                 onClick={() => void handleConfirmDuplicates()}
               >
                 <Upload />

@@ -21,7 +21,13 @@ const viewLabels: Record<View, string> = {
   agenda: "Agenda",
 };
 
-export function CalendarToolbar({ label, view, views, onNavigate, onView }: ToolbarProps<CalendarEvent>) {
+export function CalendarToolbar({
+  label,
+  view,
+  views,
+  onNavigate,
+  onView,
+}: ToolbarProps<CalendarEvent>) {
   const availableViews = (Array.isArray(views) ? views : (Object.keys(views) as View[])).filter(
     (viewKey) => viewKey !== "work_week",
   );
@@ -39,7 +45,13 @@ export function CalendarToolbar({ label, view, views, onNavigate, onView }: Tool
           >
             <ChevronLeft />
           </Button>
-          <Button type="button" variant="ghost" size="sm" className="px-3 font-semibold" onClick={() => onNavigate("TODAY")}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="px-3 font-semibold"
+            onClick={() => onNavigate("TODAY")}
+          >
             Hoje
           </Button>
           <Button
@@ -52,7 +64,9 @@ export function CalendarToolbar({ label, view, views, onNavigate, onView }: Tool
             <ChevronRight />
           </Button>
         </div>
-        <h2 className="text-xl font-semibold tracking-[-0.03em] text-foreground capitalize">{label}</h2>
+        <h2 className="text-xl font-semibold tracking-[-0.03em] text-foreground capitalize">
+          {label}
+        </h2>
       </div>
 
       <div className="flex w-fit gap-0.5 rounded-lg border bg-muted/40 p-0.5">
@@ -66,7 +80,8 @@ export function CalendarToolbar({ label, view, views, onNavigate, onView }: Tool
             aria-pressed={view === viewKey}
             className={cn(
               "px-3 text-muted-foreground hover:bg-transparent hover:text-foreground dark:hover:bg-transparent",
-              view === viewKey && "bg-card font-semibold text-foreground shadow-sm hover:bg-card dark:hover:bg-card",
+              view === viewKey &&
+                "bg-card font-semibold text-foreground shadow-sm hover:bg-card dark:hover:bg-card",
             )}
           >
             {viewLabels[viewKey]}

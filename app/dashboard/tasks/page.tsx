@@ -115,7 +115,10 @@ export default function TasksPage() {
         if (!container) return;
 
         const containerRect = container.getBoundingClientRect();
-        const newHeight = Math.max(20, Math.min(90, ((e.clientY - containerRect.top) / containerRect.height) * 100));
+        const newHeight = Math.max(
+          20,
+          Math.min(90, ((e.clientY - containerRect.top) / containerRect.height) * 100),
+        );
         setBoardHeight(newHeight);
       };
 
@@ -148,7 +151,8 @@ export default function TasksPage() {
     setIsFormOpen(true);
   }
   function handleDragStart(event: DragStartEvent) {
-    if (event.active.data.current?.type === "task") setActiveTask(event.active.data.current.task as TaskRecord);
+    if (event.active.data.current?.type === "task")
+      setActiveTask(event.active.data.current.task as TaskRecord);
   }
   function handleDragEnd(event: DragEndEvent) {
     const overId = event.over?.id;
@@ -199,24 +203,32 @@ export default function TasksPage() {
   return (
     <TasksZoomContext value={zoomScale}>
       <div className="md:h-[87vh] md:min-h-0 md:overflow-hidden">
-        <section style={{ zoom: zoomScale }} className="flex flex-col gap-8 md:h-full md:min-h-0 md:overflow-hidden">
+        <section
+          style={{ zoom: zoomScale }}
+          className="flex flex-col gap-8 md:h-full md:min-h-0 md:overflow-hidden"
+        >
           <div className="flex shrink-0 flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
             <div>
               <p className="trudx-kicker mb-1.5 text-muted-foreground">Organização</p>
               <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Tarefas</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 <span className="hidden md:inline">
-                  Arraste as tarefas entre as colunas para acompanhar cada etapa. Use a alça no cabeçalho para reordenar
-                  as colunas.
+                  Arraste as tarefas entre as colunas para acompanhar cada etapa. Use a alça no
+                  cabeçalho para reordenar as colunas.
                 </span>
                 <span className="md:hidden">
-                  Deslize para o lado para ver as outras colunas. Segure um card por um instante para arrastá-lo — ou
-                  use o botão de mover no próprio card.
+                  Deslize para o lado para ver as outras colunas. Segure um card por um instante
+                  para arrastá-lo — ou use o botão de mover no próprio card.
                 </span>
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" className="h-11 px-4" onClick={() => setIsManagingColumns(true)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 px-4"
+                onClick={() => setIsManagingColumns(true)}
+              >
                 <SlidersHorizontal />
                 Gerenciar colunas
               </Button>
@@ -271,7 +283,11 @@ export default function TasksPage() {
                           >
                             <TaskCard
                               task={activeTask}
-                              clientName={activeTask.cliente_id ? clientNameById[activeTask.cliente_id] : undefined}
+                              clientName={
+                                activeTask.cliente_id
+                                  ? clientNameById[activeTask.cliente_id]
+                                  : undefined
+                              }
                             />
                           </div>
                         ) : null}
@@ -302,7 +318,9 @@ export default function TasksPage() {
               clients={clients}
               isSaving={isSaving}
               onOpenChange={setIsFormOpen}
-              onSubmit={(input) => (editingTask ? updateTask(editingTask.id, input) : createTask(input))}
+              onSubmit={(input) =>
+                editingTask ? updateTask(editingTask.id, input) : createTask(input)
+              }
             />
             <ManageColumnsDialog
               open={isManagingColumns}
@@ -323,7 +341,9 @@ export default function TasksPage() {
               onOpenChange={(open) => {
                 if (!open) setDeletingTask(null);
               }}
-              onConfirm={() => (deletingTask ? handleDeleteTask(deletingTask.id) : Promise.resolve(false))}
+              onConfirm={() =>
+                deletingTask ? handleDeleteTask(deletingTask.id) : Promise.resolve(false)
+              }
             />
           </div>
         </section>

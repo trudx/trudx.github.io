@@ -52,7 +52,9 @@ export async function parseOfxFile(file: File): Promise<OfxGroup[]> {
   const parsed = parseStrict(text);
 
   const statementResponses = asArray(parsed.OFX.BANKMSGSRSV1?.STMTTRNRS);
-  const rawTransactions = statementResponses.flatMap((response) => asArray(response.STMTRS?.BANKTRANLIST?.STMTTRN));
+  const rawTransactions = statementResponses.flatMap((response) =>
+    asArray(response.STMTRS?.BANKTRANLIST?.STMTTRN),
+  );
 
   if (rawTransactions.length === 0) {
     throw new Error("Nenhuma transação encontrada nesse arquivo OFX.");

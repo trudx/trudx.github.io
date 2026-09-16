@@ -7,7 +7,17 @@ import Button from "@/components/ui/button";
 import { TaskTimerDisplay } from "./task-timer-display";
 
 //* Libraries Imports
-import { ArrowRightLeft, CalendarDays, Clock3, Pencil, Play, Square, Timer, Trash2, User } from "lucide-react";
+import {
+  ArrowRightLeft,
+  CalendarDays,
+  Clock3,
+  Pencil,
+  Play,
+  Square,
+  Timer,
+  Trash2,
+  User,
+} from "lucide-react";
 
 //* Types Imports
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
@@ -47,7 +57,8 @@ const priorityLabels: Record<TaskPriority, string> = {
 };
 const priorityCardStyles: Record<TaskPriority, string> = {
   low: "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-950 dark:bg-zinc-950 dark:text-white",
-  medium: "border-amber-400 bg-amber-400 text-amber-950 dark:border-amber-400 dark:bg-amber-400 dark:text-amber-950",
+  medium:
+    "border-amber-400 bg-amber-400 text-amber-950 dark:border-amber-400 dark:bg-amber-400 dark:text-amber-950",
   high: "border-red-600 bg-red-600 text-white dark:border-red-500 dark:bg-red-500 dark:text-white",
 };
 const priorityBadgeStyles: Record<TaskPriority, string> = {
@@ -69,7 +80,8 @@ const priorityDividerStyles: Record<TaskPriority, string> = {
 // Executando: o card assume o azul e ignora a cor da prioridade, pra dar pra ver de longe o que
 // está rodando. Como o azul é fundo escuro com texto branco, os detalhes reaproveitam as
 // variantes da prioridade "low", que já são feitas pra esse contraste.
-const runningCardStyle = "border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500 dark:text-white";
+const runningCardStyle =
+  "border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500 dark:text-white";
 
 export function TaskCard({
   task,
@@ -124,7 +136,12 @@ export function TaskCard({
       </div>
 
       {task.description && (
-        <p className={cn("mt-2 line-clamp-2 text-sm leading-relaxed", priorityMutedTextStyles[detailPriority])}>
+        <p
+          className={cn(
+            "mt-2 line-clamp-2 text-sm leading-relaxed",
+            priorityMutedTextStyles[detailPriority],
+          )}
+        >
           {task.description}
         </p>
       )}
@@ -186,7 +203,11 @@ export function TaskCard({
                 if (isRunning) timer.onStop();
                 else timer.onStart(task.id);
               }}
-              aria-label={isRunning ? `Finalizar execução de ${task.title}` : `Iniciar execução de ${task.title}`}
+              aria-label={
+                isRunning
+                  ? `Finalizar execução de ${task.title}`
+                  : `Iniciar execução de ${task.title}`
+              }
             >
               {isRunning ? <Square /> : <Play />}
             </Button>

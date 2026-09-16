@@ -38,7 +38,9 @@ export function SignupForm() {
     <form className="w-full space-y-6" onSubmit={handleSubmit}>
       <div className="border-b pb-5">
         <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Criar conta</h1>
-        <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">Comece a organizar seu negócio freelance.</p>
+        <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">
+          Comece a organizar seu negócio freelance.
+        </p>
       </div>
 
       <div className="space-y-4">
@@ -115,7 +117,10 @@ export function SignupForm() {
 
       <p className="text-center text-xs text-muted-foreground">
         Já tem conta?{" "}
-        <Link href="/login" className="font-semibold text-foreground underline-offset-4 hover:underline">
+        <Link
+          href="/login"
+          className="font-semibold text-foreground underline-offset-4 hover:underline"
+        >
           Entrar
         </Link>
       </p>

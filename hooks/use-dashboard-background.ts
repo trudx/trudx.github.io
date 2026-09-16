@@ -29,7 +29,11 @@ function subscribe(onChange: () => void) {
 
 /** Preferência (por dispositivo) de mostrar a ilustração do período do dia no topo da visão geral. */
 export function useDashboardBackground() {
-  const isEnabled = useSyncExternalStore(subscribe, readEnabled, () => DASHBOARD_BACKGROUND_DEFAULT);
+  const isEnabled = useSyncExternalStore(
+    subscribe,
+    readEnabled,
+    () => DASHBOARD_BACKGROUND_DEFAULT,
+  );
 
   const setEnabled = useCallback((value: boolean) => {
     try {

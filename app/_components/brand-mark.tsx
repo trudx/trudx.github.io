@@ -39,7 +39,12 @@ export function BrandMark({ boxed = true, className, starClassName }: BrandMarkP
   }
 
   return (
-    <span className={cn("grid size-9 shrink-0 place-items-center rounded-md bg-foreground text-background", className)}>
+    <span
+      className={cn(
+        "grid size-9 shrink-0 place-items-center rounded-md bg-foreground text-background",
+        className,
+      )}
+    >
       {star}
     </span>
   );

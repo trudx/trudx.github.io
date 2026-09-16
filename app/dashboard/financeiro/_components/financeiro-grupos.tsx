@@ -41,7 +41,10 @@ export function matchGrupoRecords(records: FinanceiroRecord[], termos: string[])
 }
 
 export function sumGrupoRecords(matching: FinanceiroRecord[]) {
-  return matching.reduce((sum, record) => sum + (record.tipo === "ganho" ? record.valor : -record.valor), 0);
+  return matching.reduce(
+    (sum, record) => sum + (record.tipo === "ganho" ? record.valor : -record.valor),
+    0,
+  );
 }
 
 export function FinanceiroGrupos({
@@ -61,7 +64,8 @@ export function FinanceiroGrupos({
 
   function addPendingTermo() {
     const value = newTermo.trim();
-    if (!value || pendingTermos.some((termo) => normalizeText(termo) === normalizeText(value))) return;
+    if (!value || pendingTermos.some((termo) => normalizeText(termo) === normalizeText(value)))
+      return;
     setPendingTermos((current) => [...current, value]);
     setNewTermo("");
   }
@@ -85,12 +89,15 @@ export function FinanceiroGrupos({
     }
   }
 
-  const canCreate = pendingTermos.length === 1 || (pendingTermos.length > 1 && pendingNome.trim().length > 0);
+  const canCreate =
+    pendingTermos.length === 1 || (pendingTermos.length > 1 && pendingNome.trim().length > 0);
   const openGrupo = grupos.find((grupo) => grupo.id === openGrupoId) ?? null;
 
   return (
     <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Cards por palavra-chave</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        Cards por palavra-chave
+      </p>
 
       <div className="flex flex-wrap gap-3">
         {grupos.map((grupo) => {
@@ -129,7 +136,9 @@ export function FinanceiroGrupos({
                 {formatValor(total)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {grupo.termos.length === 1 ? "1 palavra-chave" : `${grupo.termos.length} palavras-chave`}
+                {grupo.termos.length === 1
+                  ? "1 palavra-chave"
+                  : `${grupo.termos.length} palavras-chave`}
               </p>
             </button>
           );
@@ -188,7 +197,12 @@ export function FinanceiroGrupos({
           )}
 
           {pendingTermos.length > 0 && (
-            <Button type="button" size="sm" disabled={isSaving || !canCreate} onClick={() => void handleCreate()}>
+            <Button
+              type="button"
+              size="sm"
+              disabled={isSaving || !canCreate}
+              onClick={() => void handleCreate()}
+            >
               {isSaving ? "Salvando..." : "Criar card"}
             </Button>
           )}

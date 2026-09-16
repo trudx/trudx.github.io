@@ -20,7 +20,10 @@ export function ClientsSkeleton() {
         <div className="overflow-x-auto">
           <div className="min-w-175">
             {Array.from({ length: 5 }, (_, rowIndex) => (
-              <div key={rowIndex} className="grid grid-cols-5 gap-4 border-b px-3 py-4 last:border-b-0">
+              <div
+                key={rowIndex}
+                className="grid grid-cols-5 gap-4 border-b px-3 py-4 last:border-b-0"
+              >
                 {tableColumnWidths.map((width, columnIndex) => (
                   <Skeleton key={columnIndex} className={`h-4 ${width}`} />
                 ))}

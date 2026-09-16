@@ -29,7 +29,14 @@ type DraggableTaskCardProps = TaskCardHandlers & {
   clientName?: string;
 };
 
-export function DraggableTaskCard({ task, clientName, timer, onEdit, onDelete, onQuickEdit }: DraggableTaskCardProps) {
+export function DraggableTaskCard({
+  task,
+  clientName,
+  timer,
+  onEdit,
+  onDelete,
+  onQuickEdit,
+}: DraggableTaskCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     data: {

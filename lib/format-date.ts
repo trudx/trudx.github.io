@@ -10,7 +10,9 @@ export function formatDate(date: string) {
 
 /** Mesma data por extenso abreviado (ex.: 26 de ago. de 2026). */
 export function formatDateLong(date: string) {
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(`${date}T00:00:00`));
+  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(
+    new Date(`${date}T00:00:00`),
+  );
 }
 
 /**

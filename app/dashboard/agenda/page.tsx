@@ -38,7 +38,8 @@ const formats = {
   dateFormat: "d",
   // O "EEE" do pt-BR no date-fns devolve o nome inteiro ("domingo"), então a abreviação é manual.
   weekdayFormat: (date: Date) => format(date, "EEEE", { locale: ptBR }).slice(0, 3),
-  dayFormat: (date: Date) => `${format(date, "EEEE", { locale: ptBR }).slice(0, 3)} ${format(date, "d")}`,
+  dayFormat: (date: Date) =>
+    `${format(date, "EEEE", { locale: ptBR }).slice(0, 3)} ${format(date, "d")}`,
   timeGutterFormat: "HH:mm",
   eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
     `${format(start, "HH:mm")} – ${format(end, "HH:mm")}`,
@@ -68,7 +69,8 @@ const messages = {
 };
 
 export default function AgendaPage() {
-  const { eventos, isLoading, isSaving, deletingId, createEvento, updateEvento, deleteEvento } = useEventos();
+  const { eventos, isLoading, isSaving, deletingId, createEvento, updateEvento, deleteEvento } =
+    useEventos();
   const { clients } = useClients();
   const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
@@ -122,9 +124,15 @@ export default function AgendaPage() {
         <div>
           <p className="trudx-kicker mb-1.5 text-muted-foreground">Agenda</p>
           <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Eventos</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Organize compromissos, reuniões e prazos.</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Organize compromissos, reuniões e prazos.
+          </p>
         </div>
-        <Button type="button" className="h-8 px-3 text-xs font-medium" onClick={() => openCreateDialog()}>
+        <Button
+          type="button"
+          className="h-8 px-3 text-xs font-medium"
+          onClick={() => openCreateDialog()}
+        >
           <Plus />
           Novo evento
         </Button>
@@ -163,7 +171,9 @@ export default function AgendaPage() {
         isSaving={isSaving}
         initialRange={initialRange}
         onOpenChange={setIsFormOpen}
-        onSubmit={(input) => (editingEvento ? updateEvento(editingEvento.id, input) : createEvento(input))}
+        onSubmit={(input) =>
+          editingEvento ? updateEvento(editingEvento.id, input) : createEvento(input)
+        }
         onDelete={editingEvento ? handleDeleteFromForm : undefined}
       />
       <DeleteEventoDialog
@@ -173,7 +183,9 @@ export default function AgendaPage() {
         onOpenChange={(open) => {
           if (!open) setDeletingEvento(null);
         }}
-        onConfirm={() => (deletingEvento ? deleteEvento(deletingEvento.id) : Promise.resolve(false))}
+        onConfirm={() =>
+          deletingEvento ? deleteEvento(deletingEvento.id) : Promise.resolve(false)
+        }
       />
     </section>
   );

@@ -37,14 +37,25 @@ export function OverviewDetailDialog({
     <Dialog.DialogRoot open onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-background p-6 sm:max-w-md sm:p-8">
         <Dialog.DialogHeader className="min-w-0">
-          <Dialog.DialogTitle className="text-xl font-semibold tracking-[-0.03em]">{title}</Dialog.DialogTitle>
+          <Dialog.DialogTitle className="text-xl font-semibold tracking-[-0.03em]">
+            {title}
+          </Dialog.DialogTitle>
           <Dialog.DialogDescription>{description}</Dialog.DialogDescription>
         </Dialog.DialogHeader>
 
         {total && (
           <div className="min-w-0 rounded-xl border bg-muted p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">Total</p>
-            <p className={cn("mt-1 text-2xl font-semibold tracking-[-0.03em] tabular-nums", totalClassName)}>{total}</p>
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              Total
+            </p>
+            <p
+              className={cn(
+                "mt-1 text-2xl font-semibold tracking-[-0.03em] tabular-nums",
+                totalClassName,
+              )}
+            >
+              {total}
+            </p>
           </div>
         )}
 
@@ -56,7 +67,12 @@ export function OverviewDetailDialog({
                 <p className="text-xs text-muted-foreground">{item.secondary}</p>
               </div>
               {item.trailing && (
-                <p className={cn("shrink-0 text-sm font-semibold tabular-nums", item.trailingClassName)}>
+                <p
+                  className={cn(
+                    "shrink-0 text-sm font-semibold tabular-nums",
+                    item.trailingClassName,
+                  )}
+                >
                   {item.trailing}
                 </p>
               )}

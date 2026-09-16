@@ -86,7 +86,11 @@ export function useTaskTimer() {
       );
       setTotaisAtualizadosEm(Date.now());
 
-      setSecondsByTaskId(Object.fromEntries((porTarefa ?? []).map((linha) => [linha.task_id, Number(linha.segundos)])));
+      setSecondsByTaskId(
+        Object.fromEntries(
+          (porTarefa ?? []).map((linha) => [linha.task_id, Number(linha.segundos)]),
+        ),
+      );
     } catch (error) {
       toast.error("Não foi possível carregar os cronômetros", {
         description: getApiErrorMessage(error, "Tente atualizar a página novamente."),
@@ -116,13 +120,17 @@ export function useTaskTimer() {
 
   /** Finaliza o cronômetro ativo no servidor. Devolve os segundos gravados, ou null se nada rodava. */
   async function finalizarNoServidor() {
-    const data = await rpc<TaskTimeEntryRecord | TaskTimeEntryRecord[] | null>("task_time_finalizar");
+    const data = await rpc<TaskTimeEntryRecord | TaskTimeEntryRecord[] | null>(
+      "task_time_finalizar",
+    );
     const entrada = Array.isArray(data) ? (data[0] ?? null) : data;
     if (!entrada?.ended_at) return null;
 
     const segundos = Math.max(
       0,
-      Math.floor((new Date(entrada.ended_at).getTime() - new Date(entrada.started_at).getTime()) / 1000),
+      Math.floor(
+        (new Date(entrada.ended_at).getTime() - new Date(entrada.started_at).getTime()) / 1000,
+      ),
     );
     return { taskId: entrada.task_id, segundos };
   }

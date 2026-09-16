@@ -16,7 +16,12 @@ import type { TaskPriority } from "@/hooks/use-tasks";
 import type { TaskFilterValue } from "@/lib/task-filters";
 
 //* Utils Imports
-import { EMPTY_TASK_FILTERS, SEM_CLIENTE, countActiveFilters, taskPriorityLabels } from "@/lib/task-filters";
+import {
+  EMPTY_TASK_FILTERS,
+  SEM_CLIENTE,
+  countActiveFilters,
+  taskPriorityLabels,
+} from "@/lib/task-filters";
 
 type TaskFiltersProps = {
   value: TaskFilterValue;
@@ -70,10 +75,19 @@ export function TaskFilters({ value, clients, onChange }: TaskFiltersProps) {
         onChange={(priorities) => onChange({ ...value, priorities: priorities as TaskPriority[] })}
       />
 
-      <WeekFilter weekStart={value.weekStart} onChange={(weekStart) => onChange({ ...value, weekStart })} />
+      <WeekFilter
+        weekStart={value.weekStart}
+        onChange={(weekStart) => onChange({ ...value, weekStart })}
+      />
 
       {activeCount > 0 && (
-        <Button type="button" variant="ghost" size="sm" className="h-9" onClick={() => onChange(EMPTY_TASK_FILTERS)}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-9"
+          onClick={() => onChange(EMPTY_TASK_FILTERS)}
+        >
           <X />
           Limpar
         </Button>

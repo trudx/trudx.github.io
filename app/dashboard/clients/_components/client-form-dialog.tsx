@@ -23,7 +23,13 @@ type ClientFormDialogProps = {
 
 const emptyForm: ClientInput = { name: "", contact: "", status: "active" };
 
-export function ClientFormDialog({ open: isOpen, client, isSaving, onOpenChange, onSubmit }: ClientFormDialogProps) {
+export function ClientFormDialog({
+  open: isOpen,
+  client,
+  isSaving,
+  onOpenChange,
+  onSubmit,
+}: ClientFormDialogProps) {
   const [form, setForm] = useState<ClientInput>(() =>
     client
       ? {
@@ -104,7 +110,9 @@ export function ClientFormDialog({ open: isOpen, client, isSaving, onOpenChange,
               }
             >
               <Select.SelectTrigger className="h-11 w-full rounded-md bg-background">
-                <Select.SelectValue>{form.status === "active" ? "Ativo" : "Inativo"}</Select.SelectValue>
+                <Select.SelectValue>
+                  {form.status === "active" ? "Ativo" : "Inativo"}
+                </Select.SelectValue>
               </Select.SelectTrigger>
               <Select.SelectContent>
                 <Select.SelectItem value="active">Ativo</Select.SelectItem>
@@ -114,7 +122,12 @@ export function ClientFormDialog({ open: isOpen, client, isSaving, onOpenChange,
           </div>
 
           <Dialog.DialogFooter className="mt-6 border-t-0 bg-transparent p-0">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSaving}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSaving}>

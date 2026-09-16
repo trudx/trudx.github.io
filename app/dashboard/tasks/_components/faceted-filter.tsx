@@ -42,7 +42,9 @@ export function FacetedFilter({
   const selectedOptions = options.filter((option) => selected.includes(option.value));
 
   function handleToggle(value: string) {
-    onChange(selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value]);
+    onChange(
+      selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value],
+    );
   }
 
   return (
@@ -57,7 +59,11 @@ export function FacetedFilter({
             <Separator orientation="vertical" className="mx-1 h-4" />
             {selectedOptions.length <= 2 ? (
               selectedOptions.map((option) => (
-                <Badge key={option.value} variant="secondary" className="rounded-sm px-1 font-normal">
+                <Badge
+                  key={option.value}
+                  variant="secondary"
+                  className="rounded-sm px-1 font-normal"
+                >
                   {option.label}
                 </Badge>
               ))
@@ -87,7 +93,9 @@ export function FacetedFilter({
                     <span
                       className={cn(
                         "flex size-4 items-center justify-center rounded-sm border",
-                        isSelected ? "border-primary bg-primary text-primary-foreground" : "border-input",
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input",
                       )}
                     >
                       {isSelected && <Check className="size-3" />}
@@ -101,7 +109,11 @@ export function FacetedFilter({
               <>
                 <Command.CommandSeparator />
                 <Command.CommandGroup>
-                  <Command.CommandItem value="__limpar" onSelect={() => onChange([])} className="justify-center">
+                  <Command.CommandItem
+                    value="__limpar"
+                    onSelect={() => onChange([])}
+                    className="justify-center"
+                  >
                     Limpar
                   </Command.CommandItem>
                 </Command.CommandGroup>

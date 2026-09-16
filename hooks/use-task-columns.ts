@@ -63,7 +63,8 @@ export function useTaskColumns() {
     setIsSaving(true);
     try {
       const userId = await getAuthenticatedUserId();
-      const position = columns.reduce((highest, column) => Math.max(highest, column.position), -1) + 1;
+      const position =
+        columns.reduce((highest, column) => Math.max(highest, column.position), -1) + 1;
       await post("task_columns", {
         user_id: userId,
         key: crypto.randomUUID(),
@@ -122,7 +123,9 @@ export function useTaskColumns() {
     } catch (error) {
       const isForeignKeyError = isForeignKeyViolation(error);
       toast.error(
-        isForeignKeyError ? "Não é possível excluir uma coluna com tarefas" : "Não foi possível excluir a coluna",
+        isForeignKeyError
+          ? "Não é possível excluir uma coluna com tarefas"
+          : "Não foi possível excluir a coluna",
         {
           description: isForeignKeyError
             ? "Mova ou exclua as tarefas desta coluna antes de removê-la."

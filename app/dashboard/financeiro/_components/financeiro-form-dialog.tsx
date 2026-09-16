@@ -56,8 +56,12 @@ export function FinanceiroFormDialog({
     <Dialog.DialogRoot open={open} onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-background p-6 sm:max-w-lg sm:p-8">
         <Dialog.DialogHeader>
-          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">Novo lançamento</Dialog.DialogTitle>
-          <Dialog.DialogDescription>Registre um gasto ou ganho no seu extrato.</Dialog.DialogDescription>
+          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
+            Novo lançamento
+          </Dialog.DialogTitle>
+          <Dialog.DialogDescription>
+            Registre um gasto ou ganho no seu extrato.
+          </Dialog.DialogDescription>
         </Dialog.DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -69,7 +73,9 @@ export function FinanceiroFormDialog({
                 type="date"
                 required
                 value={form.data}
-                onChange={(event) => setForm((current) => ({ ...current, data: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, data: event.target.value }))
+                }
                 className="h-11"
               />
             </div>
@@ -83,7 +89,9 @@ export function FinanceiroFormDialog({
                 }
               >
                 <Select.SelectTrigger className="h-11 w-full bg-background">
-                  <Select.SelectValue>{form.tipo === "gasto" ? "Gasto" : "Ganho"}</Select.SelectValue>
+                  <Select.SelectValue>
+                    {form.tipo === "gasto" ? "Gasto" : "Ganho"}
+                  </Select.SelectValue>
                 </Select.SelectTrigger>
                 <Select.SelectContent>
                   <Select.SelectItem value="gasto">Gasto</Select.SelectItem>
@@ -102,7 +110,9 @@ export function FinanceiroFormDialog({
               step="0.01"
               required
               value={form.valor || ""}
-              onChange={(event) => setForm((current) => ({ ...current, valor: Number(event.target.value) }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, valor: Number(event.target.value) }))
+              }
               className="h-11"
             />
           </div>
@@ -112,7 +122,9 @@ export function FinanceiroFormDialog({
             <Input
               id="financeiro-descricao"
               value={form.descricao}
-              onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, descricao: event.target.value }))
+              }
               placeholder="Ex.: Almoço com cliente"
               className="h-11"
             />
@@ -124,7 +136,10 @@ export function FinanceiroFormDialog({
               <Select.SelectRoot
                 value={form.cliente_id ?? "none"}
                 onValueChange={(value) =>
-                  setForm((current) => ({ ...current, cliente_id: value === "none" ? null : value }))
+                  setForm((current) => ({
+                    ...current,
+                    cliente_id: value === "none" ? null : value,
+                  }))
                 }
               >
                 <Select.SelectTrigger className="h-11 w-full bg-background">
@@ -169,7 +184,12 @@ export function FinanceiroFormDialog({
           </div>
 
           <Dialog.DialogFooter className="mt-6 border-t-0 bg-transparent p-0">
-            <Button type="button" variant="outline" disabled={isSaving} onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isSaving}
+              onClick={() => onOpenChange(false)}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSaving}>

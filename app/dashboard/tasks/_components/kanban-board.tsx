@@ -38,7 +38,8 @@ export function KanbanBoard({
   onDelete,
   onQuickEdit,
 }: KanbanBoardProps) {
-  const { ref, canScrollLeft, canScrollRight, scrollByColumn, updateEdges } = useHorizontalScroll<HTMLDivElement>();
+  const { ref, canScrollLeft, canScrollRight, scrollByColumn, updateEdges } =
+    useHorizontalScroll<HTMLDivElement>();
 
   // Criar/remover coluna muda a largura do trilho sem disparar scroll nem resize do container.
   useEffect(() => {
@@ -102,7 +103,9 @@ export function KanbanBoard({
           onClick={() => scrollByColumn(-1)}
           className={cn(
             "absolute top-1/2 left-1 hidden -translate-y-1/2 bg-background/95 shadow-sm backdrop-blur transition-opacity md:inline-flex",
-            canScrollLeft ? "opacity-70 group-hover/board:opacity-100" : "pointer-events-none opacity-0",
+            canScrollLeft
+              ? "opacity-70 group-hover/board:opacity-100"
+              : "pointer-events-none opacity-0",
           )}
         >
           <ChevronLeft />
@@ -115,7 +118,9 @@ export function KanbanBoard({
           onClick={() => scrollByColumn(1)}
           className={cn(
             "absolute top-1/2 right-1 hidden -translate-y-1/2 bg-background/95 shadow-sm backdrop-blur transition-opacity md:inline-flex",
-            canScrollRight ? "opacity-70 group-hover/board:opacity-100" : "pointer-events-none opacity-0",
+            canScrollRight
+              ? "opacity-70 group-hover/board:opacity-100"
+              : "pointer-events-none opacity-0",
           )}
         >
           <ChevronRight />

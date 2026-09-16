@@ -46,7 +46,14 @@ type DashboardHeroProps = {
   children?: ReactNode;
 };
 
-export function DashboardHero({ period, greeting, formattedDate, description, isLoading, children }: DashboardHeroProps) {
+export function DashboardHero({
+  period,
+  greeting,
+  formattedDate,
+  description,
+  isLoading,
+  children,
+}: DashboardHeroProps) {
   const { isEnabled, setEnabled } = useDashboardBackground();
 
   return (
@@ -113,7 +120,9 @@ export function DashboardHero({ period, greeting, formattedDate, description, is
             {isLoading || !greeting ? (
               <Skeleton className="h-10 w-72" />
             ) : (
-              <h1 className="text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl">{greeting}</h1>
+              <h1 className="text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl">
+                {greeting}
+              </h1>
             )}
             <p className="text-sm text-foreground/70 first-letter:uppercase">{formattedDate}</p>
           </div>

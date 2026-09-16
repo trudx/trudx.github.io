@@ -8,7 +8,11 @@ import { formatDate } from "@/lib/format-date";
 
 const BOM = "﻿";
 
-const tipoLabels: Record<FinanceiroTipo, string> = { gasto: "Gasto", gasto_fixo: "Gasto fixo", ganho: "Ganho" };
+const tipoLabels: Record<FinanceiroTipo, string> = {
+  gasto: "Gasto",
+  gasto_fixo: "Gasto fixo",
+  ganho: "Ganho",
+};
 
 function csvEscape(value: string) {
   return /[";\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
@@ -40,7 +44,8 @@ export function exportFinanceiroToCsv(
     ];
   });
 
-  const csvContent = BOM + [header, ...rows].map((row) => row.map(csvEscape).join(";")).join("\r\n");
+  const csvContent =
+    BOM + [header, ...rows].map((row) => row.map(csvEscape).join(";")).join("\r\n");
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
 

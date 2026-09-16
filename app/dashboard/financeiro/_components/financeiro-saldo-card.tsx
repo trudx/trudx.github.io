@@ -26,8 +26,14 @@ type FinanceiroSaldoCardProps = {
  * `gasto_fixo`, mesma regra usada no saldo do período e nos cards de palavra-chave.
  */
 export function resumirLinhas(linhas: FinanceiroTotalLinha[]): SaldoResumo {
-  const ganhos = linhas.reduce((sum, linha) => (linha.tipo === "ganho" ? sum + linha.total : sum), 0);
-  const saidas = linhas.reduce((sum, linha) => (linha.tipo === "ganho" ? sum : sum + linha.total), 0);
+  const ganhos = linhas.reduce(
+    (sum, linha) => (linha.tipo === "ganho" ? sum + linha.total : sum),
+    0,
+  );
+  const saidas = linhas.reduce(
+    (sum, linha) => (linha.tipo === "ganho" ? sum : sum + linha.total),
+    0,
+  );
   return { ganhos, saidas, saldo: ganhos - saidas };
 }
 
@@ -35,7 +41,10 @@ export function resumirLinhas(linhas: FinanceiroTotalLinha[]): SaldoResumo {
  * Quebra os totais por banco. Bancos cadastrados aparecem mesmo sem lançamento (pra dar a foto
  * completa); o balde "sem banco" só aparece se tiver algum lançamento solto.
  */
-export function agruparPorBanco(linhas: FinanceiroTotalLinha[], bancos: BancoRecord[]): SaldoPorBanco[] {
+export function agruparPorBanco(
+  linhas: FinanceiroTotalLinha[],
+  bancos: BancoRecord[],
+): SaldoPorBanco[] {
   const porBanco = bancos
     .map((banco) => ({
       bancoId: banco.id,
@@ -66,7 +75,9 @@ export function FinanceiroSaldoCard({ linhas, isLoading, onOpen }: FinanceiroSal
       {isLoading ? (
         <Skeleton className="mt-4 h-9 w-36" />
       ) : (
-        <p className={`mt-4 text-3xl font-black tracking-[-0.06em] ${!isHidden && saldo < 0 ? "text-rose-700" : "text-foreground"}`}>
+        <p
+          className={`mt-4 text-3xl font-black tracking-[-0.06em] ${!isHidden && saldo < 0 ? "text-rose-700" : "text-foreground"}`}
+        >
           {formatValor(saldo)}
         </p>
       )}

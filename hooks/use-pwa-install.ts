@@ -45,13 +45,18 @@ function readState(): PwaInstallState {
     (navigator as Navigator & { standalone?: boolean }).standalone === true;
   // iPadOS se apresenta como Mac; o toque é o que diferencia.
   const isIos =
-    /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
   return { canPrompt: deferredPrompt !== null, isIos, isInstalled: isStandalone };
 }
 
 export function usePwaInstall() {
-  const [state, setState] = useState<PwaInstallState>({ canPrompt: false, isIos: false, isInstalled: false });
+  const [state, setState] = useState<PwaInstallState>({
+    canPrompt: false,
+    isIos: false,
+    isInstalled: false,
+  });
 
   useEffect(() => {
     function sync() {

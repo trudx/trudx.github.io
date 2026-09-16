@@ -30,6 +30,9 @@ export function formatCurrencyPrivate(value: number, isHidden: boolean) {
 
 export function useFinanceiroPrivacy() {
   const { isHidden, toggle } = useContext(FinanceiroPrivacyContext);
-  const formatValor = useCallback((value: number) => formatCurrencyPrivate(value, isHidden), [isHidden]);
+  const formatValor = useCallback(
+    (value: number) => formatCurrencyPrivate(value, isHidden),
+    [isHidden],
+  );
   return { isHidden, toggle, formatValor };
 }

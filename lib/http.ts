@@ -32,7 +32,10 @@ http.interceptors.request.use(async (config) => {
 
   config.headers.set("apikey", env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
   // Sem sessão, a chave pública vale como bearer e a RLS barra tudo que exige `auth.uid()`.
-  config.headers.set("Authorization", `Bearer ${token ?? env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}`);
+  config.headers.set(
+    "Authorization",
+    `Bearer ${token ?? env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}`,
+  );
 
   return config;
 });
@@ -49,7 +52,10 @@ export class HttpError extends Error {
   readonly hint?: string;
   readonly status?: number;
 
-  constructor(message: string, options: { code?: string; details?: string; hint?: string; status?: number } = {}) {
+  constructor(
+    message: string,
+    options: { code?: string; details?: string; hint?: string; status?: number } = {},
+  ) {
     super(message);
     this.name = "HttpError";
     this.code = options.code;

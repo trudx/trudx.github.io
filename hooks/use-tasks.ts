@@ -148,10 +148,15 @@ export function useTasks() {
     const task = previousTasks.find((currentTask) => currentTask.id === id);
 
     if (!task) return false;
-    if (Object.entries(changes).every(([key, value]) => task[key as keyof TaskQuickPatch] === value)) return true;
+    if (
+      Object.entries(changes).every(([key, value]) => task[key as keyof TaskQuickPatch] === value)
+    )
+      return true;
 
     setTasks((currentTasks) =>
-      currentTasks.map((currentTask) => (currentTask.id === id ? { ...currentTask, ...changes } : currentTask)),
+      currentTasks.map((currentTask) =>
+        currentTask.id === id ? { ...currentTask, ...changes } : currentTask,
+      ),
     );
 
     try {

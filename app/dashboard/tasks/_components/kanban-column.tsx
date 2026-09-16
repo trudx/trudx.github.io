@@ -36,12 +36,13 @@ export function KanbanColumn({
   onDelete,
   onQuickEdit,
 }: KanbanColumnProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({
-    id: column.id,
-    data: {
-      type: "column",
-    },
-  });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } =
+    useSortable({
+      id: column.id,
+      data: {
+        type: "column",
+      },
+    });
 
   const scale = useTasksZoomContext();
   const style = {

@@ -65,7 +65,9 @@ function buildParams({ select, filters, order, limit }: QueryOptions) {
   if (order?.length) {
     params.set(
       "order",
-      order.map(({ column, ascending }) => `${column}.${ascending === false ? "desc" : "asc"}`).join(","),
+      order
+        .map(({ column, ascending }) => `${column}.${ascending === false ? "desc" : "asc"}`)
+        .join(","),
     );
   }
 
@@ -87,7 +89,11 @@ export async function getOne<T>(table: string, options: QueryOptions = {}): Prom
 }
 
 /** Insere um ou vários registros e devolve o que foi gravado. */
-export async function post<T>(table: string, body: object | object[], options: { select?: string } = {}): Promise<T[]> {
+export async function post<T>(
+  table: string,
+  body: object | object[],
+  options: { select?: string } = {},
+): Promise<T[]> {
   const { data } = await http.post<T[]>(`/${table}`, body, {
     params: buildParams({ select: options.select ?? "*" }),
     headers: { Prefer: "return=representation" },

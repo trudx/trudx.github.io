@@ -70,7 +70,10 @@ function ContextMenuLabel({
     <ContextMenuPrimitive.GroupLabel
       data-slot="context-menu-label"
       data-inset={inset}
-      className={cn("px-1.5 py-1 text-xs font-medium text-muted-foreground data-inset:pl-7", className)}
+      className={cn(
+        "px-1.5 py-1 text-xs font-medium text-muted-foreground data-inset:pl-7",
+        className,
+      )}
       {...props}
     />
   );
@@ -128,7 +131,14 @@ function ContextMenuSubTrigger({
 }
 
 function ContextMenuSubContent({ ...props }: React.ComponentProps<typeof ContextMenuContent>) {
-  return <ContextMenuContent data-slot="context-menu-sub-content" className="shadow-lg" side="right" {...props} />;
+  return (
+    <ContextMenuContent
+      data-slot="context-menu-sub-content"
+      className="shadow-lg"
+      side="right"
+      {...props}
+    />
+  );
 }
 
 function ContextMenuCheckboxItem({

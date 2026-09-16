@@ -50,7 +50,10 @@ type FormState = {
   cliente_id: string | null;
 };
 
-function buildInitialForm(evento: EventoRecord | null, initialRange?: { start: Date; end: Date } | null): FormState {
+function buildInitialForm(
+  evento: EventoRecord | null,
+  initialRange?: { start: Date; end: Date } | null,
+): FormState {
   if (evento) {
     const inicioDate = new Date(evento.data_inicio);
     const fimDate = new Date(evento.data_fim);
@@ -131,7 +134,9 @@ export function EventoFormDialog({
             {isEditing ? "Editar evento" : "Novo evento"}
           </Dialog.DialogTitle>
           <Dialog.DialogDescription>
-            {isEditing ? "Atualize os detalhes do evento." : "Agende um novo compromisso na sua agenda."}
+            {isEditing
+              ? "Atualize os detalhes do evento."
+              : "Agende um novo compromisso na sua agenda."}
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
 
@@ -142,7 +147,9 @@ export function EventoFormDialog({
               id="evento-titulo"
               required
               value={form.titulo}
-              onChange={(event) => setForm((current) => ({ ...current, titulo: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, titulo: event.target.value }))
+              }
               placeholder="Ex.: Reunião com cliente"
               className="h-11"
             />
@@ -153,7 +160,9 @@ export function EventoFormDialog({
             <Textarea
               id="evento-descricao"
               value={form.descricao}
-              onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, descricao: event.target.value }))
+              }
               placeholder="Detalhes importantes para esse evento"
             />
           </div>
@@ -163,7 +172,9 @@ export function EventoFormDialog({
             <Input
               id="evento-local"
               value={form.local}
-              onChange={(event) => setForm((current) => ({ ...current, local: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, local: event.target.value }))
+              }
               placeholder="Ex.: Escritório do cliente, chamada de vídeo..."
               className="h-11"
             />
@@ -175,7 +186,10 @@ export function EventoFormDialog({
               checked={form.dia_inteiro}
               onCheckedChange={(checked) => handleDiaInteiroChange(checked === true)}
             />
-            <Label htmlFor="evento-dia-inteiro" className="text-sm font-medium text-muted-foreground">
+            <Label
+              htmlFor="evento-dia-inteiro"
+              className="text-sm font-medium text-muted-foreground"
+            >
               Dia inteiro
             </Label>
           </div>
@@ -188,7 +202,9 @@ export function EventoFormDialog({
                 type={form.dia_inteiro ? "date" : "datetime-local"}
                 required
                 value={form.inicio}
-                onChange={(event) => setForm((current) => ({ ...current, inicio: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, inicio: event.target.value }))
+                }
                 className="h-11"
               />
             </div>
@@ -199,7 +215,9 @@ export function EventoFormDialog({
                 type={form.dia_inteiro ? "date" : "datetime-local"}
                 required
                 value={form.fim}
-                onChange={(event) => setForm((current) => ({ ...current, fim: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, fim: event.target.value }))
+                }
                 className="h-11"
               />
             </div>
@@ -244,7 +262,12 @@ export function EventoFormDialog({
               <span />
             )}
             <div className="flex gap-2">
-              <Button type="button" variant="outline" disabled={isSaving} onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isSaving}
+                onClick={() => onOpenChange(false)}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={isSaving}>

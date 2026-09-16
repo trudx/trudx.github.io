@@ -36,7 +36,8 @@ const priorityOptions: { value: TaskPriority; label: string; style: string }[] =
   {
     value: "low",
     label: "Baixa",
-    style: "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950",
+    style:
+      "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950",
   },
   { value: "medium", label: "Média", style: "border-amber-400 bg-amber-400 text-amber-950" },
   {
@@ -64,7 +65,9 @@ export function TaskQuickEditSheet({
     <Sheet.SheetRoot open onOpenChange={onOpenChange}>
       <Sheet.SheetContent side="right" className="w-full gap-6 p-6 sm:max-w-sm">
         <Sheet.SheetHeader className="p-0">
-          <Sheet.SheetTitle className="text-lg font-bold tracking-[-0.03em]">Edição rápida</Sheet.SheetTitle>
+          <Sheet.SheetTitle className="text-lg font-bold tracking-[-0.03em]">
+            Edição rápida
+          </Sheet.SheetTitle>
           <Sheet.SheetDescription className="line-clamp-2">{task.title}</Sheet.SheetDescription>
         </Sheet.SheetHeader>
 
@@ -101,7 +104,12 @@ export function TaskQuickEditSheet({
             </>
           ) : (
             <>
-              <Button type="button" size="sm" disabled={timer.isSaving} onClick={() => timer.onStart(task.id)}>
+              <Button
+                type="button"
+                size="sm"
+                disabled={timer.isSaving}
+                onClick={() => timer.onStart(task.id)}
+              >
                 <Play />
                 Iniciar execução
               </Button>
@@ -163,7 +171,9 @@ export function TaskQuickEditSheet({
           <Label>Cliente</Label>
           <Select.SelectRoot
             value={task.cliente_id ?? "none"}
-            onValueChange={(value) => void onPatch(task.id, { cliente_id: value === "none" ? null : value })}
+            onValueChange={(value) =>
+              void onPatch(task.id, { cliente_id: value === "none" ? null : value })
+            }
           >
             <Select.SelectTrigger className="h-11 w-full bg-background">
               <Select.SelectValue>{selectedClient?.name ?? "Nenhum"}</Select.SelectValue>
@@ -178,11 +188,15 @@ export function TaskQuickEditSheet({
             </Select.SelectContent>
           </Select.SelectRoot>
           {clients.length === 0 && (
-            <p className="text-xs text-muted-foreground">Você ainda não cadastrou nenhum cliente.</p>
+            <p className="text-xs text-muted-foreground">
+              Você ainda não cadastrou nenhum cliente.
+            </p>
           )}
         </div>
 
-        <p className="mt-auto text-xs text-muted-foreground">As alterações são salvas automaticamente.</p>
+        <p className="mt-auto text-xs text-muted-foreground">
+          As alterações são salvas automaticamente.
+        </p>
       </Sheet.SheetContent>
     </Sheet.SheetRoot>
   );

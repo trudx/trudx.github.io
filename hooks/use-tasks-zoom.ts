@@ -13,7 +13,9 @@ export const TASKS_ZOOM_OPTIONS = [50, 60, 67, 75, 80, 90, 100] as const;
 function readZoom() {
   try {
     const stored = Number(localStorage.getItem(STORAGE_KEY));
-    return TASKS_ZOOM_OPTIONS.includes(stored as (typeof TASKS_ZOOM_OPTIONS)[number]) ? stored : TASKS_ZOOM_DEFAULT;
+    return TASKS_ZOOM_OPTIONS.includes(stored as (typeof TASKS_ZOOM_OPTIONS)[number])
+      ? stored
+      : TASKS_ZOOM_DEFAULT;
   } catch {
     return TASKS_ZOOM_DEFAULT;
   }

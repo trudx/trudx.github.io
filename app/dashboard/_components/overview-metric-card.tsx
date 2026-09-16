@@ -47,7 +47,11 @@ export function OverviewMetricCard({
   const content = (
     <>
       <div className="flex items-start justify-between gap-3">
-        <p className={cn("text-sm font-medium", isHero ? "text-zinc-300" : "text-muted-foreground")}>{label}</p>
+        <p
+          className={cn("text-sm font-medium", isHero ? "text-zinc-300" : "text-muted-foreground")}
+        >
+          {label}
+        </p>
         {Icon && (
           <span
             className={cn(
@@ -84,7 +88,9 @@ export function OverviewMetricCard({
             )}
           >
             {hint}
-            {isClickable && <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />}
+            {isClickable && (
+              <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            )}
           </p>
         )}
       </div>
@@ -107,7 +113,9 @@ export function OverviewMetricCard({
       className={cn(
         className,
         "group transition-all duration-300",
-        isHero ? "hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl" : "hover:bg-accent/40",
+        isHero
+          ? "hover:-translate-y-1 hover:border-white/25 hover:shadow-2xl"
+          : "hover:bg-accent/40",
       )}
     >
       {content}

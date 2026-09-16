@@ -19,7 +19,10 @@ type InstallAppButtonProps = Omit<ComponentProps<typeof Button>, "onClick" | "ch
   label?: string;
 };
 
-export function InstallAppButton({ label = "Instalar app", ...buttonProps }: InstallAppButtonProps) {
+export function InstallAppButton({
+  label = "Instalar app",
+  ...buttonProps
+}: InstallAppButtonProps) {
   const { canPrompt, isIos, isInstalled, install } = usePwaInstall();
   const [isIosHelpOpen, setIsIosHelpOpen] = useState(false);
 
@@ -33,7 +36,8 @@ export function InstallAppButton({ label = "Instalar app", ...buttonProps }: Ins
     }
 
     const outcome = await install();
-    if (outcome === "accepted") toast.success("izi Freelas instalado", { description: "Abra pelo ícone na sua tela." });
+    if (outcome === "accepted")
+      toast.success("izi Freelas instalado", { description: "Abra pelo ícone na sua tela." });
   }
 
   return (
@@ -46,7 +50,9 @@ export function InstallAppButton({ label = "Instalar app", ...buttonProps }: Ins
       <Dialog.DialogRoot open={isIosHelpOpen} onOpenChange={setIsIosHelpOpen}>
         <Dialog.DialogContent className="bg-background p-6 sm:max-w-sm sm:p-8">
           <Dialog.DialogHeader>
-            <Dialog.DialogTitle className="text-xl font-semibold tracking-[-0.03em]">Instalar no iPhone</Dialog.DialogTitle>
+            <Dialog.DialogTitle className="text-xl font-semibold tracking-[-0.03em]">
+              Instalar no iPhone
+            </Dialog.DialogTitle>
             <Dialog.DialogDescription>
               O Safari não tem botão de instalação automática. Leva 3 toques:
             </Dialog.DialogDescription>

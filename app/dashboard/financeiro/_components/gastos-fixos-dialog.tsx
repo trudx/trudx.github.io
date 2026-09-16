@@ -80,7 +80,9 @@ export function GastosFixosDialog({
     <Dialog.DialogRoot open={open} onOpenChange={onOpenChange}>
       <Dialog.DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto bg-background p-6 sm:max-w-2xl sm:p-8">
         <Dialog.DialogHeader>
-          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">Gastos fixos</Dialog.DialogTitle>
+          <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
+            Gastos fixos
+          </Dialog.DialogTitle>
           <Dialog.DialogDescription>
             Enquanto ativos, geram um lançamento automático no dia de cobrança de cada mês.
           </Dialog.DialogDescription>
@@ -93,7 +95,9 @@ export function GastosFixosDialog({
               <Input
                 id="gasto-fixo-descricao"
                 value={form.descricao}
-                onChange={(event) => setForm((current) => ({ ...current, descricao: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, descricao: event.target.value }))
+                }
                 placeholder="Ex.: Aluguel"
                 className="h-11"
               />
@@ -107,7 +111,9 @@ export function GastosFixosDialog({
                 step="0.01"
                 required
                 value={form.valor || ""}
-                onChange={(event) => setForm((current) => ({ ...current, valor: Number(event.target.value) }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, valor: Number(event.target.value) }))
+                }
                 className="h-11"
               />
             </div>
@@ -123,7 +129,9 @@ export function GastosFixosDialog({
                 max="31"
                 required
                 value={form.dia_cobranca}
-                onChange={(event) => setForm((current) => ({ ...current, dia_cobranca: Number(event.target.value) }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, dia_cobranca: Number(event.target.value) }))
+                }
                 className="h-11"
               />
             </div>
@@ -134,7 +142,9 @@ export function GastosFixosDialog({
                 type="date"
                 required
                 value={form.data_inicio}
-                onChange={(event) => setForm((current) => ({ ...current, data_inicio: event.target.value }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, data_inicio: event.target.value }))
+                }
                 className="h-11"
               />
             </div>
@@ -144,7 +154,9 @@ export function GastosFixosDialog({
                 id="gasto-fixo-fim"
                 type="date"
                 value={form.data_fim ?? ""}
-                onChange={(event) => setForm((current) => ({ ...current, data_fim: event.target.value || null }))}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, data_fim: event.target.value || null }))
+                }
                 className="h-11"
               />
             </div>
@@ -169,7 +181,10 @@ export function GastosFixosDialog({
             </li>
           )}
           {gastosFixos.map((gasto) => (
-            <li key={gasto.id} className="flex items-center gap-3 rounded-lg border bg-background p-3">
+            <li
+              key={gasto.id}
+              className="flex items-center gap-3 rounded-lg border bg-background p-3"
+            >
               <Switch
                 checked={gasto.ativo}
                 onCheckedChange={(checked) => void onToggleAtivo(gasto.id, checked)}

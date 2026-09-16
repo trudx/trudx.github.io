@@ -50,8 +50,10 @@ export function OfxGroupCard({ group, review, clients, onUpdate }: OfxGroupCardP
           <div>
             <p className="font-medium">{group.descricao}</p>
             <p className="text-xs text-muted-foreground">
-              {group.transactions.length === 1 ? "1 transação" : `${group.transactions.length} transações`} ·{" "}
-              {formatValor(group.valor)} {group.transactions.length > 1 && "cada"}
+              {group.transactions.length === 1
+                ? "1 transação"
+                : `${group.transactions.length} transações`}{" "}
+              · {formatValor(group.valor)} {group.transactions.length > 1 && "cada"}
             </p>
           </div>
         </div>
@@ -82,7 +84,8 @@ export function OfxGroupCard({ group, review, clients, onUpdate }: OfxGroupCardP
           >
             <Select.SelectTrigger className="h-10 w-full bg-background">
               <Select.SelectValue>
-                {clients.find((client) => client.id === review.cliente_id)?.name ?? "Nenhum cliente"}
+                {clients.find((client) => client.id === review.cliente_id)?.name ??
+                  "Nenhum cliente"}
               </Select.SelectValue>
             </Select.SelectTrigger>
             <Select.SelectContent>

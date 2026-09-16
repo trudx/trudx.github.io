@@ -37,7 +37,8 @@ export function DeleteFinanceiroDialog({
           <Dialog.DialogDescription>
             {isBulk ? (
               <>
-                Essa ação removerá <strong>{count} lançamentos selecionados</strong> do extrato e não pode ser desfeita.
+                Essa ação removerá <strong>{count} lançamentos selecionados</strong> do extrato e
+                não pode ser desfeita.
               </>
             ) : (
               <>
@@ -47,10 +48,20 @@ export function DeleteFinanceiroDialog({
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
         <Dialog.DialogFooter className="mt-4 border-t-0 bg-transparent p-0">
-          <Button type="button" variant="outline" disabled={isDeleting} onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isDeleting}
+            onClick={() => onOpenChange(false)}
+          >
             Cancelar
           </Button>
-          <Button type="button" variant="destructive" disabled={isDeleting} onClick={() => void handleConfirm()}>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={isDeleting}
+            onClick={() => void handleConfirm()}
+          >
             {isDeleting ? "Excluindo..." : isBulk ? "Excluir selecionados" : "Excluir lançamento"}
           </Button>
         </Dialog.DialogFooter>
