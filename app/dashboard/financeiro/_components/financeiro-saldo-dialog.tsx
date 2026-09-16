@@ -7,12 +7,12 @@ import Table from "@/components/ui/table";
 
 import { agruparPorBanco, resumirLinhas } from "./financeiro-saldo-card";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { BancoRecord } from "@/hooks/use-bancos";
 import type { FinanceiroTotalLinha } from "@/hooks/use-financeiro-saldo";
-
-//* Utils Imports
-import { formatCurrency } from "@/lib/format-currency";
 
 type FinanceiroSaldoDialogProps = {
   linhas: FinanceiroTotalLinha[];
@@ -21,6 +21,7 @@ type FinanceiroSaldoDialogProps = {
 };
 
 export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: FinanceiroSaldoDialogProps) {
+  const { isHidden, formatValor } = useFinanceiroPrivacy();
   const { ganhos, saidas, saldo } = resumirLinhas(linhas);
   const porBanco = agruparPorBanco(linhas, bancos);
 
@@ -37,13 +38,13 @@ export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: Financei
         <div className="min-w-0 rounded-xl border bg-muted p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] opacity-75">Saldo total</p>
           <p
-            className={`mt-1 text-2xl font-black tracking-[-0.04em] ${saldo < 0 ? "text-rose-700" : "text-foreground"}`}
+            className={`mt-1 text-2xl font-black tracking-[-0.04em] ${!isHidden && saldo < 0 ? "text-rose-700" : "text-foreground"}`}
           >
-            {formatCurrency(saldo)}
+            {formatValor(saldo)}
           </p>
           <p className="mt-1 flex flex-wrap gap-x-3 text-xs">
-            <span className="font-semibold text-emerald-700">+{formatCurrency(ganhos)}</span>
-            <span className="font-semibold text-rose-700">-{formatCurrency(saidas)}</span>
+            <span className="font-semibold text-emerald-700">+{formatValor(ganhos)}</span>
+            <span className="font-semibold text-rose-700">-{formatValor(saidas)}</span>
           </p>
         </div>
 
@@ -76,15 +77,15 @@ export function FinanceiroSaldoDialog({ linhas, bancos, onOpenChange }: Financei
                   <Table.TableRow key={banco.bancoId ?? "sem-banco"}>
                     <Table.TableCell className="px-3 py-3 font-semibold">{banco.nome}</Table.TableCell>
                     <Table.TableCell className="px-3 py-3 text-right text-emerald-700">
-                      {formatCurrency(banco.ganhos)}
+                      {formatValor(banco.ganhos)}
                     </Table.TableCell>
                     <Table.TableCell className="px-3 py-3 text-right text-rose-700">
-                      {formatCurrency(banco.saidas)}
+                      {formatValor(banco.saidas)}
                     </Table.TableCell>
                     <Table.TableCell
-                      className={`px-3 py-3 text-right font-semibold ${banco.saldo < 0 ? "text-rose-700" : "text-foreground"}`}
+                      className={`px-3 py-3 text-right font-semibold ${!isHidden && banco.saldo < 0 ? "text-rose-700" : "text-foreground"}`}
                     >
-                      {formatCurrency(banco.saldo)}
+                      {formatValor(banco.saldo)}
                     </Table.TableCell>
                   </Table.TableRow>
                 ))}

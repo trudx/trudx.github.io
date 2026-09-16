@@ -11,11 +11,11 @@ import Switch from "@/components/ui/switch";
 import { useState, type FormEvent } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { GastoFixoInput, GastoFixoRecord } from "@/hooks/use-gastos-fixos";
-
-//* Utils Imports
-import { formatCurrency } from "@/lib/format-currency";
 
 type GastosFixosDialogProps = {
   open: boolean;
@@ -48,6 +48,7 @@ export function GastosFixosDialog({
   onToggleAtivo,
   onDelete,
 }: GastosFixosDialogProps) {
+  const { formatValor } = useFinanceiroPrivacy();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<GastoFixoInput>(emptyForm);
   const isEditing = editingId !== null;
@@ -177,7 +178,7 @@ export function GastosFixosDialog({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{gasto.descricao || "Sem descrição"}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatCurrency(gasto.valor)} · todo dia {gasto.dia_cobranca}
+                  {formatValor(gasto.valor)} · todo dia {gasto.dia_cobranca}
                   {!gasto.ativo && " · inativo"}
                 </p>
               </div>

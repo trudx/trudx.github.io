@@ -53,14 +53,14 @@ export function LoginForm() {
 
   return (
     <form className="w-full space-y-6" onSubmit={handleSubmit}>
-      <div className="space-y-1">
-        <h1 className="text-[1.65rem] font-bold tracking-[-0.04em] text-foreground">Entrar</h1>
-        <p className="text-[0.78rem] leading-5 text-muted-foreground">Acesse sua conta para continuar.</p>
+      <div className="border-b pb-5">
+        <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Entrar</h1>
+        <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">Acesse sua conta para continuar.</p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-[0.72rem] font-semibold">
+          <Label htmlFor="email" className="text-xs font-semibold">
             E-mail
           </Label>
           <Input
@@ -71,12 +71,12 @@ export function LoginForm() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="h-11 rounded-md bg-background"
+            className="h-9 bg-background"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-[0.72rem] font-semibold">
+          <Label htmlFor="password" className="text-xs font-semibold">
             Senha
           </Label>
           <Input
@@ -88,23 +88,23 @@ export function LoginForm() {
             minLength={6}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="h-11 rounded-md bg-background text-sm tracking-[0.18em]"
+            className="h-9 bg-background text-sm"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <Checkbox id="remember-me" checked={rememberMe} onCheckedChange={setRememberMe} />
-          <Label htmlFor="remember-me" className="text-[0.72rem] font-medium text-muted-foreground">
+          <Label htmlFor="remember-me" className="text-xs font-medium text-muted-foreground">
             Salvar login neste dispositivo
           </Label>
         </div>
       </div>
 
-      <Button type="submit" disabled={isLoading} className="h-11 w-full px-4 text-sm font-bold">
+      <Button type="submit" disabled={isLoading} className="h-9 w-full px-4 text-xs font-semibold">
         {isLoading ? "Entrando..." : "Entrar"}
       </Button>
 
-      <p className="text-center text-[0.78rem] text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         Não tem conta?{" "}
         <Link href="/signup" className="font-semibold text-foreground underline-offset-4 hover:underline">
           Cadastre-se

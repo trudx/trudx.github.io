@@ -6,14 +6,15 @@ import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
 
 //* Libraries Imports
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Inter } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 
 //* Types Imports
 import type { Metadata, Viewport } from "next";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Inter é a fonte da interface do Figma — base da linguagem visual densa e neutra do app.
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -22,13 +23,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
-  title: "izi Freelas | Gestão para freelancers",
-  description: "Clientes, tarefas e financeiro numa única plataforma para quem toca o negócio sozinho.",
-  applicationName: "izi Freelas",
+  title: "trudx | Sistema de trabalho para freelancers",
+  description: "Clientes, tarefas, agenda e financeiro sob uma única ordem, para quem toca o negócio sozinho.",
+  applicationName: "trudx",
   appleWebApp: {
     capable: true,
-    title: "izi Freelas",
+    title: "trudx",
     statusBarStyle: "black-translucent",
   },
   icons: {
@@ -47,7 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

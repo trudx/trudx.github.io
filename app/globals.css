@@ -22,7 +22,7 @@
   --border: #e4e4e7;
   --input: #e4e4e7;
   --ring: #a1a1aa;
-  --radius: 0.625rem;
+  --radius: 0.375rem;
 }
 
 .dark {
@@ -68,16 +68,59 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-inter);
+
+  /*
+   * Escala de raio do Figma: controles com 2–5px, painéis com 6–8px, modais com 12px. Sobrescrever a
+   * escala inteira muda todos os componentes do shadcn sem editar um por um.
+   */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+  --radius-2xl: 12px;
+  --radius-3xl: 13px;
+  --radius-4xl: 5px;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), sans-serif;
+  font-family: var(--font-inter), sans-serif;
+  font-feature-settings: "cv11", "ss01";
 }
 
-* {
-  border-color: var(--border);
+/*
+ * Cor de borda padrão dentro de `@layer base`: fora de camada, a regra universal venceria as
+ * utilitárias do Tailwind (estilo sem camada ganha de estilo em camada) e `border-foreground`
+ * nunca pintava — as réguas pretas da identidade saíam cinza.
+ */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+}
+
+/* Rótulo de seção no estilo dos painéis do Figma: pequeno, semibold, sem caixa alta. */
+.trudx-kicker {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1rem;
+  color: var(--muted-foreground);
+}
+
+/*
+ * Barra de rolagem horizontal fina para trilhos (Kanban). Discreta em repouso, ganha contraste no
+ * hover do trilho, que é quando o usuário provavelmente vai usá-la.
+ */
+.trudx-scroll-x {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) 18%, transparent) transparent;
+}
+
+.trudx-scroll-x:hover {
+  scrollbar-color: color-mix(in oklch, var(--foreground) 40%, transparent) transparent;
 }

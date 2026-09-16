@@ -4,12 +4,14 @@
 import Checkbox from "@/components/ui/checkbox";
 import Select from "@/components/ui/select";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { ClientRecord } from "@/hooks/use-clients";
 import type { OfxGroup } from "@/lib/ofx";
 
 //* Utils Imports
-import { formatCurrency } from "@/lib/format-currency";
 import { cn } from "@/lib/utils";
 
 /** Escolhas do usuário para um grupo de transações do OFX, antes de importar. */
@@ -32,6 +34,7 @@ const toneStyles = {
 };
 
 export function OfxGroupCard({ group, review, clients, onUpdate }: OfxGroupCardProps) {
+  const { formatValor } = useFinanceiroPrivacy();
   const tone = toneStyles[review.tipo];
   const total = group.valor * group.transactions.length;
 
@@ -48,13 +51,13 @@ export function OfxGroupCard({ group, review, clients, onUpdate }: OfxGroupCardP
             <p className="font-medium">{group.descricao}</p>
             <p className="text-xs text-muted-foreground">
               {group.transactions.length === 1 ? "1 transação" : `${group.transactions.length} transações`} ·{" "}
-              {formatCurrency(group.valor)} {group.transactions.length > 1 && "cada"}
+              {formatValor(group.valor)} {group.transactions.length > 1 && "cada"}
             </p>
           </div>
         </div>
         <p className={cn("shrink-0 text-sm font-semibold", tone.text)}>
           {tone.sign}
-          {formatCurrency(total)}
+          {formatValor(total)}
         </p>
       </div>
 

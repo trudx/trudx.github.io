@@ -12,6 +12,7 @@ import {
   TaskFormDialog,
   TaskQuickEditSheet,
   TaskTimeSummary,
+  TasksZoomContext,
 } from "./_components";
 
 //* Libraries Imports
@@ -27,13 +28,15 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { Plus, SlidersHorizontal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 
 //* Hooks Imports
 import { useClients } from "@/hooks/use-clients";
 import { useTaskColumns } from "@/hooks/use-task-columns";
 import { useTaskTimer } from "@/hooks/use-task-timer";
 import { useTasks } from "@/hooks/use-tasks";
+import { useTasksZoomScale } from "@/hooks/use-tasks-zoom";
 
 //* Types Imports
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
@@ -56,6 +59,13 @@ export default function TasksPage() {
     deleteTask,
   } = useTasks();
   const { clients } = useClients();
+  const zoomScale = useTasksZoomScale();
+  // O overlay de arraste vai por portal para o body; portal só existe no cliente.
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const {
     runningTaskId,
     runningStartedAt,
@@ -187,125 +197,137 @@ export default function TasksPage() {
   const quickEditTask = tasks.find((task) => task.id === quickEditTaskId) ?? null;
 
   return (
-    <section className="flex flex-col gap-8 md:h-[87vh] md:min-h-0 md:overflow-hidden">
-      <div className="flex shrink-0 flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">Organização</p>
-          <h1 className="text-3xl font-bold tracking-[-0.05em] text-foreground">Tarefas</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            <span className="hidden md:inline">
-              Arraste as tarefas entre as colunas para acompanhar cada etapa. Use a alça no cabeçalho para reordenar as
-              colunas.
-            </span>
-            <span className="md:hidden">
-              Deslize para o lado para ver as outras colunas. Segure um card por um instante para arrastá-lo — ou use o
-              botão de mover no próprio card.
-            </span>
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" className="h-11 px-4" onClick={() => setIsManagingColumns(true)}>
-            <SlidersHorizontal />
-            Gerenciar colunas
-          </Button>
-          <Button
-            type="button"
-            className="h-11 px-4 font-bold"
-            disabled={isLoadingColumns || columns.length === 0}
-            onClick={openCreateDialog}
-          >
-            <Plus />
-            Nova tarefa
-          </Button>
-        </div>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-4">
-        <TaskTimeSummary
-          totais={totais}
-          totaisAtualizadosEm={totaisAtualizadosEm}
-          isRunning={runningTaskId !== null}
-          isLoading={isLoadingTimer}
-        />
-        <TaskFilters value={filters} clients={clients} onChange={setFilters} />
-        <div
-          ref={resizeRef}
-          className="h-1 cursor-row-resize hover:bg-primary/20 transition-colors"
-          title="Arraste para redimensionar"
-        />
-        <div style={{ height: `calc(${boardHeight}% - 0.25rem)` }} className="min-h-0 flex-1">
-          <DndContext
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <KanbanBoard
-            tasks={visibleTasks}
-            columns={columns}
-            clientNameById={clientNameById}
-            timer={timerProps}
-            isLoading={isLoading}
-            onEdit={openEditDialog}
-            onDelete={setDeletingTask}
-            onQuickEdit={(task) => setQuickEditTaskId(task.id)}
-          />
-          <DragOverlay>
-            {activeTask ? (
-              <div className="w-[min(22rem,calc(100vw-2rem))] rotate-1 shadow-xl">
-                <TaskCard
-                  task={activeTask}
-                  clientName={activeTask.cliente_id ? clientNameById[activeTask.cliente_id] : undefined}
+    <TasksZoomContext value={zoomScale}>
+      <div className="md:h-[87vh] md:min-h-0 md:overflow-hidden">
+        <section style={{ zoom: zoomScale }} className="flex flex-col gap-8 md:h-full md:min-h-0 md:overflow-hidden">
+          <div className="flex shrink-0 flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
+            <div>
+              <p className="trudx-kicker mb-1.5 text-muted-foreground">Organização</p>
+              <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Tarefas</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                <span className="hidden md:inline">
+                  Arraste as tarefas entre as colunas para acompanhar cada etapa. Use a alça no cabeçalho para reordenar
+                  as colunas.
+                </span>
+                <span className="md:hidden">
+                  Deslize para o lado para ver as outras colunas. Segure um card por um instante para arrastá-lo — ou
+                  use o botão de mover no próprio card.
+                </span>
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button type="button" variant="outline" className="h-11 px-4" onClick={() => setIsManagingColumns(true)}>
+                <SlidersHorizontal />
+                Gerenciar colunas
+              </Button>
+              <Button
+                type="button"
+                className="h-8 px-3 text-xs font-medium"
+                disabled={isLoadingColumns || columns.length === 0}
+                onClick={openCreateDialog}
+              >
+                <Plus />
+                Nova tarefa
+              </Button>
+            </div>
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            <TaskTimeSummary
+              totais={totais}
+              totaisAtualizadosEm={totaisAtualizadosEm}
+              isRunning={runningTaskId !== null}
+              isLoading={isLoadingTimer}
+            />
+            <TaskFilters value={filters} clients={clients} onChange={setFilters} />
+            <div
+              ref={resizeRef}
+              className="h-1 cursor-row-resize hover:bg-primary/20 transition-colors"
+              title="Arraste para redimensionar"
+            />
+            <div style={{ height: `calc(${boardHeight}% - 0.25rem)` }} className="min-h-0 flex-1">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCorners}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <KanbanBoard
+                  tasks={visibleTasks}
+                  columns={columns}
+                  clientNameById={clientNameById}
+                  timer={timerProps}
+                  isLoading={isLoading}
+                  onEdit={openEditDialog}
+                  onDelete={setDeletingTask}
+                  onQuickEdit={(task) => setQuickEditTaskId(task.id)}
                 />
-              </div>
-            ) : null}
-          </DragOverlay>
-          </DndContext>
-        </div>
-        {quickEditTask && (
-          <TaskQuickEditSheet
-            task={quickEditTask}
-            clients={clients}
-            columns={columns}
-            timer={{ ...timerProps, onDiscard: () => void discardTimer() }}
-            onOpenChange={(open) => {
-              if (!open) setQuickEditTaskId(null);
-            }}
-            onPatch={quickUpdateTask}
-            onMoveToColumn={updateTaskColumn}
-          />
-        )}
-        <TaskFormDialog
-          key={`${editingTask?.id ?? "new"}-${isFormOpen}`}
-          open={isFormOpen}
-          task={editingTask}
-          columns={columns}
-          clients={clients}
-          isSaving={isSaving}
-          onOpenChange={setIsFormOpen}
-          onSubmit={(input) => (editingTask ? updateTask(editingTask.id, input) : createTask(input))}
-        />
-        <ManageColumnsDialog
-          open={isManagingColumns}
-          columns={columns}
-          taskCountByColumnId={taskCountByColumnId}
-          isSaving={isSavingColumns}
-          onOpenChange={setIsManagingColumns}
-          onCreate={createColumn}
-          onRename={renameColumn}
-          onDelete={deleteColumn}
-          onReorder={reorderColumns}
-        />
-        <DeleteTaskDialog
-          open={Boolean(deletingTask)}
-          taskTitle={deletingTask?.title ?? ""}
-          loggedSeconds={deletingTask ? (secondsByTaskId[deletingTask.id] ?? 0) : 0}
-          isDeleting={Boolean(deletingTaskId)}
-          onOpenChange={(open) => {
-            if (!open) setDeletingTask(null);
-          }}
-          onConfirm={() => (deletingTask ? handleDeleteTask(deletingTask.id) : Promise.resolve(false))}
-        />
+                {isClient
+                  ? createPortal(
+                      <DragOverlay>
+                        {activeTask ? (
+                          <div
+                            style={{ zoom: zoomScale }}
+                            className="w-[min(22rem,calc(100vw-2rem))] rotate-1 shadow-xl"
+                          >
+                            <TaskCard
+                              task={activeTask}
+                              clientName={activeTask.cliente_id ? clientNameById[activeTask.cliente_id] : undefined}
+                            />
+                          </div>
+                        ) : null}
+                      </DragOverlay>,
+                      document.body,
+                    )
+                  : null}
+              </DndContext>
+            </div>
+            {quickEditTask && (
+              <TaskQuickEditSheet
+                task={quickEditTask}
+                clients={clients}
+                columns={columns}
+                timer={{ ...timerProps, onDiscard: () => void discardTimer() }}
+                onOpenChange={(open) => {
+                  if (!open) setQuickEditTaskId(null);
+                }}
+                onPatch={quickUpdateTask}
+                onMoveToColumn={updateTaskColumn}
+              />
+            )}
+            <TaskFormDialog
+              key={`${editingTask?.id ?? "new"}-${isFormOpen}`}
+              open={isFormOpen}
+              task={editingTask}
+              columns={columns}
+              clients={clients}
+              isSaving={isSaving}
+              onOpenChange={setIsFormOpen}
+              onSubmit={(input) => (editingTask ? updateTask(editingTask.id, input) : createTask(input))}
+            />
+            <ManageColumnsDialog
+              open={isManagingColumns}
+              columns={columns}
+              taskCountByColumnId={taskCountByColumnId}
+              isSaving={isSavingColumns}
+              onOpenChange={setIsManagingColumns}
+              onCreate={createColumn}
+              onRename={renameColumn}
+              onDelete={deleteColumn}
+              onReorder={reorderColumns}
+            />
+            <DeleteTaskDialog
+              open={Boolean(deletingTask)}
+              taskTitle={deletingTask?.title ?? ""}
+              loggedSeconds={deletingTask ? (secondsByTaskId[deletingTask.id] ?? 0) : 0}
+              isDeleting={Boolean(deletingTaskId)}
+              onOpenChange={(open) => {
+                if (!open) setDeletingTask(null);
+              }}
+              onConfirm={() => (deletingTask ? handleDeleteTask(deletingTask.id) : Promise.resolve(false))}
+            />
+          </div>
+        </section>
       </div>
-    </section>
+    </TasksZoomContext>
   );
 }

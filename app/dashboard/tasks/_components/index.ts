@@ -13,3 +13,4 @@ export * from "./task-quick-edit-sheet";
 export * from "./task-time-summary";
 export * from "./task-timer-display";
 export * from "./week-filter";
+export * from "./tasks-zoom-context";

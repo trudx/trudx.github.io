@@ -1,8 +1,9 @@
 "use client";
 
 //* Components Imports
-import Avatar from "@/components/ui/avatar";
 import Button from "@/components/ui/button";
+
+import { BrandMark } from "@/app/_components/brand-mark";
 
 import { ThemeToggle } from "./theme-toggle";
 
@@ -26,27 +27,32 @@ const navigation = [
   { href: "/dashboard/settings", label: "Configurações", icon: Settings },
 ];
 
+// Painel no estilo do Figma: cabeçalho de arquivo, rótulo de seção pequeno e itens de 28px com
+// seleção em bloco suave — denso, sem competir com o conteúdo.
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { logout, isLoading } = useLogout();
 
   return (
-    <div
-      className="
-        flex min-h-0 flex-col gap-8
-        lg:sticky
-        lg:top-6
-        lg:h-[calc(100dvh-3rem)]
-      "
-    >
-      <Link href="/dashboard" className="flex shrink-0 items-center gap-3 px-1" aria-label="Ir para a visão geral">
-        <span className="flex size-10 items-center justify-center rounded-md bg-primary text-sm font-black tracking-[-0.08em] text-primary-foreground">
-          iF
+    <div className="flex min-h-0 flex-col gap-4 lg:sticky lg:top-0 lg:h-dvh lg:py-3">
+      <Link
+        href="/dashboard"
+        className="flex shrink-0 items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted"
+        aria-label="Ir para a visão geral"
+      >
+        <BrandMark className="size-6 rounded-md" />
+        <span className="text-[0.8rem] font-semibold tracking-[-0.01em] text-foreground">trudx</span>
+        <span className="ml-auto rounded-sm bg-muted px-1.5 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
+          Free
         </span>
-        <span className="text-[0.78rem] font-black uppercase tracking-[0.18em] text-foreground">izi Freelas</span>
       </Link>
 
-      <nav className="flex gap-1 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible" aria-label="Navegação principal">
+      <nav
+        className="-mx-1 flex gap-0.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0"
+        aria-label="Navegação principal"
+      >
+        <p className="trudx-kicker mb-1 hidden px-2 lg:block">Páginas</p>
+
         {navigation.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href;
 
@@ -57,27 +63,25 @@ export function DashboardSidebar() {
               size="sm"
               render={<Link href={href} aria-current={isActive ? "page" : undefined} />}
               className={cn(
-                "h-10 shrink-0 justify-start gap-3 rounded-md px-3 text-muted-foreground",
-                isActive && "bg-accent font-bold text-accent-foreground shadow-sm",
+                "h-7 shrink-0 justify-start gap-2 px-2 text-xs font-normal text-foreground/80",
+                isActive && "bg-accent font-medium text-foreground hover:bg-accent",
               )}
             >
-              <Icon />
+              <Icon className={cn("size-3.5 text-muted-foreground", isActive && "text-foreground")} />
               <span>{label}</span>
             </Button>
           );
         })}
       </nav>
 
-      <div className="mt-auto space-y-3">
+      <div className="mt-auto space-y-1 border-t pt-3">
         <ThemeToggle />
 
-        <div className="flex items-center gap-3 rounded-lg border bg-card p-3">
-          <Avatar.AvatarRoot size="sm" className="bg-muted text-foreground ring-2 ring-background">
-            <Avatar.AvatarFallback>iF</Avatar.AvatarFallback>
-          </Avatar.AvatarRoot>
+        <div className="flex items-center gap-2 rounded-md px-2 py-1.5">
+          <BrandMark className="size-6 rounded-full" />
           <div className="min-w-0">
-            <p className="truncate text-xs font-bold text-foreground">Minha conta</p>
-            <p className="truncate text-[0.68rem] text-muted-foreground">izi Freelas</p>
+            <p className="truncate text-xs font-medium text-foreground">Minha conta</p>
+            <p className="truncate text-[0.65rem] text-muted-foreground">Plano gratuito</p>
           </div>
         </div>
 
@@ -87,19 +91,19 @@ export function DashboardSidebar() {
           size="sm"
           disabled={isLoading}
           onClick={() => void logout()}
-          className="mt-3 h-9 w-full justify-start gap-3 rounded-md px-3 text-muted-foreground"
+          className="h-7 w-full justify-start gap-2 px-2 text-xs font-normal text-foreground/80"
         >
-          <LogOut />
+          <LogOut className="size-3.5 text-muted-foreground" />
           <span>{isLoading ? "Saindo..." : "Sair"}</span>
         </Button>
 
-        <p className="px-1 text-center text-[0.65rem] text-muted-foreground">
+        <p className="px-2 pt-2 text-[0.65rem] text-muted-foreground">
           por{" "}
           <a
             href="https://kayky.dev.br/"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold hover:text-foreground hover:underline"
+            className="font-medium hover:text-foreground hover:underline"
           >
             Kayky
           </a>

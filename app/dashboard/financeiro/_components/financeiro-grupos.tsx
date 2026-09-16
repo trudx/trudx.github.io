@@ -10,12 +10,14 @@ import { FinanceiroGrupoDialog } from "./financeiro-grupo-dialog";
 import { useState, type KeyboardEvent } from "react";
 import { Plus, X } from "lucide-react";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { FinanceiroRecord } from "@/hooks/use-financeiro";
 import type { FinanceiroGrupoRecord } from "@/hooks/use-financeiro-grupos";
 
 //* Utils Imports
-import { formatCurrency } from "@/lib/format-currency";
 import { normalizeText } from "@/lib/normalize-text";
 
 type FinanceiroGruposProps = {
@@ -51,6 +53,7 @@ export function FinanceiroGrupos({
   onUpdate,
   onDelete,
 }: FinanceiroGruposProps) {
+  const { isHidden, formatValor } = useFinanceiroPrivacy();
   const [newTermo, setNewTermo] = useState("");
   const [pendingTermos, setPendingTermos] = useState<string[]>([]);
   const [pendingNome, setPendingNome] = useState("");
@@ -121,9 +124,9 @@ export function FinanceiroGrupos({
                 {titulo}
               </p>
               <p
-                className={`mt-2 text-xl font-black tracking-[-0.04em] ${total < 0 ? "text-rose-700" : "text-foreground"}`}
+                className={`mt-2 text-xl font-black tracking-[-0.04em] ${!isHidden && total < 0 ? "text-rose-700" : "text-foreground"}`}
               >
-                {formatCurrency(total)}
+                {formatValor(total)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
                 {grupo.termos.length === 1 ? "1 palavra-chave" : `${grupo.termos.length} palavras-chave`}

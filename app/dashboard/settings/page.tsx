@@ -5,7 +5,7 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Label from "@/components/ui/label";
 
-import { SettingsSkeleton } from "./_components/settings-skeleton";
+import { SettingsSkeleton, TasksZoomSetting } from "./_components";
 
 //* Hooks Imports
 import { useProfile } from "@/hooks/use-profile";
@@ -23,9 +23,9 @@ export default function SettingsPage() {
 
   return (
     <section className="w-full max-w-3xl space-y-8">
-      <div>
-        <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">Conta</p>
-        <h1 className="text-3xl font-bold tracking-[-0.05em] text-foreground">Configurações</h1>
+      <div className="border-b border-foreground/15 pb-6">
+        <p className="trudx-kicker mb-1.5 text-muted-foreground">Conta</p>
+        <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Configurações</h1>
         <p className="mt-2 text-sm text-muted-foreground">Atualize os dados da sua conta.</p>
       </div>
 
@@ -107,6 +107,8 @@ export default function SettingsPage() {
           </form>
         </div>
       )}
+
+      <TasksZoomSetting />
     </section>
   );
 }

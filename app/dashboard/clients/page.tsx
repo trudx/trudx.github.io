@@ -61,13 +61,13 @@ export default function ClientsPage() {
 
   return (
     <section className="space-y-8">
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">Gestão</p>
-          <h1 className="text-3xl font-bold tracking-[-0.05em] text-foreground">Clientes</h1>
+          <p className="trudx-kicker mb-1.5 text-muted-foreground">Gestão</p>
+          <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Clientes</h1>
           <p className="mt-2 text-sm text-muted-foreground">Gerencie os contatos da sua carteira em um só lugar.</p>
         </div>
-        <Button type="button" onClick={openCreateDialog} className="h-11 px-4 font-bold">
+        <Button type="button" onClick={openCreateDialog} className="h-8 px-3 text-xs font-medium">
           <Plus />
           Novo cliente
         </Button>

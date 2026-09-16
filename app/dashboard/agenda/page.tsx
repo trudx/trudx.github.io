@@ -118,13 +118,13 @@ export default function AgendaPage() {
 
   return (
     <section className="flex h-full min-h-[42rem] flex-col space-y-8">
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
         <div>
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">Agenda</p>
-          <h1 className="text-3xl font-bold tracking-[-0.05em] text-foreground">Eventos</h1>
+          <p className="trudx-kicker mb-1.5 text-muted-foreground">Agenda</p>
+          <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Eventos</h1>
           <p className="mt-2 text-sm text-muted-foreground">Organize compromissos, reuniões e prazos.</p>
         </div>
-        <Button type="button" className="h-11 px-4 font-bold" onClick={() => openCreateDialog()}>
+        <Button type="button" className="h-8 px-3 text-xs font-medium" onClick={() => openCreateDialog()}>
           <Plus />
           Novo evento
         </Button>

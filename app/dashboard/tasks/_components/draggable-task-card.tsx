@@ -2,6 +2,7 @@
 
 //* Components Imports
 import { TaskCard } from "./task-card";
+import { toZoomedTranslate, useTasksZoomContext } from "./tasks-zoom-context";
 
 //* Libraries Imports
 import { useDraggable } from "@dnd-kit/core";
@@ -37,7 +38,8 @@ export function DraggableTaskCard({ task, clientName, timer, onEdit, onDelete, o
     },
   });
 
-  const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
+  const scale = useTasksZoomContext();
+  const style = transform ? { transform: toZoomedTranslate(transform, scale) } : undefined;
 
   return (
     <div ref={setNodeRef} style={style}>

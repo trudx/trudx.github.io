@@ -3,12 +3,12 @@
 //* Components Imports
 import Skeleton from "@/components/ui/skeleton";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { BancoRecord } from "@/hooks/use-bancos";
 import type { FinanceiroTotalLinha } from "@/hooks/use-financeiro-saldo";
-
-//* Utils Imports
-import { formatCurrency } from "@/lib/format-currency";
 
 export type SaldoResumo = { ganhos: number; saidas: number; saldo: number };
 export type SaldoPorBanco = { bancoId: string | null; nome: string } & SaldoResumo;
@@ -51,6 +51,7 @@ export function agruparPorBanco(linhas: FinanceiroTotalLinha[], bancos: BancoRec
 }
 
 export function FinanceiroSaldoCard({ linhas, isLoading, onOpen }: FinanceiroSaldoCardProps) {
+  const { isHidden, formatValor } = useFinanceiroPrivacy();
   const { ganhos, saidas, saldo } = resumirLinhas(linhas);
 
   return (
@@ -65,8 +66,8 @@ export function FinanceiroSaldoCard({ linhas, isLoading, onOpen }: FinanceiroSal
       {isLoading ? (
         <Skeleton className="mt-4 h-9 w-36" />
       ) : (
-        <p className={`mt-4 text-3xl font-black tracking-[-0.06em] ${saldo < 0 ? "text-rose-700" : "text-foreground"}`}>
-          {formatCurrency(saldo)}
+        <p className={`mt-4 text-3xl font-black tracking-[-0.06em] ${!isHidden && saldo < 0 ? "text-rose-700" : "text-foreground"}`}>
+          {formatValor(saldo)}
         </p>
       )}
 
@@ -75,8 +76,8 @@ export function FinanceiroSaldoCard({ linhas, isLoading, onOpen }: FinanceiroSal
           <Skeleton className="h-4 w-40" />
         ) : (
           <>
-            <span className="font-semibold text-emerald-700">+{formatCurrency(ganhos)}</span>
-            <span className="font-semibold text-rose-700">-{formatCurrency(saidas)}</span>
+            <span className="font-semibold text-emerald-700">+{formatValor(ganhos)}</span>
+            <span className="font-semibold text-rose-700">-{formatValor(saidas)}</span>
           </>
         )}
       </div>

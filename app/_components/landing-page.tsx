@@ -1,16 +1,14 @@
 "use client";
 
 //* Components Imports
-import Avatar from "@/components/ui/avatar";
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
-import Card from "@/components/ui/card";
 import Collapsible from "@/components/ui/collapsible";
-import Separator from "@/components/ui/separator";
 
 import { InstallAppButton } from "@/components/install-app-button";
 
 import { AuthBrand } from "./auth-brand";
+import { BrandMark } from "./brand-mark";
 import { SiteFooter } from "./site-footer";
 
 //* Libraries Imports
@@ -27,7 +25,6 @@ import {
   Megaphone,
   Palette,
   ShieldCheck,
-  Sparkles,
   UsersRound,
   Wallet,
   Wallet2,
@@ -35,6 +32,7 @@ import {
 } from "lucide-react";
 
 type ModuleItem = {
+  index: string;
   icon: typeof UsersRound;
   title: string;
   description: string;
@@ -44,6 +42,7 @@ type ModuleItem = {
 
 const modules: ModuleItem[] = [
   {
+    index: "01",
     icon: UsersRound,
     title: "Clientes",
     description: "Cadastre, edite e busque sua carteira de clientes, com indicadores de quem está ativo ou inativo.",
@@ -51,6 +50,7 @@ const modules: ModuleItem[] = [
     alt: "Aperto de mão profissional entre dois parceiros de negócio",
   },
   {
+    index: "02",
     icon: KanbanSquare,
     title: "Tarefas",
     description: "Um Kanban com colunas que você mesmo configura, e arrasta e solta pra acompanhar cada entrega.",
@@ -58,6 +58,7 @@ const modules: ModuleItem[] = [
     alt: "Post-its organizados em colunas de tarefa a fazer, em andamento e concluída",
   },
   {
+    index: "03",
     icon: Wallet,
     title: "Financeiro",
     description:
@@ -68,6 +69,7 @@ const modules: ModuleItem[] = [
 ];
 
 type ValueItem = {
+  index: string;
   icon: typeof Zap;
   title: string;
   description: string;
@@ -75,19 +77,25 @@ type ValueItem = {
 
 const values: ValueItem[] = [
   {
+    index: "01",
     icon: Zap,
     title: "Sem complicação",
-    description: "Sem setup de horas, sem curva de aprendizado. Você cria a conta e já sai usando — sem tutorial obrigatório.",
+    description:
+      "Sem setup de horas, sem curva de aprendizado. Você cria a conta e já sai usando — sem tutorial obrigatório.",
   },
   {
+    index: "02",
     icon: Wallet2,
     title: "Sem custo, sem pegadinha",
-    description: "É grátis e ponto. Não tem plano premium escondido, não tem cobrança por usuário, não tem limite que some do dia pra noite.",
+    description:
+      "É grátis e ponto. Não tem plano premium escondido, não tem cobrança por usuário, não tem limite que some do dia pra noite.",
   },
   {
+    index: "03",
     icon: ShieldCheck,
     title: "Seus dados, seu controle",
-    description: "Tudo fica no Supabase com criptografia e login pelo Google. Nada de lock-in: seus dados são seus, pra sempre.",
+    description:
+      "Tudo fica no Supabase com criptografia e login protegido. Nada de lock-in: seus dados são seus, pra sempre.",
   },
 ];
 
@@ -106,7 +114,8 @@ const steps: StepItem[] = [
   {
     number: "02",
     title: "Cadastre seus clientes",
-    description: "Adicione nome, contato e status. A busca e os indicadores de ativo/inativo já estão prontos pra usar.",
+    description:
+      "Adicione nome, contato e status. A busca e os indicadores de ativo/inativo já estão prontos pra usar.",
   },
   {
     number: "03",
@@ -125,21 +134,17 @@ const personas: PersonaItem[] = [
   { icon: Code2, label: "Devs e programadores" },
   { icon: Megaphone, label: "Social media e marketing" },
   { icon: Briefcase, label: "Consultores e coaches" },
-  { icon: Sparkles, label: "Prestadores de serviço" },
+  { icon: Zap, label: "Prestadores de serviço" },
   { icon: UsersRound, label: "Pequenos negócios" },
 ];
 
-type PlanFeature = {
-  label: string;
-};
-
-const planFeatures: PlanFeature[] = [
-  { label: "Cadastro ilimitado de clientes" },
-  { label: "Kanban de tarefas com colunas configuráveis" },
-  { label: "Agenda integrada com seus compromissos" },
-  { label: "Financeiro com extrato, fixos e importação OFX" },
-  { label: "Login seguro com Supabase Auth" },
-  { label: "Acesso por qualquer dispositivo" },
+const planFeatures: string[] = [
+  "Cadastro ilimitado de clientes",
+  "Kanban de tarefas com colunas configuráveis",
+  "Agenda integrada com seus compromissos",
+  "Financeiro com extrato, fixos e importação OFX",
+  "Login seguro com Supabase Auth",
+  "Acesso por qualquer dispositivo",
 ];
 
 type FaqItem = {
@@ -151,7 +156,7 @@ const faqItems: FaqItem[] = [
   {
     question: "É realmente grátis? Tem alguma pegadinha?",
     answer:
-      "É grátis, sem letras miúdas. Não existe plano premium, não existe versão de teste com data pra expirar e não cobramos nada pelo que está no app hoje. O izi Freelas é mantido como projeto independente.",
+      "É grátis, sem letras miúdas. Não existe plano premium, não existe versão de teste com data pra expirar e não cobramos nada pelo que está no app hoje. O trudx é mantido como projeto independente.",
   },
   {
     question: "Preciso cadastrar cartão de crédito?",
@@ -159,7 +164,8 @@ const faqItems: FaqItem[] = [
   },
   {
     question: "Vai continuar grátis no futuro?",
-    answer: "A ideia é manter o núcleo do produto sempre gratuito. Se um dia surgir algo opcional e pago, será algo novo, nunca o que já funciona hoje.",
+    answer:
+      "A ideia é manter o núcleo do produto sempre gratuito. Se um dia surgir algo opcional e pago, será algo novo, nunca o que já funciona hoje.",
   },
   {
     question: "Meus dados estão seguros?",
@@ -168,355 +174,329 @@ const faqItems: FaqItem[] = [
   },
 ];
 
+const dossie = [
+  { label: "Módulos", value: "04" },
+  { label: "Mensalidade", value: "R$ 0" },
+  { label: "Cartão", value: "Não" },
+  { label: "Limite de clientes", value: "∞" },
+];
+
 export function LandingPage() {
   return (
-    <main className="relative isolate min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute -right-24 -top-24 -z-10 h-96 w-96 rounded-full bg-muted blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-28 -left-24 -z-10 h-80 w-80 rounded-full bg-muted blur-3xl" />
-
-      <div className="px-6 py-6 sm:px-10 lg:px-16">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between">
-          <AuthBrand compact />
+    <main className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur">
+        <nav className="mx-auto flex max-w-[92rem] items-center justify-between px-5 py-3.5 sm:px-8 lg:px-12">
+          <AuthBrand />
 
           <div className="flex items-center gap-2">
             <Button
               render={<Link href="/login" />}
               variant="ghost"
-              className="h-9 px-3 text-sm font-semibold"
+              className="hidden h-9 px-3 text-xs font-semibold sm:inline-flex"
             >
               Entrar
             </Button>
-            <Button
-              render={<Link href="/signup" />}
-              variant="foreground"
-              className="h-9 px-3 text-sm font-semibold"
-            >
-              Criar conta grátis
+            <Button render={<Link href="/signup" />} variant="foreground" className="h-9 px-4 text-xs font-semibold">
+              Criar conta
             </Button>
           </div>
         </nav>
-      </div>
+      </header>
 
-      <section className="px-6 pt-6 sm:px-10 lg:px-16">
-        <div className="mx-auto grid min-h-[calc(100vh-220px)] max-w-6xl items-center gap-14 pb-20 lg:grid-cols-[1.04fr_0.96fr] lg:pb-24">
-          <div className="max-w-xl">
-            <Badge
-              variant="default"
-              className="mb-7 h-7 gap-1.5 rounded-full px-3 text-[0.7rem] font-bold uppercase tracking-[0.12em]"
-            >
-              <Sparkles className="size-3" strokeWidth={2.5} />
-              100% grátis · Sem cartão de crédito
-            </Badge>
+      <div className="h-[93vh] flex flex-col">
+        {/* ── 01 · Manifesto ─────────────────────────────────────────────── */}
+        <section className="border-b h-full">
+          <div className="mx-auto grid max-w-[92rem] lg:grid-cols-[1.15fr_0.85fr] h-full">
+            <div className="px-5 py-14 sm:px-8 lg:border-r lg:px-12 lg:py-20">
+              <p className="trudx-kicker text-muted-foreground">Manifesto</p>
 
-            <h1 className="text-5xl font-semibold leading-[1.02] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-7xl">
-              Menos planilha, mais trabalho entregue.
-            </h1>
+              <h1 className="mt-7 text-5xl leading-[1.04] text-foreground sm:text-6xl lg:text-[4.2rem] font-semibold tracking-[-0.03em]">
+                Menos planilha.
+                <span className="block text-muted-foreground">Mais trabalho entregue.</span>
+              </h1>
 
-            <p className="mt-7 max-w-md text-lg leading-8 text-muted-foreground">
-              O izi Freelas reúne clientes, tarefas, agenda e financeiro num só lugar — feito pra quem toca o negócio
-              sozinho e não quer pagar mensalidade de ferramenta corporativa.
-            </p>
+              <div className="mt-9 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start">
+                <BrandMark className="size-14" />
+                <p className="max-w-md text-base leading-7 text-muted-foreground">
+                  O <span className="font-semibold text-foreground">trudx</span> reúne clientes, tarefas, agenda e
+                  financeiro sob uma única ordem — feito pra quem toca o negócio sozinho e não quer pagar mensalidade de
+                  ferramenta corporativa.
+                </p>
+              </div>
 
-            <div className="mt-10 flex flex-wrap gap-3">
-              <Button
-                render={<Link href="/signup" />}
-                variant="foreground"
-                size="lg"
-                className="h-12 rounded-md px-6 text-sm font-bold shadow-sm transition duration-200 hover:-translate-y-0.5"
-              >
-                Criar conta grátis
-                <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5 group-hover/button:-translate-y-0.5" />
-              </Button>
-              <Button
-                render={<Link href="/login" />}
-                variant="outline"
-                size="lg"
-                className="h-12 rounded-md px-6 text-sm font-bold"
-              >
-                Já tenho conta
-              </Button>
-              <InstallAppButton
-                variant="ghost"
-                size="lg"
-                className="h-12 rounded-md px-6 text-sm font-bold"
-              />
+              <div className="mt-10 flex flex-wrap gap-2.5">
+                <Button
+                  render={<Link href="/signup" />}
+                  variant="foreground"
+                  size="lg"
+                  className="h-10 px-4 text-xs font-semibold"
+                >
+                  Criar conta grátis
+                  <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5 group-hover/button:-translate-y-0.5" />
+                </Button>
+                <Button
+                  render={<Link href="/login" />}
+                  variant="outline"
+                  size="lg"
+                  className="h-10 px-4 text-xs font-semibold"
+                >
+                  Já tenho conta
+                </Button>
+                <InstallAppButton variant="ghost" size="lg" className="h-10 px-4 text-xs font-semibold" />
+              </div>
+
+              <p className="mt-8 flex items-center gap-2 border-t pt-4 text-xs text-muted-foreground">
+                <Check className="size-3.5" strokeWidth={3} />
+                Sem mensalidade · Sem validade · Sem letras miúdas
+              </p>
             </div>
 
-            <p className="mt-6 flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-              <Check className="size-3.5" strokeWidth={3} />
-              Sem mensalidade. Sem data de validade. Sem letras miúdas.
-            </p>
-          </div>
+            {/* Cartaz: bloco sólido, estrela em escala e ficha técnica em mono. */}
+            <aside className="p-3 lg:p-4">
+              <div className="relative h-full overflow-hidden rounded-2xl bg-foreground text-background">
+                <BrandMark
+                  boxed={false}
+                  className="pointer-events-none absolute -top-16 -right-20 size-[26rem] rotate-12 text-background/[0.04]"
+                />
 
-          <div className="relative mx-auto w-full max-w-lg lg:ml-auto">
-            <div className="absolute -inset-3 rounded-[2rem] border border-foreground/10 bg-muted/40 -rotate-3" />
-            <Card.CardRoot className="relative gap-0 overflow-hidden rounded-xl border bg-card py-0 shadow-sm">
-              <Card.CardHeader className="mb-3 px-5 pt-5 sm:px-7 sm:pt-7">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    Seus clientes
-                  </p>
-                  <p className="mt-1 text-2xl font-semibold tracking-tight">Visão geral</p>
-                </div>
-                <Card.CardAction>
-                  <Badge variant="secondary" className="h-auto px-3 py-1.5 text-xs font-bold">
-                    128 ativos
-                  </Badge>
-                </Card.CardAction>
-              </Card.CardHeader>
-
-              <Card.CardContent className="space-y-3 px-5 pb-5 sm:px-7 sm:pb-7">
-                {["Marina Costa", "Lucas Almeida", "Ana Beatriz"].map((name) => (
-                  <div key={name} className="flex items-center gap-3 rounded-lg bg-muted p-3">
-                    <Avatar.AvatarRoot size="lg" className="rounded-md bg-background">
-                      <Avatar.AvatarFallback className="rounded-md bg-background text-sm font-bold">
-                        {name
-                          .split(" ")
-                          .map((part) => part[0])
-                          .join("")}
-                      </Avatar.AvatarFallback>
-                      <Avatar.AvatarBadge className="bg-foreground" />
-                    </Avatar.AvatarRoot>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold">{name}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">Cliente cadastrado</p>
-                    </div>
+                <div className="relative flex h-full flex-col justify-between gap-12 px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
+                  <div>
+                    <p className="trudx-kicker text-background/60">Plano único</p>
+                    <p className="mt-5 text-7xl leading-none font-semibold tracking-[-0.03em]">R$ 0</p>
+                    <p className="mt-3 text-xs text-background/70">Para sempre · Sem cartão</p>
                   </div>
-                ))}
-              </Card.CardContent>
-            </Card.CardRoot>
-          </div>
-        </div>
-      </section>
 
-      <section className="border-y bg-muted/30 px-6 py-10 sm:px-10 lg:px-16">
-        <div className="mx-auto max-w-6xl">
-          <p className="mb-6 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-            Tudo o que você precisa num só lugar
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                  <dl className="border-t border-background/30">
+                    {dossie.map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="flex items-baseline justify-between gap-4 border-b border-background/15 py-3"
+                      >
+                        <dt className="text-xs text-background/60">{label}</dt>
+                        <dd className="text-xl font-semibold tracking-[-0.03em]">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        {/* Faixa de módulos: barra sólida, itens separados por estrela. */}
+        <div className="overflow-hidden border-b bg-foreground text-background">
+          <div className="mx-auto flex max-w-[92rem] flex-wrap items-center justify-center gap-x-6 gap-y-2 px-5 py-3.5 sm:px-8 lg:px-12">
             {[
               { icon: UsersRound, label: "Clientes" },
               { icon: KanbanSquare, label: "Tarefas" },
               { icon: CalendarDays, label: "Agenda" },
               { icon: Wallet, label: "Financeiro" },
-            ].map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-2.5 rounded-full border bg-card px-4 py-2 text-sm font-bold shadow-sm"
-              >
-                <span className="grid size-7 place-items-center rounded-full bg-foreground text-background">
+            ].map(({ icon: Icon, label }, index) => (
+              <div key={label} className="flex items-center gap-6">
+                {index > 0 ? <BrandMark boxed={false} className="size-3 text-background/50" /> : null}
+                <span className="flex items-center gap-2 text-xs font-semibold">
                   <Icon className="size-3.5" strokeWidth={2.5} />
+                  {label}
                 </span>
-                {label}
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              Por que escolher o izi Freelas
-            </p>
-            <h2 className="text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
-              Feito pra quem toca o negócio sozinho.
+      {/* ── 02 · Princípios ────────────────────────────────────────────── */}
+      <section className="border-b">
+        <div className="mx-auto grid max-w-[92rem] lg:grid-cols-[0.34fr_0.66fr]">
+          <div className="px-5 py-12 sm:px-8 lg:border-r lg:px-12 lg:py-20">
+            <p className="trudx-kicker text-muted-foreground">Princípios</p>
+            <h2 className="mt-6 text-3xl leading-[1.1] text-foreground lg:text-5xl font-semibold tracking-[-0.03em]">
+              Feito pra quem toca o negócio sozinho
             </h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-muted-foreground">
+            <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
               A maioria das ferramentas obriga você a escolher entre pagar caro, perder horas configurando ou aceitar um
-              app raso demais. Aqui, a proposta é simples: tudo que importa, sem custo e sem barreira.
+              app raso demais. Aqui a proposta é outra: tudo que importa, sem custo e sem barreira.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {values.map(({ icon: Icon, title, description }) => (
-              <div
+          <div className="grid sm:grid-cols-3">
+            {values.map(({ index, icon: Icon, title, description }) => (
+              <article
                 key={title}
-                className="group relative overflow-hidden rounded-xl border bg-card p-6 shadow-sm transition-colors hover:bg-muted/40"
+                className="group border-b /15 px-5 py-10 transition-colors last:border-b-0 hover:bg-muted sm:border-b-0 sm:border-r sm:px-7 sm:last:border-r-0 lg:px-8 lg:py-14"
               >
-                <span className="mb-5 flex size-10 items-center justify-center rounded-md bg-foreground text-background">
-                  <Icon className="size-4" strokeWidth={2.3} />
-                </span>
-                <p className="text-base font-bold tracking-tight text-foreground">{title}</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-              </div>
+                <div className="flex items-center justify-between">
+                  <span className="grid size-10 place-items-center bg-foreground text-background">
+                    <Icon className="size-4" strokeWidth={2.3} />
+                  </span>
+                  <span className="text-sm font-semibold text-foreground/25">{index}</span>
+                </div>
+                <h3 className="mt-7 text-xl leading-tight text-foreground font-semibold tracking-[-0.03em]">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-muted/30 px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Como funciona</p>
-            <h2 className="text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
-              Em três passos você já está usando.
+      {/* ── 03 · Procedimento ──────────────────────────────────────────── */}
+      <section className="border-b bg-muted/40">
+        <div className="mx-auto max-w-[92rem] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
+          <div className="flex flex-wrap items-end justify-between gap-6 border-b pb-5">
+            <p className="trudx-kicker text-muted-foreground">Procedimento</p>
+            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-semibold tracking-[-0.03em]">
+              Em três passos você já está usando
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="grid md:grid-cols-3">
             {steps.map(({ number, title, description }) => (
-              <div
+              <article
                 key={number}
-                className="relative rounded-xl border bg-card p-6 shadow-sm"
+                className="border-b border-foreground/20 px-0 py-8 last:border-b-0 md:border-b-0 md:border-r md:px-8 md:py-12 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
               >
-                <span className="block text-5xl font-bold leading-none tracking-tight text-foreground/15">
+                <span className="block text-6xl leading-none text-foreground/20 lg:text-7xl font-semibold tracking-[-0.03em]">
                   {number}
                 </span>
-                <Separator className="my-5 bg-foreground/15" />
-                <p className="text-base font-bold tracking-tight text-foreground">{title}</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
-              </div>
+                <div className="mt-6 border-t pt-5">
+                  <h3 className="text-xl leading-tight text-foreground font-semibold tracking-[-0.03em]">{title}</h3>
+                  <p className="mt-3 max-w-xs text-sm leading-6 text-muted-foreground">{description}</p>
+                </div>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              O que você organiza aqui
-            </p>
-            <h2 className="text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
-              Três módulos, um só login.
+      {/* ── 04 · Módulos ───────────────────────────────────────────────── */}
+      <section className="border-b">
+        <div className="mx-auto max-w-[92rem]">
+          <div className="flex flex-wrap items-end justify-between gap-6 border-b px-5 py-10 sm:px-8 lg:px-12">
+            <p className="trudx-kicker text-muted-foreground">Módulos</p>
+            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-semibold tracking-[-0.03em]">
+              Três frentes, um só login
             </h2>
           </div>
 
-          <div className="mt-12 grid gap-6 sm:grid-cols-3">
-            {modules.map(({ icon: Icon, title, description, image, alt }) => (
-              <div
+          <div className="grid sm:grid-cols-3">
+            {modules.map(({ index, icon: Icon, title, description, image, alt }) => (
+              <article
                 key={title}
-                className="group overflow-hidden rounded-xl border bg-card shadow-sm transition-colors hover:bg-muted/20"
+                className="group border-b /15 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0"
               >
-                <div className="relative aspect-[4/3] overflow-hidden">
+                <div className="relative aspect-[5/4] overflow-hidden border-b">
                   <Image
                     src={image}
                     alt={alt}
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-cover grayscale transition duration-300 group-hover:grayscale-0"
+                    className="object-cover grayscale contrast-125 transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0"
                   />
-                </div>
-                <div className="p-5">
-                  <span className="mb-3 flex size-9 items-center justify-center rounded-md bg-muted text-foreground">
-                    <Icon className="size-4" />
+                  <span className="absolute top-0 left-0 bg-foreground px-3 py-1.5 text-xs font-semibold text-background">
+                    {index}
                   </span>
-                  <p className="font-bold text-foreground">{title}</p>
-                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{description}</p>
                 </div>
+
+                <div className="px-5 py-8 lg:px-8 lg:py-10">
+                  <div className="flex items-center gap-3">
+                    <Icon className="size-4 text-foreground" strokeWidth={2.4} />
+                    <h3 className="text-xl text-foreground font-semibold tracking-[-0.03em]">{title}</h3>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 05 · Destinatários ─────────────────────────────────────────── */}
+      <section className="border-b">
+        <div className="mx-auto grid max-w-[92rem] lg:grid-cols-[0.34fr_0.66fr]">
+          <div className="px-5 py-12 sm:px-8 lg:border-r lg:px-12 lg:py-20">
+            <p className="trudx-kicker text-muted-foreground">Destinatários</p>
+            <h2 className="mt-6 text-3xl leading-[1.1] text-foreground lg:text-5xl font-semibold tracking-[-0.03em]">
+              Pra quem responde por tudo
+            </h2>
+            <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
+              Se você cobra por projeto, atende cliente final e responde do orçamento à entrega, o trudx foi desenhado
+              pra você.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3">
+            {personas.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex min-h-[7.5rem] flex-col justify-between gap-4 border-r border-b p-5 transition-colors hover:bg-muted lg:p-7"
+              >
+                <Icon className="size-4 text-foreground" strokeWidth={2.3} />
+                <span className="text-sm leading-tight text-foreground font-semibold tracking-[-0.03em]">{label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="border-y bg-muted/30 px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-            <div>
-              <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                Feito pra quem é
-              </p>
-              <h2 className="text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
-                Pra quem toca o negócio sozinho.
-              </h2>
-              <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
-                Se você cobra por projeto, atende cliente final e responde por tudo — do orçamento à entrega —, o izi
-                Freelas foi pensado pra você.
-              </p>
-            </div>
+      {/* ── 06 · Plano único ───────────────────────────────────────────── */}
+      <section className="border-b">
+        <div className="mx-auto grid max-w-[92rem] lg:grid-cols-2">
+          <div className="relative overflow-hidden bg-foreground px-5 py-14 text-background sm:px-8 lg:border-r lg:px-12 lg:py-20">
+            <div className="relative">
+              <p className="trudx-kicker text-background/60">Plano único</p>
+              <p className="mt-8 text-7xl leading-none font-semibold tracking-[-0.03em]">R$ 0</p>
+              <p className="mt-4 text-xs text-background/70">Para sempre · Sem cobrança escondida</p>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {personas.map(({ icon: Icon, label }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm"
+              <Button
+                render={<Link href="/signup" />}
+                variant="secondary"
+                size="lg"
+                className="mt-10 h-10 w-full px-4 text-xs font-semibold sm:w-auto"
+              >
+                Criar conta grátis
+                <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5 group-hover/button:-translate-y-0.5" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
+            <p className="trudx-kicker text-muted-foreground">O que está incluso</p>
+            <ul className="mt-8">
+              {planFeatures.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-center gap-4 border-b py-4 text-sm leading-6 text-foreground first:border-t first:"
                 >
-                  <span className="grid size-9 shrink-0 place-items-center rounded-md bg-muted text-foreground">
-                    <Icon className="size-4" strokeWidth={2.2} />
-                  </span>
-                  <span className="text-sm font-bold leading-tight">{label}</span>
-                </div>
+                  <BrandMark boxed={false} className="size-3 shrink-0 text-foreground" />
+                  <span className="font-medium">{feature}</span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
       </section>
 
-      <section className="px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-6xl">
-          <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border bg-card shadow-sm">
-            <div className="grid items-start gap-0 lg:grid-cols-[0.9fr_1.1fr]">
-              <div className="flex flex-col gap-6 bg-foreground p-8 text-background sm:p-10">
-                <Badge
-                  variant="default"
-                  className="h-7 w-fit gap-1.5 rounded-full bg-background px-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-foreground"
-                >
-                  <Sparkles className="size-3" strokeWidth={2.5} />
-                  Plano único
-                </Badge>
-                <div>
-                  <p className="flex items-baseline gap-2">
-                    <span className="text-6xl font-bold leading-none tracking-tight">R$ 0</span>
-                    <span className="text-sm font-semibold opacity-70">/para sempre</span>
-                  </p>
-                  <p className="mt-3 text-sm leading-6 opacity-80">
-                    Sem cartão de crédito. Sem cobrança escondida. Sem data de expiração.
-                  </p>
-                </div>
-
-                <Button
-                  render={<Link href="/signup" />}
-                  variant="secondary"
-                  size="lg"
-                  className="h-12 w-full rounded-md px-6 text-sm font-bold"
-                >
-                  Criar conta grátis
-                  <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5 group-hover/button:-translate-y-0.5" />
-                </Button>
-              </div>
-
-              <div className="flex flex-col gap-4 p-8 sm:p-10">
-                <p className="text-base font-bold tracking-tight text-foreground">O que está incluso</p>
-                <ul className="flex flex-col gap-3">
-                  {planFeatures.map((feature) => (
-                    <li key={feature.label} className="flex items-start gap-3 text-sm leading-6 text-foreground">
-                      <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-foreground text-background">
-                        <Check className="size-3" strokeWidth={3.5} />
-                      </span>
-                      <span className="font-medium">{feature.label}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-muted/30 px-6 py-20 sm:px-10 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-3xl">
-          <div className="mb-10 max-w-2xl">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
-              Perguntas frequentes
-            </p>
-            <h2 className="text-3xl font-bold tracking-[-0.04em] text-foreground sm:text-4xl">
-              Ainda tem dúvida? Sem stress.
+      {/* ── 07 · Esclarecimentos ───────────────────────────────────────── */}
+      <section className="border-b bg-muted/40">
+        <div className="mx-auto max-w-[92rem] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
+          <div className="flex flex-wrap items-end justify-between gap-6 border-b pb-5">
+            <p className="trudx-kicker text-muted-foreground">Esclarecimentos</p>
+            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-semibold tracking-[-0.03em]">
+              Ainda tem dúvida? Sem stress
             </h2>
           </div>
 
-          <div className="flex flex-col gap-3">
-            {faqItems.map((item) => (
+          <div className="mx-auto max-w-4xl">
+            {faqItems.map((item, index) => (
               <Collapsible.CollapsibleRoot
                 key={item.question}
-                className="group overflow-hidden rounded-xl border bg-card shadow-sm data-[open]:bg-muted/30"
+                className="group border-b border-foreground/20 data-[open]:bg-background"
               >
-                <Collapsible.CollapsibleTrigger className="flex w-full items-center justify-between gap-6 px-5 py-4 text-left text-sm font-bold text-foreground outline-none sm:px-6 sm:py-5 sm:text-base group-data-[open]:[&>svg]:rotate-45">
-                  {item.question}
-                  <span className="grid size-7 shrink-0 place-items-center rounded-full border bg-background text-foreground transition-transform duration-200 group-data-[open]:rotate-45">
+                <Collapsible.CollapsibleTrigger className="flex w-full items-center gap-5 py-5 text-left outline-none sm:gap-8">
+                  <span className="text-xs text-muted-foreground">{String(index + 1).padStart(2, "0")}</span>
+                  <span className="flex-1 text-lg leading-tight text-foreground sm:text-xl font-semibold tracking-[-0.03em]">
+                    {item.question}
+                  </span>
+                  <span className="grid size-8 shrink-0 place-items-center border text-foreground transition-transform duration-200 group-data-[open]:rotate-45">
                     <svg
                       className="size-3.5"
                       viewBox="0 0 12 12"
@@ -524,13 +504,14 @@ export function LandingPage() {
                       stroke="currentColor"
                       strokeWidth="2.5"
                       strokeLinecap="round"
+                      aria-hidden="true"
                     >
                       <path d="M6 1.5v9M1.5 6h9" />
                     </svg>
                   </span>
                 </Collapsible.CollapsibleTrigger>
                 <Collapsible.CollapsibleContent className="overflow-hidden text-sm leading-6 text-muted-foreground transition-all data-[starting-style]:h-0 data-[ending-style]:h-0 data-[open]:animate-none">
-                  <div className="px-5 pb-5 sm:px-6 sm:pb-6">{item.answer}</div>
+                  <div className="max-w-2xl pb-6 sm:pl-[4.2rem]">{item.answer}</div>
                 </Collapsible.CollapsibleContent>
               </Collapsible.CollapsibleRoot>
             ))}
@@ -538,47 +519,47 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="px-6 py-12 sm:px-10 lg:px-16 lg:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex flex-col items-center gap-6 rounded-[2rem] bg-foreground px-8 py-14 text-center text-background sm:px-16">
-            <Badge
-              variant="default"
-              className="h-7 gap-1.5 rounded-full bg-background px-3 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-foreground"
+      {/* ── 08 · Convocação ────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-b bg-foreground text-background">
+        <BrandMark
+          boxed={false}
+          className="pointer-events-none absolute -bottom-24 -left-16 size-[22rem] -rotate-12 text-background/[0.04]"
+        />
+
+        <div className="relative mx-auto max-w-[92rem] px-5 py-16 sm:px-8 lg:px-12 lg:py-24">
+          <Badge variant="default" className="h-7 gap-2 bg-background px-3 text-xs font-semibold text-foreground">
+            <BrandMark boxed={false} className="size-3" />
+            100% grátis
+          </Badge>
+
+          <h2 className="mt-8 max-w-4xl text-4xl leading-[1.06] sm:text-5xl font-semibold tracking-[-0.03em]">
+            Pronto para parar de pular entre planilhas?
+          </h2>
+
+          <div className="mt-10 flex flex-wrap items-center gap-2.5">
+            <Button
+              render={<Link href="/signup" />}
+              variant="secondary"
+              size="lg"
+              className="h-10 px-4 text-xs font-semibold"
             >
-              <Sparkles className="size-3" strokeWidth={2.5} />
-              100% grátis
-            </Badge>
-            <h2 className="max-w-xl text-3xl font-bold tracking-[-0.04em] sm:text-4xl">
-              Pronto para parar de pular entre planilhas?
-            </h2>
-            <p className="max-w-md text-sm leading-6 opacity-80">
-              Crie sua conta em menos de 1 minuto e veja como é ter clientes, tarefas, agenda e financeiro no mesmo
-              lugar — sem pagar nada por isso.
-            </p>
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-              <Button
-                render={<Link href="/signup" />}
-                variant="secondary"
-                size="lg"
-                className="h-12 rounded-md px-6 text-sm font-bold"
-              >
-                Criar conta grátis
-                <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5 group-hover/button:-translate-y-0.5" />
-              </Button>
-              <Button
-                render={<Link href="/login" />}
-                variant="outline"
-                size="lg"
-                className="h-12 rounded-md border-background/30 bg-transparent px-6 text-sm font-bold text-background hover:bg-background/10 hover:text-background"
-              >
-                Entrar
-              </Button>
-            </div>
-            <p className="flex items-center gap-2 text-xs font-semibold opacity-80">
-              <Clock className="size-3.5" strokeWidth={2.5} />
-              Menos de 1 minuto para começar
-            </p>
+              Criar conta grátis
+              <ArrowUpRight className="size-4 transition-transform duration-200 group-hover/button:translate-x-0.5 group-hover/button:-translate-y-0.5" />
+            </Button>
+            <Button
+              render={<Link href="/login" />}
+              variant="outline"
+              size="lg"
+              className="h-10 bg-transparent px-4 text-xs font-semibold text-background hover:bg-background/10 hover:text-background !border-background/40"
+            >
+              Entrar
+            </Button>
           </div>
+
+          <p className="mt-8 flex items-center gap-2 text-xs text-background/70">
+            <Clock className="size-3.5" strokeWidth={2.5} />
+            Menos de 1 minuto para começar
+          </p>
         </div>
       </section>
 

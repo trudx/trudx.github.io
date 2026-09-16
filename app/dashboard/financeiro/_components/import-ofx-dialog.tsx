@@ -15,6 +15,9 @@ import { useState, type ChangeEvent } from "react";
 import { toast } from "sonner";
 import { TrendingDown, TrendingUp, Upload } from "lucide-react";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { BancoRecord } from "@/hooks/use-bancos";
 import type { ClientRecord } from "@/hooks/use-clients";
@@ -24,7 +27,6 @@ import type { OfxReviewState } from "./ofx-group-card";
 
 //* Utils Imports
 import { parseOfxFile } from "@/lib/ofx";
-import { formatCurrency } from "@/lib/format-currency";
 import { formatDate } from "@/lib/format-date";
 
 type ImportOfxDialogProps = {
@@ -53,6 +55,7 @@ export function ImportOfxDialog({
   onFindDuplicates,
   onImport,
 }: ImportOfxDialogProps) {
+  const { formatValor } = useFinanceiroPrivacy();
   const [groups, setGroups] = useState<OfxGroup[]>([]);
   const [review, setReview] = useState<Record<string, OfxReviewState>>({});
   const [bancoId, setBancoId] = useState<string | null>(null);
@@ -216,7 +219,7 @@ export function ImportOfxDialog({
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{duplicate.descricao || "Sem descrição"}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDate(duplicate.data)} · {formatCurrency(duplicate.valor)} ·{" "}
+                    {formatDate(duplicate.data)} · {formatValor(duplicate.valor)} ·{" "}
                     {duplicate.tipo === "gasto" ? "Saída" : "Ganho"}
                   </p>
                 </div>
@@ -266,14 +269,14 @@ export function ImportOfxDialog({
                   <TrendingUp className="size-4" />
                   <span className="text-xs font-bold uppercase tracking-[0.1em]">Ganhos</span>
                 </div>
-                <p className="mt-1 text-lg font-black text-emerald-800">+{formatCurrency(totalGanhos)}</p>
+                <p className="mt-1 text-lg font-black text-emerald-800">+{formatValor(totalGanhos)}</p>
               </div>
               <div className="rounded-lg border border-rose-200 bg-rose-50 p-3">
                 <div className="flex items-center gap-2 text-rose-800">
                   <TrendingDown className="size-4" />
                   <span className="text-xs font-bold uppercase tracking-[0.1em]">Saídas</span>
                 </div>
-                <p className="mt-1 text-lg font-black text-rose-800">-{formatCurrency(totalGastos)}</p>
+                <p className="mt-1 text-lg font-black text-rose-800">-{formatValor(totalGastos)}</p>
               </div>
             </div>
 

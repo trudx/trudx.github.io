@@ -1,6 +1,6 @@
-# izi Freelas
+# trudx
 
-izi Freelas é uma aplicação web para gestão de freelancers e pequenos negócios. A plataforma permite autenticar usuários, cadastrar e organizar clientes, tarefas, agenda e financeiro num só lugar.
+trudx é uma aplicação web para gestão de freelancers e pequenos negócios. A plataforma permite autenticar usuários, cadastrar e organizar clientes, tarefas, agenda e financeiro num só lugar.
 
 ## Funcionalidades
 

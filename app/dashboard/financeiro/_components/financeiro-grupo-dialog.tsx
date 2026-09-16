@@ -12,12 +12,14 @@ import { matchGrupoRecords, sumGrupoRecords } from "./financeiro-grupos";
 import { useState, type KeyboardEvent } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 
+//* Hooks Imports
+import { useFinanceiroPrivacy } from "./financeiro-privacy";
+
 //* Types Imports
 import type { FinanceiroRecord } from "@/hooks/use-financeiro";
 import type { FinanceiroGrupoRecord } from "@/hooks/use-financeiro-grupos";
 
 //* Utils Imports
-import { formatCurrency } from "@/lib/format-currency";
 import { formatDate } from "@/lib/format-date";
 import { normalizeText } from "@/lib/normalize-text";
 
@@ -38,6 +40,7 @@ export function FinanceiroGrupoDialog({
   onUpdate,
   onDelete,
 }: FinanceiroGrupoDialogProps) {
+  const { isHidden, formatValor } = useFinanceiroPrivacy();
   const [termos, setTermos] = useState<string[]>(grupo.termos);
   const [nome, setNome] = useState(grupo.nome ?? "");
   const [newTermo, setNewTermo] = useState("");
@@ -80,9 +83,9 @@ export function FinanceiroGrupoDialog({
           </Dialog.DialogDescription>
         </Dialog.DialogHeader>
 
-        <div className={`min-w-0 rounded-xl border bg-muted p-4 ${total < 0 ? "text-rose-700" : "text-foreground"}`}>
+        <div className={`min-w-0 rounded-xl border bg-muted p-4 ${!isHidden && total < 0 ? "text-rose-700" : "text-foreground"}`}>
           <p className="text-xs font-semibold uppercase tracking-[0.12em] opacity-75">Total</p>
-          <p className="mt-1 text-2xl font-black tracking-[-0.04em]">{formatCurrency(total)}</p>
+          <p className="mt-1 text-2xl font-black tracking-[-0.04em]">{formatValor(total)}</p>
           <p className="mt-1 text-xs opacity-75">
             {matching.length === 0
               ? "Nenhum lançamento"
@@ -165,7 +168,7 @@ export function FinanceiroGrupoDialog({
                         className={`shrink-0 font-semibold ${record.tipo === "ganho" ? "text-emerald-700" : "text-foreground"}`}
                       >
                         {record.tipo === "ganho" ? "+" : "-"}
-                        {formatCurrency(record.valor)}
+                        {formatValor(record.valor)}
                       </p>
                     </li>
                   ))}

@@ -9,9 +9,9 @@ export default function manifest(): MetadataRoute.Manifest {
   // GitHub Pages injeta um basePath (ex.: /izi-freelas).
   return {
     id: "./",
-    name: "izi Freelas",
-    short_name: "izi Freelas",
-    description: "Clientes, tarefas e financeiro numa única plataforma para quem toca o negócio sozinho.",
+    name: "trudx",
+    short_name: "trudx",
+    description: "Clientes, tarefas, agenda e financeiro sob uma única ordem, para quem toca o negócio sozinho.",
     lang: "pt-BR",
     start_url: "./dashboard",
     scope: "./",

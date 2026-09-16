@@ -5,6 +5,7 @@ import Button from "@/components/ui/button";
 
 import { DraggableTaskCard } from "./draggable-task-card";
 import { TaskCardSkeleton } from "./task-card-skeleton";
+import { toZoomedTranslate, useTasksZoomContext } from "./tasks-zoom-context";
 
 //* Libraries Imports
 import { useSortable } from "@dnd-kit/sortable";
@@ -42,8 +43,9 @@ export function KanbanColumn({
     },
   });
 
+  const scale = useTasksZoomContext();
   const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: toZoomedTranslate(transform, scale),
     transition,
   };
 

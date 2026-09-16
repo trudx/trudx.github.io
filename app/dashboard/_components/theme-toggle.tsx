@@ -21,10 +21,10 @@ export function ThemeToggle() {
   const isDark = mounted && resolvedTheme === "dark";
 
   return (
-    <div className="flex items-center justify-between rounded-md border bg-card px-3 py-2.5">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        {isDark ? <Moon className="size-4" /> : <Sun className="size-4" />}
-        <span className="text-[0.72rem] font-semibold">Tema escuro</span>
+    <div className="flex items-center justify-between rounded-md px-2 py-1">
+      <div className="flex items-center gap-2 text-foreground/80">
+        {isDark ? <Moon className="size-3.5 text-muted-foreground" /> : <Sun className="size-3.5 text-muted-foreground" />}
+        <span className="text-xs">Tema escuro</span>
       </div>
       <Switch
         size="sm"

@@ -36,14 +36,14 @@ export function SignupForm() {
 
   return (
     <form className="w-full space-y-6" onSubmit={handleSubmit}>
-      <div className="space-y-1">
-        <h1 className="text-[1.65rem] font-bold tracking-[-0.04em] text-foreground">Criar conta</h1>
-        <p className="text-[0.78rem] leading-5 text-muted-foreground">Comece a organizar seu negócio freelance.</p>
+      <div className="border-b pb-5">
+        <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Criar conta</h1>
+        <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">Comece a organizar seu negócio freelance.</p>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-[0.72rem] font-semibold">
+          <Label htmlFor="name" className="text-xs font-semibold">
             Nome
           </Label>
           <Input
@@ -54,12 +54,12 @@ export function SignupForm() {
             required
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="h-11 rounded-md bg-background"
+            className="h-9 bg-background"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="signup-email" className="text-[0.72rem] font-semibold">
+          <Label htmlFor="signup-email" className="text-xs font-semibold">
             E-mail
           </Label>
           <Input
@@ -70,12 +70,12 @@ export function SignupForm() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="h-11 rounded-md bg-background"
+            className="h-9 bg-background"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="signup-password" className="text-[0.72rem] font-semibold">
+          <Label htmlFor="signup-password" className="text-xs font-semibold">
             Senha
           </Label>
           <Input
@@ -87,12 +87,12 @@ export function SignupForm() {
             minLength={6}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="h-11 rounded-md bg-background text-sm tracking-[0.18em]"
+            className="h-9 bg-background text-sm"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="signup-confirm-password" className="text-[0.72rem] font-semibold">
+          <Label htmlFor="signup-confirm-password" className="text-xs font-semibold">
             Confirmar senha
           </Label>
           <Input
@@ -104,16 +104,16 @@ export function SignupForm() {
             minLength={6}
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            className="h-11 rounded-md bg-background text-sm tracking-[0.18em]"
+            className="h-9 bg-background text-sm"
           />
         </div>
       </div>
 
-      <Button type="submit" disabled={isLoading} className="h-11 w-full px-4 text-sm font-bold">
+      <Button type="submit" disabled={isLoading} className="h-9 w-full px-4 text-xs font-semibold">
         {isLoading ? "Criando conta..." : "Criar conta"}
       </Button>
 
-      <p className="text-center text-[0.78rem] text-muted-foreground">
+      <p className="text-center text-xs text-muted-foreground">
         Já tem conta?{" "}
         <Link href="/login" className="font-semibold text-foreground underline-offset-4 hover:underline">
           Entrar

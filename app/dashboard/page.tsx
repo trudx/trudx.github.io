@@ -1,15 +1,11 @@
 "use client";
 
 //* Components Imports
-import Skeleton from "@/components/ui/skeleton";
-
-import { InstallAppButton } from "@/components/install-app-button";
-
-import { OverviewDetailDialog, type OverviewDetailItem } from "./_components/overview-detail-dialog";
-import { OverviewMetricCard } from "./_components/overview-metric-card";
+import { DashboardHero, OverviewDetailDialog, OverviewMetricCard } from "./_components";
 
 //* Libraries Imports
 import { useState } from "react";
+import { CalendarCheck, CalendarClock, CircleAlert, TrendingDown, TrendingUp, UserPlus } from "lucide-react";
 
 //* Hooks Imports
 import { useClients } from "@/hooks/use-clients";
@@ -17,10 +13,13 @@ import { getLastDaysPeriod, useFinanceiro } from "@/hooks/use-financeiro";
 import { useProfile } from "@/hooks/use-profile";
 import { useTasks } from "@/hooks/use-tasks";
 
+//* Types Imports
+import type { OverviewDetailItem } from "./_components";
+
 //* Utils Imports
 import { formatCurrency } from "@/lib/format-currency";
 import { formatDate, formatDateLong, formatTimestamp } from "@/lib/format-date";
-import { buildGreeting } from "@/lib/greeting";
+import { buildGreeting, getGreetingPeriod } from "@/lib/greeting";
 
 type DetailKey = "ganhos" | "gastos" | "clientes";
 
@@ -118,67 +117,80 @@ export default function DashboardPage() {
   const detail = openDetail ? detailProps[openDetail] : null;
 
   return (
-    <section className="mx-auto w-full max-w-5xl space-y-12">
-      <header className="flex flex-wrap items-start justify-between gap-4 pt-4">
-        <div>
-          {isLoadingProfile || !greeting ? (
-            <Skeleton className="h-10 w-72" />
-          ) : (
-            <h1 className="text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">{greeting}</h1>
-          )}
-          <p className="mt-3 text-sm text-muted-foreground">{formatDateLong(hojeIso)}</p>
-        </div>
-        <InstallAppButton variant="outline" size="lg" className="h-10 px-4 text-sm font-semibold" />
-      </header>
+    // Margens negativas espelham o padding do <main> do layout: a ilustração vai de ponta a ponta.
+    <div className="-mx-4 -mt-6 sm:-mx-6 sm:-mt-8 lg:-mx-8">
+      <DashboardHero
+        period={getGreetingPeriod(sessao.agora)}
+        greeting={greeting}
+        formattedDate={formatDateLong(hojeIso)}
+        description="Um resumo do que entrou, saiu e está para vencer — clique num indicador para ver os lançamentos."
+        isLoading={isLoadingProfile}
+      >
+        <section aria-labelledby="dashboard-financeiro-title" className="flex flex-col gap-3">
+          <h2 id="dashboard-financeiro-title" className="trudx-kicker text-foreground/70">
+            Últimos 7 dias
+          </h2>
+          <div className="grid gap-4 md:grid-cols-3">
+            <OverviewMetricCard
+              variant="hero"
+              icon={TrendingUp}
+              label="Ganhos"
+              value={ganhos.length > 0 ? formatCurrency(totalGanhos) : null}
+              emptyLabel="Sem ganhos"
+              hint={`${ganhos.length} ${ganhos.length === 1 ? "lançamento" : "lançamentos"}`}
+              isLoading={isLoadingFinanceiro}
+              valueClassName="text-emerald-400"
+              onOpen={() => setOpenDetail("ganhos")}
+            />
+            <OverviewMetricCard
+              variant="hero"
+              icon={TrendingDown}
+              label="Gastos"
+              value={gastos.length > 0 ? formatCurrency(totalGastos) : null}
+              emptyLabel="Sem gastos"
+              hint={`${gastos.length} ${gastos.length === 1 ? "lançamento" : "lançamentos"}`}
+              isLoading={isLoadingFinanceiro}
+              valueClassName="text-rose-400"
+              onOpen={() => setOpenDetail("gastos")}
+            />
+            <OverviewMetricCard
+              variant="hero"
+              icon={UserPlus}
+              label="Novos clientes"
+              value={clientesRecentes.length > 0 ? String(clientesRecentes.length) : null}
+              emptyLabel="Sem novos clientes"
+              hint="Ver quem entrou"
+              isLoading={isLoadingClients}
+              onOpen={() => setOpenDetail("clientes")}
+            />
+          </div>
+        </section>
+      </DashboardHero>
 
-      <div className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Últimos 7 dias</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+      <section
+        aria-labelledby="dashboard-tarefas-title"
+        className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pb-8 sm:px-6 lg:px-8"
+      >
+        <h2 id="dashboard-tarefas-title" className="trudx-kicker">
+          Tarefas
+        </h2>
+        <div className="grid gap-4 md:grid-cols-3">
           <OverviewMetricCard
-            label="Ganhos"
-            value={ganhos.length > 0 ? formatCurrency(totalGanhos) : null}
-            emptyLabel="Sem ganhos"
-            hint={`${ganhos.length} ${ganhos.length === 1 ? "lançamento" : "lançamentos"}`}
-            isLoading={isLoadingFinanceiro}
-            valueClassName="text-emerald-700"
-            onOpen={() => setOpenDetail("ganhos")}
-          />
-          <OverviewMetricCard
-            label="Gastos"
-            value={gastos.length > 0 ? formatCurrency(totalGastos) : null}
-            emptyLabel="Sem gastos"
-            hint={`${gastos.length} ${gastos.length === 1 ? "lançamento" : "lançamentos"}`}
-            isLoading={isLoadingFinanceiro}
-            valueClassName="text-rose-700"
-            onOpen={() => setOpenDetail("gastos")}
-          />
-          <OverviewMetricCard
-            label="Novos clientes"
-            value={clientesRecentes.length > 0 ? String(clientesRecentes.length) : null}
-            emptyLabel="Sem novos clientes"
-            hint="Ver quem entrou"
-            isLoading={isLoadingClients}
-            onOpen={() => setOpenDetail("clientes")}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tarefas</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <OverviewMetricCard
+            icon={CalendarCheck}
             label="Para hoje"
             value={String(tarefasHoje.length)}
             emptyLabel="—"
             isLoading={isLoadingTasks}
           />
           <OverviewMetricCard
+            icon={CalendarClock}
             label="Para amanhã"
             value={String(tarefasAmanha.length)}
             emptyLabel="—"
             isLoading={isLoadingTasks}
           />
           <OverviewMetricCard
+            icon={CircleAlert}
             label="Pendentes"
             value={String(tarefasPendentes.length)}
             emptyLabel="—"
@@ -186,7 +198,7 @@ export default function DashboardPage() {
             isLoading={isLoadingTasks}
           />
         </div>
-      </div>
+      </section>
 
       {detail && (
         <OverviewDetailDialog
@@ -200,6 +212,6 @@ export default function DashboardPage() {
           }}
         />
       )}
-    </section>
+    </div>
   );
 }

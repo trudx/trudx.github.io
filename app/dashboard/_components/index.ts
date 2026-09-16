@@ -1,4 +1,5 @@
 export * from "./dashboard-auth-guard";
+export * from "./dashboard-hero";
 export * from "./dashboard-sidebar";
 export * from "./overview-detail-dialog";
 export * from "./overview-metric-card";
