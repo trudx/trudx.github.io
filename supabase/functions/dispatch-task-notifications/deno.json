@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "@negrel/webpush": "jsr:@negrel/webpush@0.5.0",
+    "@supabase/server": "npm:@supabase/server@1.8.0",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.112.3"
+  }
+}
