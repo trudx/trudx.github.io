@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CalendarDays,
+  HeartPulse,
   KanbanSquare,
   LayoutDashboard,
   LogOut,
@@ -32,6 +33,7 @@ const navigation = [
   { href: "/dashboard/tasks", label: "Tarefas", icon: KanbanSquare },
   { href: "/dashboard/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/dashboard/agenda", label: "Agenda", icon: CalendarDays },
+  { href: "/dashboard/system-health", label: "Saúde de sistemas", icon: HeartPulse },
   { href: "/dashboard/settings", label: "Configurações", icon: Settings },
 ];
 

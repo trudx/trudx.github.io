@@ -21,6 +21,7 @@ import {
 
 //* Types Imports
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
+import type { MouseEvent } from "react";
 import type { TaskPriority, TaskRecord } from "@/hooks/use-tasks";
 
 //* Utils Imports
@@ -103,6 +104,12 @@ export function TaskCard({
     <article
       {...draggableAttributes}
       {...draggableListeners}
+      onClick={(event) => {
+        if (!onEdit || (event.target as HTMLElement).closest("button, a, input, textarea, select"))
+          return;
+        onEdit(task);
+      }}
+      aria-label={onEdit ? `Tarefa ${task.title}. Clique para editar.` : undefined}
       className={cn(
         "group rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
         isRunning ? runningCardStyle : priorityCardStyles[task.priority],
@@ -110,6 +117,7 @@ export function TaskCard({
         // "nunca role a partir daqui" e a página travaria no celular. Com o TouchSensor por
         // atraso, o navegador precisa mesmo ser dono do gesto até a ativação.
         draggableListeners && "cursor-grab touch-manipulation active:cursor-grabbing",
+        onEdit && "cursor-pointer",
         isDragging && "opacity-40",
       )}
     >
@@ -120,7 +128,10 @@ export function TaskCard({
           {...(onQuickEdit
             ? {
                 render: <button type="button" />,
-                onClick: () => onQuickEdit(task),
+                onClick: (event: MouseEvent<HTMLButtonElement>) => {
+                  event.stopPropagation();
+                  onQuickEdit(task);
+                },
                 "aria-label": `Alterar prioridade e cliente de ${task.title}`,
                 title: "Alterar prioridade e cliente",
               }

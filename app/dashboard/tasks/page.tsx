@@ -249,6 +249,7 @@ export default function TasksPage() {
               totaisAtualizadosEm={totaisAtualizadosEm}
               isRunning={runningTaskId !== null}
               isLoading={isLoadingTimer}
+              onRefresh={refreshTimer}
             />
             <TaskFilters value={filters} clients={clients} onChange={setFilters} />
             <div
