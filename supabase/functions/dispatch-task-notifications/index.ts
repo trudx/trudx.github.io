@@ -84,7 +84,11 @@ function createPayload(payload: PushPayload) {
   return JSON.stringify(payload);
 }
 
-async function reserveEvent(supabase: SupabaseClient, subscriptionId: string, eventKey: string) {
+async function reserveEvent(
+  supabase: SupabaseClient,
+  subscriptionId: string,
+  eventKey: string,
+): Promise<string | null> {
   const now = new Date();
   const retryAfter = new Date(now.getTime() + 15 * 60 * 1000).toISOString();
   const { data, error } = await supabase
@@ -131,10 +135,10 @@ async function reserveEvent(supabase: SupabaseClient, subscriptionId: string, ev
       .select("id")
       .maybeSingle();
     if (claimError) throw claimError;
-    return claimed?.id as string | undefined;
+    return claimed?.id ?? null;
   }
   if (error) throw error;
-  return data?.id as string | undefined;
+  return data?.id ?? null;
 }
 
 async function deliver(
@@ -149,7 +153,7 @@ async function deliver(
     return "skipped" as const;
   }
 
-  let eventId: string | undefined;
+  let eventId: string | null = null;
   try {
     eventId = await reserveEvent(supabase, subscription.id, eventKey);
   } catch (error) {
