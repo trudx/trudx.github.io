@@ -58,7 +58,7 @@ export default function TasksPage() {
     quickUpdateTask,
     deleteTask,
   } = useTasks();
-  const { clients } = useClients();
+  const { clients, selectableClients } = useClients();
   const zoomScale = useTasksZoomScale();
   // O overlay de arraste vai por portal para o body; portal só existe no cliente.
   const isClient = useSyncExternalStore(
@@ -301,7 +301,7 @@ export default function TasksPage() {
             {quickEditTask && (
               <TaskQuickEditSheet
                 task={quickEditTask}
-                clients={clients}
+                clients={selectableClients}
                 columns={columns}
                 timer={{ ...timerProps, onDiscard: () => void discardTimer() }}
                 onOpenChange={(open) => {
@@ -316,7 +316,7 @@ export default function TasksPage() {
               open={isFormOpen}
               task={editingTask}
               columns={columns}
-              clients={clients}
+              clients={selectableClients}
               isSaving={isSaving}
               onOpenChange={setIsFormOpen}
               onSubmit={(input) =>

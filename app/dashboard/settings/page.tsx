@@ -5,7 +5,12 @@ import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Label from "@/components/ui/label";
 
-import { SettingsSkeleton, TaskPushNotificationsSetting, TasksZoomSetting } from "./_components";
+import {
+  ClientsListSetting,
+  SettingsSkeleton,
+  TaskPushNotificationsSetting,
+  TasksZoomSetting,
+} from "./_components";
 
 //* Hooks Imports
 import { useProfile } from "@/hooks/use-profile";
@@ -108,6 +113,7 @@ export default function SettingsPage() {
         </div>
       )}
 
+      <ClientsListSetting />
       <TasksZoomSetting />
       <TaskPushNotificationsSetting />
     </section>

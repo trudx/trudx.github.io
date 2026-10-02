@@ -26,7 +26,7 @@ import type { OfxGroup } from "@/lib/ofx";
 import type { OfxReviewState } from "./ofx-group-card";
 
 //* Utils Imports
-import { parseOfxFile } from "@/lib/ofx";
+import { parseStatementFile } from "@/lib/ofx";
 import { formatDate } from "@/lib/format-date";
 
 type ImportOfxDialogProps = {
@@ -87,7 +87,8 @@ export function ImportOfxDialog({
 
     setIsParsing(true);
     try {
-      const parsedGroups = await parseOfxFile(file);
+      const { groups: parsedGroups, warnings } = await parseStatementFile(file);
+      for (const warning of warnings) toast.warning(warning);
       setGroups(parsedGroups);
       setReview(
         Object.fromEntries(
@@ -98,13 +99,13 @@ export function ImportOfxDialog({
         ),
       );
     } catch (error) {
-      toast.error("Não foi possível ler esse arquivo OFX", {
+      toast.error("Não foi possível ler esse extrato", {
         description:
           error instanceof Error
             ? error.message
             : "Confira se o arquivo exportado pelo banco não está corrompido.",
       });
-      console.error("Erro ao processar OFX:", error);
+      console.error("Erro ao processar extrato:", error);
     } finally {
       setIsParsing(false);
     }
@@ -204,10 +205,10 @@ export function ImportOfxDialog({
           ) : (
             <>
               <Dialog.DialogTitle className="text-xl font-bold tracking-[-0.04em]">
-                Importar extrato OFX
+                Importar extrato
               </Dialog.DialogTitle>
               <Dialog.DialogDescription>
-                Selecione o arquivo exportado pelo seu banco. Transações parecidas são agrupadas
+                Selecione o extrato exportado pelo seu banco (OFX ou PDF do Santander). Transações parecidas são agrupadas
                 para você revisar de uma vez.
               </Dialog.DialogDescription>
             </>
@@ -236,11 +237,11 @@ export function ImportOfxDialog({
           </ul>
         ) : groups.length === 0 ? (
           <div className="space-y-2">
-            <Label htmlFor="ofx-file">Arquivo .ofx</Label>
+            <Label htmlFor="ofx-file">Arquivo .ofx ou .pdf</Label>
             <Input
               id="ofx-file"
               type="file"
-              accept=".ofx,.qfx"
+              accept=".ofx,.qfx,.pdf"
               disabled={isParsing}
               onChange={(event) => void handleFileChange(event)}
               className="h-11"

@@ -1,6 +1,9 @@
 //* Libraries Imports
 import { parseStrict, type ofxTypes } from "ofx-js";
 
+//* Utils Imports
+import { parsePdfStatement } from "@/lib/pdf-statement";
+
 export type OfxTransaction = {
   fitid: string | null;
   data: string;
@@ -46,21 +49,7 @@ function groupingKey(transaction: OfxTransaction) {
   return `${transaction.descricao.trim().toLowerCase()}::${transaction.valor.toFixed(2)}`;
 }
 
-/** Lê um arquivo .ofx/.qfx e devolve as transações agrupadas por descrição+valor parecidos. */
-export async function parseOfxFile(file: File): Promise<OfxGroup[]> {
-  const text = await file.text();
-  const parsed = parseStrict(text);
-
-  const statementResponses = asArray(parsed.OFX.BANKMSGSRSV1?.STMTTRNRS);
-  const rawTransactions = statementResponses.flatMap((response) =>
-    asArray(response.STMTRS?.BANKTRANLIST?.STMTTRN),
-  );
-
-  if (rawTransactions.length === 0) {
-    throw new Error("Nenhuma transação encontrada nesse arquivo OFX.");
-  }
-
-  const transactions = rawTransactions.map(normalizeTransaction);
+function groupTransactions(transactions: OfxTransaction[]): OfxGroup[] {
   const groups = new Map<string, OfxGroup>();
 
   for (const transaction of transactions) {
@@ -81,4 +70,31 @@ export async function parseOfxFile(file: File): Promise<OfxGroup[]> {
   }
 
   return [...groups.values()].sort((a, b) => b.transactions.length - a.transactions.length);
+}
+
+/** Lê um arquivo .ofx/.qfx e devolve as transações agrupadas por descrição+valor parecidos. */
+export async function parseOfxFile(file: File): Promise<OfxGroup[]> {
+  const text = await file.text();
+  const parsed = parseStrict(text);
+
+  const statementResponses = asArray(parsed.OFX.BANKMSGSRSV1?.STMTTRNRS);
+  const rawTransactions = statementResponses.flatMap((response) =>
+    asArray(response.STMTRS?.BANKTRANLIST?.STMTTRN),
+  );
+
+  if (rawTransactions.length === 0) {
+    throw new Error("Nenhuma transação encontrada nesse arquivo OFX.");
+  }
+
+  return groupTransactions(rawTransactions.map(normalizeTransaction));
+}
+
+/** Lê um extrato (.ofx/.qfx ou .pdf do Santander) e devolve os grupos para revisão, mais avisos de leitura. */
+export async function parseStatementFile(file: File) {
+  if (!file.name.toLowerCase().endsWith(".pdf")) {
+    return { groups: await parseOfxFile(file), warnings: [] as string[] };
+  }
+
+  const { transactions, warnings } = await parsePdfStatement(file);
+  return { groups: groupTransactions(transactions), warnings };
 }

@@ -11,6 +11,9 @@ import { getAuthenticatedUserId } from "@/services/auth-service";
 //* Utils Imports
 import { getApiErrorMessage } from "@/lib/api-error";
 
+//* Hooks Imports
+import { useClientListPreference } from "@/hooks/use-client-list-preference";
+
 export type ClientStatus = "active" | "inactive";
 
 export type ClientRecord = {
@@ -31,6 +34,7 @@ export type ClientInput = {
 
 export function useClients() {
   const [clients, setClients] = useState<ClientRecord[]>([]);
+  const { onlyActive } = useClientListPreference();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
@@ -122,8 +126,14 @@ export function useClients() {
     }
   }
 
+  // `clients` é a lista completa (para resolver nomes e filtros); os seletores usam `selectableClients`.
+  const selectableClients = onlyActive
+    ? clients.filter((client) => client.status === "active")
+    : clients;
+
   return {
     clients,
+    selectableClients,
     isLoading,
     isSaving,
     deletingClientId,

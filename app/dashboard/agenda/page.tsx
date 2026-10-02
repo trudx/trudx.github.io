@@ -71,7 +71,7 @@ const messages = {
 export default function AgendaPage() {
   const { eventos, isLoading, isSaving, deletingId, createEvento, updateEvento, deleteEvento } =
     useEventos();
-  const { clients } = useClients();
+  const { selectableClients } = useClients();
   const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -167,7 +167,7 @@ export default function AgendaPage() {
         key={`${editingEvento?.id ?? "new"}-${isFormOpen}`}
         open={isFormOpen}
         evento={editingEvento}
-        clients={clients}
+        clients={selectableClients}
         isSaving={isSaving}
         initialRange={initialRange}
         onOpenChange={setIsFormOpen}

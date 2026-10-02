@@ -8,8 +8,10 @@ import Input from "@/components/ui/input";
 import Select from "@/components/ui/select";
 import Table from "@/components/ui/table";
 
+import { FacetedFilter } from "@/app/dashboard/tasks/_components/faceted-filter";
 import { BancosDialog } from "./_components/bancos-dialog";
 import { DeleteFinanceiroDialog } from "./_components/delete-financeiro-dialog";
+import { FinanceiroDetailDialog } from "./_components/financeiro-detail-dialog";
 import { FinanceiroFormDialog } from "./_components/financeiro-form-dialog";
 import { FinanceiroGrupos } from "./_components/financeiro-grupos";
 import { FinanceiroSaldoCard } from "./_components/financeiro-saldo-card";
@@ -22,7 +24,7 @@ import { PrivacyToggle } from "./_components/privacy-toggle";
 
 //* Libraries Imports
 import { useEffect, useMemo, useState } from "react";
-import { Building2, Download, Plus, Repeat, Search, Trash2, Upload } from "lucide-react";
+import { Building2, Download, Plus, Repeat, Search, Trash2, Undo2, Upload } from "lucide-react";
 
 //* Hooks Imports
 import { useBancos } from "@/hooks/use-bancos";
@@ -37,6 +39,19 @@ import { FinanceiroPrivacyContext, formatCurrencyPrivate } from "./_components/f
 import { exportFinanceiroToCsv } from "@/lib/financeiro-csv";
 import { formatDate } from "@/lib/format-date";
 import { normalizeText } from "@/lib/normalize-text";
+
+const SEM_VALOR = "__none";
+
+const ORIGEM_OPTIONS = [
+  { value: "pdf", label: "Importado de PDF" },
+  { value: "ofx", label: "Importado de OFX" },
+  { value: "manual", label: "Manual / gasto fixo" },
+];
+
+function getOrigem(record: FinanceiroRecord) {
+  if (!record.fitid) return "manual";
+  return record.fitid.startsWith("pdf-") ? "pdf" : "ofx";
+}
 
 const tipoLabels: Record<FinanceiroTipo, string> = {
   gasto: "Gasto",
@@ -77,10 +92,14 @@ export default function FinanceiroPage() {
     createRecord,
     findDuplicates,
     importRecords,
+    updateRecord,
+    lastImportCount,
+    isUndoingImport,
+    undoLastImport,
     deleteRecord,
     deleteRecords,
   } = useFinanceiro();
-  const { clients } = useClients();
+  const { clients, selectableClients } = useClients();
   const gastosFixosState = useGastosFixos();
   const gruposState = useFinanceiroGrupos();
   const bancosState = useBancos();
@@ -91,10 +110,29 @@ export default function FinanceiroPage() {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [isBancosOpen, setIsBancosOpen] = useState(false);
   const [deletingRecord, setDeletingRecord] = useState<FinanceiroRecord | null>(null);
+  const [detailRecord, setDetailRecord] = useState<FinanceiroRecord | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
   const [descricaoBusca, setDescricaoBusca] = useState("");
   const [valorBusca, setValorBusca] = useState("");
+  const [origemFilter, setOrigemFilter] = useState<string[]>([]);
+  const [clienteFilter, setClienteFilter] = useState<string[]>([]);
+  const [bancoFilter, setBancoFilter] = useState<string[]>([]);
+
+  const clienteOptions = useMemo(
+    () => [
+      { value: SEM_VALOR, label: "Sem cliente" },
+      ...clients.map((client) => ({ value: client.id, label: client.name })),
+    ],
+    [clients],
+  );
+  const bancoOptions = useMemo(
+    () => [
+      { value: SEM_VALOR, label: "Sem banco (avulsos)" },
+      ...bancosState.bancos.map((banco) => ({ value: banco.id, label: banco.nome })),
+    ],
+    [bancosState.bancos],
+  );
 
   const filteredRecords = useMemo(() => {
     const normalizedSearch = normalizeText(descricaoBusca);
@@ -103,6 +141,11 @@ export default function FinanceiroPage() {
     const valorMax = valorAlvo !== null ? valorAlvo * 1.1 : null;
 
     return records.filter((record) => {
+      if (origemFilter.length > 0 && !origemFilter.includes(getOrigem(record))) return false;
+      if (clienteFilter.length > 0 && !clienteFilter.includes(record.cliente_id ?? SEM_VALOR))
+        return false;
+      if (bancoFilter.length > 0 && !bancoFilter.includes(record.banco_id ?? SEM_VALOR))
+        return false;
       if (normalizedSearch && !normalizeText(record.descricao ?? "").includes(normalizedSearch))
         return false;
       if (
@@ -113,7 +156,7 @@ export default function FinanceiroPage() {
         return false;
       return true;
     });
-  }, [records, descricaoBusca, valorBusca]);
+  }, [records, descricaoBusca, valorBusca, origemFilter, clienteFilter, bancoFilter]);
 
   useEffect(() => {
     // Selection only makes sense scoped to the currently filtered/loaded records.
@@ -172,6 +215,16 @@ export default function FinanceiroPage() {
     return result;
   }
 
+  async function handleUndoLastImport() {
+    const confirmed = window.confirm(
+      `Remover os ${lastImportCount} lançamento${lastImportCount === 1 ? "" : "s"} da última importação?`,
+    );
+    if (!confirmed) return;
+
+    const success = await undoLastImport();
+    if (success) void refreshSaldo();
+  }
+
   async function handleDeleteRecord(id: string) {
     const success = await deleteRecord(id);
     if (success) void refreshSaldo();
@@ -225,8 +278,20 @@ export default function FinanceiroPage() {
               onClick={() => setIsImportOpen(true)}
             >
               <Upload />
-              Importar OFX
+              Importar extrato
             </Button>
+            {lastImportCount > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-8 px-3 text-xs font-medium"
+                disabled={isUndoingImport}
+                onClick={() => void handleUndoLastImport()}
+              >
+                <Undo2 />
+                {isUndoingImport ? "Desfazendo..." : `Desfazer último import (${lastImportCount})`}
+              </Button>
+            )}
             <Button
               type="button"
               className="h-8 px-3 text-xs font-medium"
@@ -312,6 +377,29 @@ export default function FinanceiroPage() {
                   className="h-10 bg-background pl-9"
                 />
               </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <FacetedFilter
+                label="Origem"
+                options={ORIGEM_OPTIONS}
+                selected={origemFilter}
+                onChange={setOrigemFilter}
+              />
+              <FacetedFilter
+                label="Cliente"
+                options={clienteOptions}
+                selected={clienteFilter}
+                emptyMessage="Nenhum cliente encontrado."
+                onChange={setClienteFilter}
+              />
+              <FacetedFilter
+                label="Banco"
+                options={bancoOptions}
+                selected={bancoFilter}
+                emptyMessage="Nenhum banco encontrado."
+                onChange={setBancoFilter}
+              />
             </div>
 
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
@@ -412,9 +500,10 @@ export default function FinanceiroPage() {
                       <Table.TableRow
                         key={record.id}
                         data-selected={selectedIds.has(record.id) || undefined}
-                        className="data-selected:bg-accent/60"
+                        className="cursor-pointer data-selected:bg-accent/60"
+                        onClick={() => setDetailRecord(record)}
                       >
-                        <Table.TableCell className="px-3">
+                        <Table.TableCell className="px-3" onClick={(event) => event.stopPropagation()}>
                           <Checkbox
                             checked={selectedIds.has(record.id)}
                             onCheckedChange={(checked) => toggleSelect(record.id, checked === true)}
@@ -446,7 +535,10 @@ export default function FinanceiroPage() {
                           {record.tipo === "ganho" ? "+" : "-"}
                           {formatCurrencyPrivate(record.valor, isValoresHidden)}
                         </Table.TableCell>
-                        <Table.TableCell className="px-3 py-4 text-right">
+                        <Table.TableCell
+                          className="px-3 py-4 text-right"
+                          onClick={(event) => event.stopPropagation()}
+                        >
                           <Button
                             type="button"
                             variant="ghost"
@@ -477,7 +569,7 @@ export default function FinanceiroPage() {
         )}
         <FinanceiroFormDialog
           open={isFormOpen}
-          clients={clients}
+          clients={selectableClients}
           bancos={bancosState.bancos}
           isSaving={isSaving}
           onOpenChange={setIsFormOpen}
@@ -485,7 +577,7 @@ export default function FinanceiroPage() {
         />
         <ImportOfxDialog
           open={isImportOpen}
-          clients={clients}
+          clients={selectableClients}
           bancos={bancosState.bancos}
           isSaving={isSaving}
           onOpenChange={setIsImportOpen}
@@ -511,6 +603,23 @@ export default function FinanceiroPage() {
           onUpdate={gastosFixosState.updateGastoFixo}
           onToggleAtivo={gastosFixosState.toggleAtivo}
           onDelete={gastosFixosState.deleteGastoFixo}
+        />
+        <FinanceiroDetailDialog
+          record={detailRecord}
+          tipoLabel={detailRecord ? tipoLabels[detailRecord.tipo] : ""}
+          tipoClassName={detailRecord ? tipoStyles[detailRecord.tipo] : ""}
+          clients={selectableClients}
+          bancos={bancosState.bancos}
+          isSaving={isSaving}
+          isValoresHidden={isValoresHidden}
+          onOpenChange={(open) => {
+            if (!open) setDetailRecord(null);
+          }}
+          onSave={updateRecord}
+          onDelete={(record) => {
+            setDetailRecord(null);
+            setDeletingRecord(record);
+          }}
         />
         <DeleteFinanceiroDialog
           open={Boolean(deletingRecord)}

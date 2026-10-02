@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 //* Services Imports
-import { get, post, remove, upsertIgnoring } from "@/services/api-service";
+import { get, patch, post, remove, upsertIgnoring } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
 
 //* Utils Imports
@@ -37,11 +37,14 @@ export type FinanceiroInput = {
   fitid?: string | null;
 };
 
+export type FinanceiroEditInput = Pick<FinanceiroInput, "descricao" | "cliente_id" | "banco_id">;
+
 export type PeriodFilter =
   | { mode: "month"; month: string }
   | { mode: "range"; start: string; end: string };
 
 const TABLE = "financeiro";
+const LAST_IMPORT_KEY = "trudx:financeiro:last-import";
 const SELECT_COLUMNS =
   "id,user_id,data,tipo,valor,descricao,cliente_id,gasto_fixo_id,banco_id,fitid,created_at";
 
@@ -73,6 +76,24 @@ export function getLastDaysPeriod(days: number): PeriodFilter {
   return { mode: "range", start: toIso(start), end: toIso(end) };
 }
 
+function readLastImportIds(): string[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(LAST_IMPORT_KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLastImportIds(ids: string[]) {
+  try {
+    if (ids.length === 0) localStorage.removeItem(LAST_IMPORT_KEY);
+    else localStorage.setItem(LAST_IMPORT_KEY, JSON.stringify(ids));
+  } catch {
+    // Sem localStorage (modo privado/bloqueado): o desfazer simplesmente não fica disponível.
+  }
+}
+
 function duplicateKey(data: string, valor: number, descricao: string) {
   return `${data}::${valor.toFixed(2)}::${descricao.trim().toLowerCase()}`;
 }
@@ -87,6 +108,14 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [lastImportIds, setLastImportIds] = useState<string[]>([]);
+  const [isUndoingImport, setIsUndoingImport] = useState(false);
+
+  useEffect(() => {
+    // localStorage só existe no navegador; o contador é lido depois da hidratação.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLastImportIds(readLastImportIds());
+  }, []);
 
   // Buscado por período (não por tipo), pra que os cards agrupados por termo vejam todos os tipos.
   const fetchRecords = useCallback(async () => {
@@ -206,6 +235,13 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
 
       await fetchRecords();
 
+      // Guarda só a última importação: é ela que o botão "Desfazer" remove.
+      if (data.length > 0) {
+        const ids = data.map((row) => row.id);
+        writeLastImportIds(ids);
+        setLastImportIds(ids);
+      }
+
       const inserted = data.length;
       const skipped = rows.length - inserted;
       toast.success(
@@ -226,6 +262,61 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
       return { inserted: 0, skipped: 0 };
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  /** Edita descrição, cliente e banco de um lançamento (valor, data e tipo não mudam). */
+  async function updateRecord(id: string, input: FinanceiroEditInput) {
+    setIsSaving(true);
+
+    try {
+      const userId = await getAuthenticatedUserId();
+      const changes = { ...input, descricao: input.descricao.trim() || null };
+      const [updated] = await patch<FinanceiroRecord>(TABLE, changes, { id, user_id: userId });
+      if (!updated) throw new Error("Nenhum lançamento foi atualizado (verifique a policy de update).");
+
+      setAllRecords((current) =>
+        current.map((record) => (record.id === id ? { ...record, ...changes } : record)),
+      );
+      toast.success("Lançamento atualizado");
+      return true;
+    } catch (error) {
+      toast.error("Não foi possível atualizar o lançamento", {
+        description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
+      });
+      console.error("Erro ao atualizar lançamento financeiro:", error);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  /** Apaga os lançamentos criados pela última importação (ids guardados no localStorage). */
+  async function undoLastImport() {
+    if (lastImportIds.length === 0) return false;
+
+    setIsUndoingImport(true);
+
+    try {
+      const userId = await getAuthenticatedUserId();
+      await remove(TABLE, { id: lastImportIds, user_id: userId });
+
+      const idSet = new Set(lastImportIds);
+      setAllRecords((current) => current.filter((record) => !idSet.has(record.id)));
+      toast.success(
+        `Importação desfeita: ${lastImportIds.length} lançamento${lastImportIds.length === 1 ? "" : "s"} removido${lastImportIds.length === 1 ? "" : "s"}`,
+      );
+      writeLastImportIds([]);
+      setLastImportIds([]);
+      return true;
+    } catch (error) {
+      toast.error("Não foi possível desfazer a importação", {
+        description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
+      });
+      console.error("Erro ao desfazer última importação:", error);
+      return false;
+    } finally {
+      setIsUndoingImport(false);
     }
   }
 
@@ -290,6 +381,10 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
     createRecord,
     findDuplicates,
     importRecords,
+    updateRecord,
+    lastImportCount: lastImportIds.length,
+    isUndoingImport,
+    undoLastImport,
     deleteRecord,
     deleteRecords,
     refreshRecords: fetchRecords,

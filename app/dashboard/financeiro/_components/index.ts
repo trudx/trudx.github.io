@@ -1,5 +1,7 @@
 export * from "./bancos-dialog";
 export * from "./delete-financeiro-dialog";
+export * from "./entity-combobox";
+export * from "./financeiro-detail-dialog";
 export * from "./financeiro-form-dialog";
 export * from "./financeiro-grupo-dialog";
 export * from "./financeiro-grupos";
