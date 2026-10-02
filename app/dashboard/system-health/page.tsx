@@ -33,11 +33,7 @@ import { toast } from "sonner";
 import { useSystemHealth } from "@/hooks/use-system-health";
 
 //* Types Imports
-import type {
-  SystemHealthCheckState,
-  SystemHealthInput,
-  SystemHealthRecord,
-} from "@/lib/system-health";
+import type { SystemHealthCheckState, SystemHealthInput, SystemHealthRecord } from "@/lib/system-health";
 
 //* Utils Imports
 import {
@@ -59,12 +55,17 @@ const statusPresentation: Record<
   },
   online: {
     label: "Online",
-    className: "border-foreground/25 text-foreground",
+    className: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
     icon: CircleCheck,
+  },
+  unverified: {
+    label: "Não verificado",
+    className: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    icon: ShieldCheck,
   },
   offline: {
     label: "Offline",
-    className: "border-destructive/40 text-destructive",
+    className: "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-400",
     icon: CircleX,
   },
 };
@@ -73,6 +74,7 @@ export default function SystemHealthPage() {
   const {
     systems,
     checkStates,
+    checkDetails,
     isLoading,
     now,
     createSystem,
@@ -83,10 +85,16 @@ export default function SystemHealthPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSystem, setEditingSystem] = useState<SystemHealthRecord | null>(null);
   const [deletingSystem, setDeletingSystem] = useState<SystemHealthRecord | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SystemHealthCheckState | "all">("all");
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const onlineCount = systems.filter((system) => checkStates[system.id] === "online").length;
   const offlineCount = systems.filter((system) => checkStates[system.id] === "offline").length;
+  const unverifiedCount = systems.filter((system) => checkStates[system.id] === "unverified").length;
+  const checkingCount = systems.filter((system) => (checkStates[system.id] ?? "checking") === "checking").length;
+  const visibleSystems = systems.filter(
+    (system) => statusFilter === "all" || (checkStates[system.id] ?? "checking") === statusFilter,
+  );
 
   function handleOpenCreate() {
     setEditingSystem(null);
@@ -142,20 +150,16 @@ export default function SystemHealthPage() {
           description: "Todas as URLs do arquivo já estão cadastradas.",
         });
       } else {
-        toast.success(
-          `${importedCount} ${importedCount === 1 ? "sistema importado" : "sistemas importados"}`,
-          {
-            description:
-              skippedCount > 0
-                ? `${skippedCount} URL(s) repetida(s) foram ignoradas. As novas URLs serão verificadas agora.`
-                : "As novas URLs serão verificadas agora e iniciarão uma nova contagem.",
-          },
-        );
+        toast.success(`${importedCount} ${importedCount === 1 ? "sistema importado" : "sistemas importados"}`, {
+          description:
+            skippedCount > 0
+              ? `${skippedCount} URL(s) repetida(s) foram ignoradas. As novas URLs serão verificadas agora.`
+              : "As novas URLs serão verificadas agora e iniciarão uma nova contagem.",
+        });
       }
     } catch (error) {
       toast.error("Não foi possível importar esse JSON", {
-        description:
-          error instanceof Error ? error.message : "Selecione uma exportação válida do trudx.",
+        description: error instanceof Error ? error.message : "Selecione uma exportação válida do trudx.",
       });
     } finally {
       input.value = "";
@@ -176,6 +180,16 @@ export default function SystemHealthPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isLoading || checkingCount > 0 || systems.length === 0}
+            className="h-8 px-3 text-xs font-medium"
+            onClick={() => window.location.reload()}
+          >
+            <RefreshCw className={cn(checkingCount > 0 && "animate-spin")} />
+            {checkingCount > 0 ? "Verificando..." : "Verificar agora"}
+          </Button>
           <Button
             type="button"
             variant="outline"
@@ -216,47 +230,7 @@ export default function SystemHealthPage() {
         </div>
       </div>
 
-      <Alert.AlertRoot className="items-start gap-3 border-foreground/15 bg-muted/40 p-4">
-        <HardDrive className="mt-0.5 size-4" />
-        <div>
-          <Alert.AlertTitle className="font-semibold">
-            Configurações salvas localmente
-          </Alert.AlertTitle>
-          <Alert.AlertDescription>
-            Os sistemas ficam neste navegador e não são sincronizados com outros dispositivos. Baixe
-            o JSON para guardar uma cópia dos nomes e URLs. Importar adiciona URLs novas, ignora as
-            repetidas e inicia uma nova contagem após a próxima resposta 200.
-          </Alert.AlertDescription>
-        </div>
-      </Alert.AlertRoot>
-
-      <Alert.AlertRoot className="items-start gap-3 border-foreground/15 bg-muted/40 p-4">
-        <ShieldCheck className="mt-0.5 size-4" />
-        <div className="space-y-2">
-          <Alert.AlertTitle className="font-semibold">
-            Como funciona o monitoramento
-          </Alert.AlertTitle>
-          <Alert.AlertDescription className="space-y-1.5 text-sm">
-            <p>
-              Cadastre a URL de uma rota{" "}
-              <strong className="text-foreground">pública, sem autenticação</strong>, que responda
-              com o status HTTP <strong className="text-foreground">200</strong>.
-            </p>
-            <p>
-              A verificação é feita pelo navegador ao abrir esta aba. A rota também precisa permitir
-              CORS para o domínio do trudx e usar HTTPS quando o app estiver em HTTPS.
-            </p>
-            <p className="flex items-start gap-2 font-medium text-foreground">
-              <RefreshCw className="mt-0.5 size-3.5 shrink-0" />
-              Para verificar novamente, recarregue esta página. Se um sistema falhar, a contagem e a
-              última checagem válida são apagadas; quando voltar a responder 200, uma nova contagem
-              começa.
-            </p>
-          </Alert.AlertDescription>
-        </div>
-      </Alert.AlertRoot>
-
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-live="polite">
         <Card.CardRoot size="sm">
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
@@ -266,22 +240,35 @@ export default function SystemHealthPage() {
             <Activity className="size-4 text-muted-foreground" />
           </Card.CardContent>
         </Card.CardRoot>
-        <Card.CardRoot size="sm">
+        <Card.CardRoot size="sm" className="bg-emerald-500/5 ring-emerald-500/25">
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Online · HTTP 200</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">{onlineCount}</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+                {onlineCount}
+              </p>
             </div>
-            <CircleCheck className="size-4 text-muted-foreground" />
+            <CircleCheck className="size-5 text-emerald-600 dark:text-emerald-400" />
           </Card.CardContent>
         </Card.CardRoot>
-        <Card.CardRoot size="sm">
+        <Card.CardRoot size="sm" className="bg-red-500/5 ring-red-500/25">
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs text-muted-foreground">Precisam de atenção</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">{offlineCount}</p>
+              <p className="text-xs text-muted-foreground">Offline</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-red-700 dark:text-red-400">{offlineCount}</p>
             </div>
-            <CircleX className="size-4 text-muted-foreground" />
+            <CircleX className="size-5 text-red-600 dark:text-red-400" />
+          </Card.CardContent>
+        </Card.CardRoot>
+        <Card.CardRoot size="sm" className="bg-amber-500/5 ring-amber-500/25">
+          <Card.CardContent className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs text-muted-foreground">Não verificados</p>
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+                {unverifiedCount}
+              </p>
+            </div>
+            <ShieldCheck className="size-5 text-amber-600 dark:text-amber-400" />
           </Card.CardContent>
         </Card.CardRoot>
       </div>
@@ -292,11 +279,38 @@ export default function SystemHealthPage() {
             <Card.CardTitle>Sistemas monitorados</Card.CardTitle>
           </div>
           <span className="text-xs text-muted-foreground">
-            {isLoading
-              ? "Carregando..."
-              : `${systems.length} ${systems.length === 1 ? "sistema" : "sistemas"}`}
+            {isLoading ? "Carregando..." : `${systems.length} ${systems.length === 1 ? "sistema" : "sistemas"}`}
           </span>
         </Card.CardHeader>
+
+        <div className="flex flex-wrap items-center gap-2 border-b px-4 py-3" aria-label="Filtrar sistemas por estado">
+          {(
+            [
+              ["all", "Todos", systems.length],
+              ["online", "Online", onlineCount],
+              ["offline", "Offline", offlineCount],
+              ["unverified", "Não verificados", unverifiedCount],
+              ["checking", "Verificando", checkingCount],
+            ] as const
+          ).map(([value, label, count]) => (
+            <Button
+              key={value}
+              type="button"
+              variant={statusFilter === value ? "secondary" : "ghost"}
+              aria-pressed={statusFilter === value}
+              onClick={() => setStatusFilter(value)}
+              className={cn(
+                "h-8 gap-2 px-3 text-xs",
+                value !== "all" && statusPresentation[value].className,
+                statusFilter === value && "ring-1 ring-current",
+              )}
+            >
+              {value !== "all" && <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />}
+              {label}
+              <span className="tabular-nums opacity-75">{count}</span>
+            </Button>
+          ))}
+        </div>
 
         <Table.TableRoot>
           <Table.TableHeader>
@@ -311,17 +325,38 @@ export default function SystemHealthPage() {
             </Table.TableRow>
           </Table.TableHeader>
           <Table.TableBody>
-            {systems.map((system) => {
+            {visibleSystems.map((system) => {
               const state = checkStates[system.id] ?? "checking";
               const presentation = statusPresentation[state];
               const StatusIcon = presentation.icon;
               const daysOnline = getSystemHealthDays(system.calculationStartedAt, now);
 
               return (
-                <Table.TableRow key={system.id}>
+                <Table.TableRow
+                  key={system.id}
+                  className={cn(
+                    state === "online" && "bg-emerald-500/[0.03]",
+                    state === "offline" && "bg-red-500/[0.05]",
+                  )}
+                >
                   <Table.TableCell>
                     <div>
-                      <p className="font-medium text-foreground">{system.name}</p>
+                      <p className="flex items-center gap-2 font-medium text-foreground">
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "size-2 shrink-0 rounded-full",
+                            state === "online"
+                              ? "bg-emerald-500"
+                              : state === "offline"
+                                ? "bg-red-500"
+                                : state === "unverified"
+                                  ? "bg-amber-500"
+                                  : "bg-muted-foreground animate-pulse",
+                          )}
+                        />
+                        {system.name}
+                      </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         Cadastrado {formatSystemHealthDate(system.createdAt)}
                       </p>
@@ -340,17 +375,18 @@ export default function SystemHealthPage() {
                   </Table.TableCell>
                   <Table.TableCell>
                     <Badge variant="outline" className={cn("gap-1.5", presentation.className)}>
-                      <StatusIcon
-                        className={cn("size-3", state === "checking" && "animate-spin")}
-                      />
+                      <StatusIcon className={cn("size-3", state === "checking" && "animate-spin")} />
                       {presentation.label}
                     </Badge>
+                    {checkDetails[system.id] && state !== "checking" && (
+                      <p className="mt-1 max-w-72 whitespace-normal break-words text-xs text-muted-foreground">
+                        {checkDetails[system.id]}
+                      </p>
+                    )}
                   </Table.TableCell>
                   <Table.TableCell>
                     <span className="font-semibold tabular-nums">{daysOnline}</span>
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      {daysOnline === 1 ? "dia" : "dias"}
-                    </span>
+                    <span className="ml-1 text-xs text-muted-foreground">{daysOnline === 1 ? "dia" : "dias"}</span>
                   </Table.TableCell>
                   <Table.TableCell className="text-xs text-muted-foreground">
                     {formatSystemHealthDate(system.calculationStartedAt)}
@@ -383,6 +419,13 @@ export default function SystemHealthPage() {
                 </Table.TableRow>
               );
             })}
+            {!isLoading && systems.length > 0 && visibleSystems.length === 0 && (
+              <Table.TableRow>
+                <Table.TableCell colSpan={7} className="h-28 text-center text-muted-foreground">
+                  Nenhum sistema neste estado.
+                </Table.TableCell>
+              </Table.TableRow>
+            )}
             {!isLoading && systems.length === 0 && (
               <Table.TableRow>
                 <Table.TableCell colSpan={7} className="h-36 text-center">
@@ -399,6 +442,46 @@ export default function SystemHealthPage() {
           </Table.TableBody>
         </Table.TableRoot>
       </Card.CardRoot>
+
+      <details className="rounded-xl border bg-card p-4">
+        <summary className="cursor-pointer text-sm font-medium">Sobre as verificações e o backup dos sistemas</summary>
+        <div className="mt-4 space-y-3">
+          <Alert.AlertRoot className="items-start gap-3 border-foreground/15 bg-muted/40 p-4">
+            <HardDrive className="mt-0.5 size-4" />
+            <div>
+              <Alert.AlertTitle className="font-semibold">Configurações salvas localmente</Alert.AlertTitle>
+              <Alert.AlertDescription>
+                Os sistemas ficam neste navegador e não são sincronizados com outros dispositivos. Baixe o JSON para
+                guardar uma cópia dos nomes e URLs. Importar adiciona URLs novas, ignora as repetidas e inicia uma nova
+                contagem após a próxima resposta 200.
+              </Alert.AlertDescription>
+            </div>
+          </Alert.AlertRoot>
+
+          <Alert.AlertRoot className="items-start gap-3 border-foreground/15 bg-muted/40 p-4">
+            <ShieldCheck className="mt-0.5 size-4" />
+            <div className="space-y-2">
+              <Alert.AlertTitle className="font-semibold">Como funciona o monitoramento</Alert.AlertTitle>
+              <Alert.AlertDescription className="space-y-1.5 text-sm">
+                <p>
+                  Cadastre a URL de uma rota <strong className="text-foreground">pública, sem autenticação</strong>, que
+                  responda com o status HTTP <strong className="text-foreground">200</strong>.
+                </p>
+                <p>
+                  A verificação é feita pelo navegador ao abrir esta aba. A rota também precisa permitir CORS para o
+                  domínio do trudx e usar HTTPS quando o app estiver em HTTPS. Bloqueios do navegador aparecem como “Não
+                  verificado”; respostas HTTP diferentes de 200 aparecem como “Offline”.
+                </p>
+                <p className="flex items-start gap-2 font-medium text-foreground">
+                  <RefreshCw className="mt-0.5 size-3.5 shrink-0" />
+                  Para verificar novamente, recarregue esta página. Se um sistema falhar, a contagem e a última checagem
+                  válida são apagadas; quando voltar a responder 200, uma nova contagem começa.
+                </p>
+              </Alert.AlertDescription>
+            </div>
+          </Alert.AlertRoot>
+        </div>
+      </details>
 
       <SystemHealthFormDialog
         key={`${editingSystem?.id ?? "new"}-${isFormOpen}`}

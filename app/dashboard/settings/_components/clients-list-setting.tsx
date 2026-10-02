@@ -3,6 +3,8 @@
 //* Components Imports
 import Label from "@/components/ui/label";
 import Switch from "@/components/ui/switch";
+import { UsersRound } from "lucide-react";
+import { SettingsSection } from "./settings-section";
 
 //* Hooks Imports
 import { useClientListPreference } from "@/hooks/use-client-list-preference";
@@ -11,24 +13,24 @@ export function ClientsListSetting() {
   const { onlyActive, setOnlyActive } = useClientListPreference();
 
   return (
-    <div className="rounded-xl border bg-card p-6 shadow-sm sm:p-8">
-      <div className="flex max-w-xl items-center justify-between gap-4">
+    <SettingsSection
+      title="Clientes"
+      description="Escolha quais clientes aparecem nos seletores do app."
+      icon={UsersRound}
+    >
+      <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
           <Label htmlFor="settings-clients-only-active" className="text-[0.72rem] font-semibold">
             Listar só clientes ativos
           </Label>
           <p className="text-xs text-muted-foreground">
-            Nos seletores de cliente (tarefas, agenda e financeiro). Desligado, os clientes inativos
-            também aparecem. Fica salvo neste dispositivo.
+            Nos seletores de cliente (tarefas, agenda e financeiro). Desligado, os clientes inativos também aparecem.
+            Fica salvo neste dispositivo.
           </p>
         </div>
 
-        <Switch
-          id="settings-clients-only-active"
-          checked={onlyActive}
-          onCheckedChange={setOnlyActive}
-        />
+        <Switch id="settings-clients-only-active" checked={onlyActive} onCheckedChange={setOnlyActive} />
       </div>
-    </div>
+    </SettingsSection>
   );
 }

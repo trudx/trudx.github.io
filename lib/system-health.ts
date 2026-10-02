@@ -9,7 +9,7 @@ export type SystemHealthRecord = {
 
 export type SystemHealthInput = Pick<SystemHealthRecord, "name" | "url">;
 
-export type SystemHealthCheckState = "checking" | "online" | "offline";
+export type SystemHealthCheckState = "checking" | "online" | "offline" | "unverified";
 
 const SYSTEM_HEALTH_CONFIG_FORMAT = "trudx-system-health-config";
 const SYSTEM_HEALTH_CONFIG_VERSION = 1;

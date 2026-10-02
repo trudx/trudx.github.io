@@ -4,13 +4,10 @@
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Label from "@/components/ui/label";
+import { UserRound, Settings2 } from "lucide-react";
+import { SettingsSection } from "./_components/settings-section";
 
-import {
-  ClientsListSetting,
-  SettingsSkeleton,
-  TaskPushNotificationsSetting,
-  TasksZoomSetting,
-} from "./_components";
+import { ClientsListSetting, SettingsSkeleton, TaskPushNotificationsSetting, TasksZoomSetting } from "./_components";
 
 //* Hooks Imports
 import { useProfile } from "@/hooks/use-profile";
@@ -27,18 +24,25 @@ export default function SettingsPage() {
   }
 
   return (
-    <section className="w-full max-w-3xl space-y-8">
-      <div className="border-b border-foreground/15 pb-6">
-        <p className="trudx-kicker mb-1.5 text-muted-foreground">Conta</p>
-        <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Configurações</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Atualize os dados da sua conta.</p>
+    <section className="flex w-full max-w-4xl flex-col gap-6">
+      <div className="border-b pb-5">
+        <p className="trudx-kicker mb-1.5 text-muted-foreground">Preferências</p>
+        <h1 className="flex items-center gap-2 text-xl font-semibold tracking-[-0.01em] text-foreground">
+          <Settings2 className="size-5" />
+          Configurações
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">Gerencie sua conta, a visualização e os lembretes do app.</p>
       </div>
 
       {isLoading ? (
         <SettingsSkeleton />
       ) : (
-        <div className="rounded-xl border bg-card p-6 shadow-sm sm:p-8">
-          <form className="max-w-xl space-y-5" onSubmit={handleSubmit}>
+        <SettingsSection
+          title="Dados da conta"
+          description="Atualize seu nome, e-mail e senha de acesso."
+          icon={UserRound}
+        >
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="settings-name" className="text-[0.72rem] font-semibold">
                 Nome
@@ -56,7 +60,7 @@ export default function SettingsPage() {
                     name: event.target.value,
                   }))
                 }
-                className="h-11 rounded-md bg-background"
+                className="h-9 bg-background"
               />
             </div>
 
@@ -67,7 +71,7 @@ export default function SettingsPage() {
               <Input
                 id="settings-email"
                 name="email"
-                type="text"
+                type="email"
                 inputMode="email"
                 autoComplete="email"
                 required
@@ -78,7 +82,7 @@ export default function SettingsPage() {
                     email: event.target.value,
                   }))
                 }
-                className="h-11 rounded-md bg-background"
+                className="h-9 bg-background"
               />
             </div>
 
@@ -100,17 +104,20 @@ export default function SettingsPage() {
                   }))
                 }
                 placeholder="Deixe em branco para manter a atual"
-                className="h-11 rounded-md bg-background text-sm tracking-[0.14em] placeholder:tracking-normal"
+                className="h-9 bg-background"
               />
             </div>
 
-            <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={isSaving} className="h-11 px-5 font-bold">
+            <p className="text-xs leading-5 text-muted-foreground">
+              Ao alterar o e-mail ou a senha, você precisará entrar novamente.
+            </p>
+            <div className="flex justify-end border-t pt-4">
+              <Button type="submit" disabled={isSaving} className="h-8 px-3 text-xs font-medium">
                 {isSaving ? "Salvando..." : "Salvar alterações"}
               </Button>
             </div>
           </form>
-        </div>
+        </SettingsSection>
       )}
 
       <ClientsListSetting />

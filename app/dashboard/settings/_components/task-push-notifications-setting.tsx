@@ -5,6 +5,7 @@ import { Bell, BellOff, Clock3, ShieldCheck, Timer } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/ui/button";
+import { SettingsSection } from "./settings-section";
 import { get, patch, remove, upsert } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
 
@@ -101,6 +102,8 @@ export function TaskPushNotificationsSetting() {
   }, []);
 
   useEffect(() => {
+    // Inicializa a preferência a partir das APIs do navegador após a hidratação.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadSubscription();
   }, [loadSubscription]);
 
@@ -205,35 +208,22 @@ export function TaskPushNotificationsSetting() {
   const isEnabled = Boolean(record && pushSubscription);
 
   return (
-    <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div className="border-b border-foreground/10 bg-gradient-to-r from-primary/[0.07] via-transparent to-transparent p-6 sm:p-8">
-        <div className="flex items-start gap-4">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            {isEnabled ? <Bell className="size-5" /> : <BellOff className="size-5" />}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="trudx-kicker mb-1 text-muted-foreground">Bem-estar</p>
-            <h2 className="text-base font-semibold text-foreground">Notificações de tarefas</h2>
-            <p className="mt-1.5 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Receba lembretes mesmo com o app fechado. A configuração fica vinculada à sua conta e a este dispositivo.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-5 p-6 sm:p-8">
+    <SettingsSection
+      title="Notificações de tarefas"
+      description="Gerencie os lembretes vinculados à sua conta e a este dispositivo."
+      icon={isEnabled ? Bell : BellOff}
+    >
+      <div className="space-y-4">
         {!VAPID_PUBLIC_KEY ? (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/[0.06] p-4 text-sm leading-6 text-foreground">
-            O Web Push ainda não foi configurado no deploy. Depois de adicionar a chave pública VAPID às variáveis do
-            GitHub e publicar novamente, este controle ficará disponível.
+            As notificações ainda não estão disponíveis. Você poderá ativá-las quando o recurso for habilitado.
           </div>
         ) : backendAvailable === false ? (
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/[0.06] p-4 text-sm leading-6 text-foreground">
-            As tabelas de notificações ainda não estão disponíveis no Supabase. Aplique o arquivo SQL indicado nas
-            instruções de configuração e recarregue esta tela.
+            Não foi possível carregar suas preferências de notificações. Recarregue a página para tentar novamente.
           </div>
         ) : !supported ? (
-          <div className="rounded-lg border border-foreground/10 bg-muted/40 p-4 text-sm leading-6 text-muted-foreground">
+          <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm leading-6 text-muted-foreground">
             Este navegador não oferece suporte a push ou não há um service worker registrado. Abra o PWA publicado em
             HTTPS e tente novamente.
           </div>
@@ -245,7 +235,7 @@ export function TaskPushNotificationsSetting() {
         ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-foreground/10 p-4 transition-colors has-[:disabled]:cursor-not-allowed has-[:checked]:border-primary/40 has-[:checked]:bg-primary/[0.04]">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-4 transition-colors has-[:disabled]:cursor-not-allowed has-[:checked]:border-primary/40 has-[:checked]:bg-primary/[0.04]">
             <input
               aria-label="Lembrete de tarefas do dia"
               type="checkbox"
@@ -264,7 +254,7 @@ export function TaskPushNotificationsSetting() {
             </span>
           </label>
 
-          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-foreground/10 p-4 transition-colors has-[:disabled]:cursor-not-allowed has-[:checked]:border-primary/40 has-[:checked]:bg-primary/[0.04]">
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-4 transition-colors has-[:disabled]:cursor-not-allowed has-[:checked]:border-primary/40 has-[:checked]:bg-primary/[0.04]">
             <input
               aria-label="Lembrete para fazer uma pausa"
               type="checkbox"
@@ -284,10 +274,10 @@ export function TaskPushNotificationsSetting() {
           </label>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-foreground/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
-            Push só funciona depois da configuração do Supabase e com permissão do navegador.
+            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            As notificações precisam da sua permissão e podem ser desativadas a qualquer momento.
           </p>
           {isEnabled ? (
             <Button
@@ -295,7 +285,7 @@ export function TaskPushNotificationsSetting() {
               variant="outline"
               disabled={isSaving || isLoading}
               onClick={() => void handleDisable()}
-              className="h-10 shrink-0"
+              className="h-8 shrink-0 px-3 text-xs font-medium"
             >
               {isSaving ? "Salvando..." : "Desativar neste dispositivo"}
             </Button>
@@ -304,13 +294,13 @@ export function TaskPushNotificationsSetting() {
               type="button"
               disabled={!supported || backendAvailable === false || isSaving || isLoading || permission === "denied"}
               onClick={() => void handleEnable()}
-              className="h-10 shrink-0"
+              className="h-8 shrink-0 px-3 text-xs font-medium"
             >
               {isLoading || isSaving ? "Aguarde..." : "Ativar notificações"}
             </Button>
           )}
         </div>
       </div>
-    </section>
+    </SettingsSection>
   );
 }

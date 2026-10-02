@@ -4,20 +4,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+//* Utils Imports
+import { checkSystemHealthEndpoint } from "@/lib/system-health-check";
+
 //* Types Imports
-import type {
-  SystemHealthCheckState,
-  SystemHealthInput,
-  SystemHealthRecord,
-} from "@/lib/system-health";
+import type { SystemHealthCheckState, SystemHealthInput, SystemHealthRecord } from "@/lib/system-health";
 
 const STORAGE_KEY = "trudx:system-health:v1";
-const CHECK_TIMEOUT_MS = 10_000;
 
 type CheckResult = {
   id: string;
   url: string;
-  isOnline: boolean;
+  state: Exclude<SystemHealthCheckState, "checking">;
+  detail: string;
   checkedAt: string;
 };
 
@@ -48,30 +47,10 @@ function readSystems() {
   }
 }
 
-async function checkEndpoint(url: string): Promise<boolean> {
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), CHECK_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      cache: "no-store",
-      credentials: "omit",
-      redirect: "manual",
-      signal: controller.signal,
-    });
-
-    return response.status === 200;
-  } catch {
-    return false;
-  } finally {
-    window.clearTimeout(timeout);
-  }
-}
-
 export function useSystemHealth() {
   const [systems, setSystems] = useState<SystemHealthRecord[]>([]);
   const [checkStates, setCheckStates] = useState<Record<string, SystemHealthCheckState>>({});
+  const [checkDetails, setCheckDetails] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [now, setNow] = useState(0);
   const systemsRef = useRef<SystemHealthRecord[]>([]);
@@ -103,11 +82,11 @@ export function useSystemHealth() {
 
       const results: CheckResult[] = await Promise.all(
         targets.map(async (system) => {
-          const isOnline = await checkEndpoint(system.url);
+          const result = await checkSystemHealthEndpoint(system.url);
           return {
             id: system.id,
             url: system.url,
-            isOnline,
+            ...result,
             checkedAt: new Date().toISOString(),
           };
         }),
@@ -118,7 +97,7 @@ export function useSystemHealth() {
         const result = resultById.get(system.id);
         if (!result || result.url !== system.url) return system;
 
-        return result.isOnline
+        return result.state === "online"
           ? {
               ...system,
               calculationStartedAt: system.calculationStartedAt ?? result.checkedAt,
@@ -131,6 +110,15 @@ export function useSystemHealth() {
             };
       });
 
+      setCheckDetails((current) => {
+        const next = { ...current };
+        for (const result of results) {
+          if (systemsRef.current.some((system) => system.id === result.id && system.url === result.url)) {
+            next[result.id] = result.detail;
+          }
+        }
+        return next;
+      });
       persistSystems(nextSystems);
       setNow(Date.now());
       setCheckStates((current) => {
@@ -138,7 +126,7 @@ export function useSystemHealth() {
         for (const result of results) {
           const currentSystem = systemsRef.current.find((system) => system.id === result.id);
           if (currentSystem?.url === result.url) {
-            next[result.id] = result.isOnline ? "online" : "offline";
+            next[result.id] = result.state;
           }
         }
         return next;
@@ -154,15 +142,9 @@ export function useSystemHealth() {
     const storedSystems = readSystems();
     systemsRef.current = storedSystems;
     // localStorage só existe no navegador; estes estados inicializam a lista depois da hidratação.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSystems(storedSystems);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCheckStates(
-      Object.fromEntries(storedSystems.map((system) => [system.id, "checking"] as const)),
-    );
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCheckStates(Object.fromEntries(storedSystems.map((system) => [system.id, "checking"] as const)));
     setIsLoading(false);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(Date.now());
     void runChecks(storedSystems);
   }, [runChecks]);
@@ -253,6 +235,7 @@ export function useSystemHealth() {
   return {
     systems,
     checkStates,
+    checkDetails,
     isLoading,
     now,
     createSystem,
