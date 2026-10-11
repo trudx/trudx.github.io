@@ -33,6 +33,7 @@ export type QueryOptions = {
   /** Ordenação, aplicada na ordem do array. */
   order?: { column: string; ascending?: boolean }[];
   limit?: number;
+  offset?: number;
 };
 
 /**
@@ -52,7 +53,7 @@ function serializeFilter(value: Exclude<FilterValue, undefined>): string[] {
   return [`eq.${value}`];
 }
 
-function buildParams({ select, filters, order, limit }: QueryOptions) {
+function buildParams({ select, filters, order, limit, offset }: QueryOptions) {
   const params = new URLSearchParams();
 
   if (select) params.set("select", select);
@@ -72,6 +73,7 @@ function buildParams({ select, filters, order, limit }: QueryOptions) {
   }
 
   if (limit !== undefined) params.set("limit", String(limit));
+  if (offset !== undefined) params.set("offset", String(offset));
 
   return params;
 }
@@ -80,6 +82,26 @@ function buildParams({ select, filters, order, limit }: QueryOptions) {
 export async function get<T>(table: string, options: QueryOptions = {}): Promise<T[]> {
   const { data } = await http.get<T[]>(`/${table}`, { params: buildParams(options) });
   return data ?? [];
+}
+
+const PAGE_SIZE = 1000;
+
+/**
+ * Lista todos os registros paginando. O PostgREST corta cada resposta em 1000 linhas; sem paginar,
+ * um período grande devolveria dados incompletos sem nenhum erro. A `order` deve ser determinística
+ * (inclua uma coluna única, como `id`) para as páginas não se sobreporem.
+ */
+export async function getAll<T>(
+  table: string,
+  options: Omit<QueryOptions, "limit" | "offset"> = {},
+): Promise<T[]> {
+  const rows: T[] = [];
+
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const page = await get<T>(table, { ...options, limit: PAGE_SIZE, offset });
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) return rows;
+  }
 }
 
 /** Busca no máximo um registro. Devolve `null` quando não encontra — nunca lança por ausência. */

@@ -5,7 +5,9 @@ import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 import Dialog from "@/components/ui/dialog";
 import Input from "@/components/ui/input";
+import Select from "@/components/ui/select";
 
+import { ConciliacaoStatusBadge } from "./conciliacao-status-badge";
 import { EntityCombobox } from "./entity-combobox";
 import { formatCurrencyPrivate } from "./financeiro-privacy";
 
@@ -16,6 +18,11 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import type { BancoRecord } from "@/hooks/use-bancos";
 import type { ClientRecord } from "@/hooks/use-clients";
 import type { FinanceiroEditInput, FinanceiroRecord } from "@/hooks/use-financeiro";
+import type { CategoriaRecord } from "@/hooks/use-financeiro-categorias";
+import type { FinanceiroNatureza } from "@/lib/financeiro/types";
+
+//* Constants Imports
+import { NATUREZA_LABELS } from "@/lib/financeiro/natureza";
 
 //* Utils Imports
 import { formatDateLong, formatTimestamp } from "@/lib/format-date";
@@ -26,6 +33,9 @@ type FinanceiroDetailDialogProps = {
   tipoClassName: string;
   clients: ClientRecord[];
   bancos: BancoRecord[];
+  categorias: CategoriaRecord[];
+  /** Provisório mais antigo que o saldo de referência do banco (derivado, não armazenado). */
+  isObsoleto: boolean;
   isSaving: boolean;
   isValoresHidden: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,7 +57,8 @@ function DetailRow({ label, children }: { label: string; children: ReactNode }) 
 }
 
 function getOrigemLabel(record: FinanceiroRecord) {
-  if (record.fitid) return record.fitid.startsWith("pdf-") ? "Importado de PDF" : "Importado de OFX";
+  if (record.fitid)
+    return record.fitid.startsWith("pdf-") ? "Importado de PDF" : "Importado de OFX";
   return record.gasto_fixo_id ? "Gasto fixo" : "Manual";
 }
 
@@ -57,6 +68,8 @@ function DetailBody({
   tipoClassName,
   clients,
   bancos,
+  categorias,
+  isObsoleto,
   isSaving,
   isValoresHidden,
   onOpenChange,
@@ -66,11 +79,15 @@ function DetailBody({
   const [descricao, setDescricao] = useState(record.descricao ?? "");
   const [clienteId, setClienteId] = useState<string | null>(record.cliente_id);
   const [bancoId, setBancoId] = useState<string | null>(record.banco_id);
+  const [categoriaId, setCategoriaId] = useState<string | null>(record.categoria_id);
+  const [natureza, setNatureza] = useState<FinanceiroNatureza>(record.natureza);
 
   const isDirty =
     descricao.trim() !== (record.descricao ?? "") ||
     clienteId !== record.cliente_id ||
-    bancoId !== record.banco_id;
+    bancoId !== record.banco_id ||
+    categoriaId !== record.categoria_id ||
+    natureza !== record.natureza;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,6 +95,21 @@ function DetailBody({
       descricao,
       cliente_id: clienteId,
       banco_id: bancoId,
+      categoria_id: categoriaId,
+      natureza,
+    });
+    if (saved) onOpenChange(false);
+  }
+
+  // Confirmar sem extrato: o usuário assume que o lançamento é definitivo (ex.: dinheiro, sem banco).
+  async function handleConfirm() {
+    const saved = await onSave(record.id, {
+      descricao,
+      cliente_id: clienteId,
+      banco_id: bancoId,
+      categoria_id: categoriaId,
+      natureza,
+      status: "confirmado",
     });
     if (saved) onOpenChange(false);
   }
@@ -126,6 +158,56 @@ function DetailBody({
             onChange={setBancoId}
           />
         </DetailRow>
+        <DetailRow label="Categoria">
+          <EntityCombobox
+            value={categoriaId}
+            options={categorias.map((categoria) => ({
+              value: categoria.id,
+              label: categoria.nome,
+            }))}
+            emptyLabel="Sem categoria"
+            searchPlaceholder="Buscar categoria..."
+            onChange={setCategoriaId}
+          />
+        </DetailRow>
+        <DetailRow label="Natureza">
+          <Select.SelectRoot
+            value={natureza}
+            onValueChange={(value) => setNatureza(value as FinanceiroNatureza)}
+          >
+            <Select.SelectTrigger className="h-10 w-full bg-background" aria-label="Natureza">
+              <Select.SelectValue>{NATUREZA_LABELS[natureza]}</Select.SelectValue>
+            </Select.SelectTrigger>
+            <Select.SelectContent>
+              {(Object.keys(NATUREZA_LABELS) as FinanceiroNatureza[]).map((option) => (
+                <Select.SelectItem key={option} value={option}>
+                  {NATUREZA_LABELS[option]}
+                </Select.SelectItem>
+              ))}
+            </Select.SelectContent>
+          </Select.SelectRoot>
+          {natureza === "transferencia" || natureza === "pagamento_fatura" ? (
+            <span className="mt-1 block text-xs font-normal text-muted-foreground">
+              Fica no extrato e no saldo do banco, mas não conta como receita nem despesa.
+            </span>
+          ) : null}
+        </DetailRow>
+        <DetailRow label="Status">
+          <ConciliacaoStatusBadge status={record.status} isObsoleto={isObsoleto} />
+          {record.conciliado_em && (
+            <span className="ml-2 text-xs font-normal text-muted-foreground">
+              em {formatTimestamp(record.conciliado_em)}
+            </span>
+          )}
+        </DetailRow>
+        {record.dados_originais && (
+          <DetailRow label="Dados do banco">
+            <span className="block">{record.dados_originais.descricao}</span>
+            <span className="block text-xs font-normal text-muted-foreground">
+              {formatDateLong(record.dados_originais.data)}
+            </span>
+          </DetailRow>
+        )}
         <DetailRow label="Tipo">
           <Badge variant="outline" className={tipoClassName}>
             {tipoLabel}
@@ -147,6 +229,16 @@ function DetailBody({
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           Fechar
         </Button>
+        {record.status === "provisorio" && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={isSaving}
+            onClick={() => void handleConfirm()}
+          >
+            Confirmar sem extrato
+          </Button>
+        )}
         <Button type="submit" disabled={!isDirty || isSaving}>
           {isSaving ? "Salvando..." : "Salvar alterações"}
         </Button>

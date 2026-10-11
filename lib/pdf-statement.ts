@@ -11,6 +11,10 @@ export type PdfStatementTransaction = {
 export type PdfStatementResult = {
   transactions: PdfStatementTransaction[];
   warnings: string[];
+  /** Período coberto pelo extrato (mês de referência, ampliado se houver lançamento fora dele). */
+  periodo: { inicio: string; fim: string } | null;
+  /** Último "SALDO EM dd/mm" impresso — candidato a saldo de referência, sempre para o usuário conferir. */
+  saldoFinal: { data: string; valor: number } | null;
 };
 
 type RawTransaction = {
@@ -21,7 +25,7 @@ type RawTransaction = {
   section: number;
 };
 
-type Checkpoint = { afterIndex: number; saldo: number };
+type Checkpoint = { afterIndex: number; saldo: number; date?: string };
 
 type Columns = { dateThreshold: number; saldoThreshold: number | null };
 
@@ -52,10 +56,7 @@ const MONTHS: Record<string, number> = {
 const CREDIT_HINT = /RECEBID|REMUNERACAO|CREDITO|DEPOSITO|ESTORNO|RENDIMENTO|RESGATE|SALARIO/;
 
 function normalize(text: string) {
-  return text
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toUpperCase();
+  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase();
 }
 
 function parseMoney(token: string) {
@@ -204,6 +205,9 @@ export function parseSantanderPages(pages: PdfTextItem[][]): PdfStatementResult 
   const reference = findReference(pages);
   const referenceYear = reference?.year ?? new Date().getFullYear();
   const referenceMonth = reference?.month ?? 12;
+  // Mês depois do mês de referência só pode ser do ano anterior (extrato de janeiro com lançamento de dezembro).
+  const resolveDate = (month: string, day: string) =>
+    `${Number(month) > referenceMonth ? referenceYear - 1 : referenceYear}-${month}-${day}`;
 
   const raw: RawTransaction[] = [];
   const checkpoints: Checkpoint[] = [];
@@ -255,7 +259,12 @@ export function parseSantanderPages(pages: PdfTextItem[][]): PdfStatementResult 
         const saldoToken = moneyItems.at(-1)?.token;
         if (saldoToken) {
           const { cents, negative } = parseMoney(saldoToken);
-          checkpoints.push({ afterIndex: raw.length, saldo: negative ? -cents : cents });
+          const saldoDate = fullText.match(/S\s*ALDO\s+EM\s+(\d{2})\/(\d{2})/);
+          checkpoints.push({
+            afterIndex: raw.length,
+            saldo: negative ? -cents : cents,
+            date: saldoDate ? resolveDate(saldoDate[2], saldoDate[1]) : undefined,
+          });
         }
         if (/S\s*ALDO\s+EM\b/.test(fullText) && sectionHasTransactions) {
           section++;
@@ -274,8 +283,7 @@ export function parseSantanderPages(pages: PdfTextItem[][]): PdfStatementResult 
           sectionHasTransactions = false;
         }
         lastMonthDay = monthDay;
-        const year = Number(month) > referenceMonth ? referenceYear - 1 : referenceYear;
-        lastDate = `${year}-${month}-${day}`;
+        lastDate = resolveDate(month, day);
       }
 
       let movement: string | null = null;
@@ -312,7 +320,7 @@ export function parseSantanderPages(pages: PdfTextItem[][]): PdfStatementResult 
   }
 
   const warnings: string[] = [];
-  if (raw.length === 0) return { transactions: [], warnings };
+  if (raw.length === 0) return { transactions: [], warnings, periodo: null, saldoFinal: null };
 
   const { signs, failedSegments } = reconcileSigns(raw, checkpoints);
   if (failedSegments > 0) {
@@ -344,7 +352,24 @@ export function parseSantanderPages(pages: PdfTextItem[][]): PdfStatementResult 
     });
   });
 
-  return { transactions: [...unique.values()], warnings };
+  const lastDated = checkpoints.filter((checkpoint) => checkpoint.date).at(-1);
+  const dates = raw.map((transaction) => transaction.date).sort();
+  const monthStart = reference
+    ? `${reference.year}-${String(reference.month).padStart(2, "0")}-01`
+    : null;
+  const monthEnd = reference
+    ? `${reference.year}-${String(reference.month).padStart(2, "0")}-${String(new Date(reference.year, reference.month, 0).getDate()).padStart(2, "0")}`
+    : null;
+
+  return {
+    transactions: [...unique.values()],
+    warnings,
+    periodo: {
+      inicio: monthStart && monthStart < dates[0] ? monthStart : dates[0],
+      fim: monthEnd && monthEnd > dates[dates.length - 1] ? monthEnd : dates[dates.length - 1],
+    },
+    saldoFinal: lastDated?.date ? { data: lastDated.date, valor: lastDated.saldo / 100 } : null,
+  };
 }
 
 /** Extrai o texto posicionado de cada página do PDF e interpreta como extrato Santander. */
@@ -371,9 +396,16 @@ export async function parsePdfStatement(file: File): Promise<PdfStatementResult>
     );
   }
 
-  const fullText = normalize(pages.flat().map((item) => item.str).join(" "));
+  const fullText = normalize(
+    pages
+      .flat()
+      .map((item) => item.str)
+      .join(" "),
+  );
   if (!fullText.includes("SANTANDER")) {
-    throw new Error("Esse PDF não parece ser um extrato do Santander (único banco suportado em PDF).");
+    throw new Error(
+      "Esse PDF não parece ser um extrato do Santander (único banco suportado em PDF).",
+    );
   }
 
   const result = parseSantanderPages(pages);

@@ -12,6 +12,16 @@ export type OfxTransaction = {
   tipoSugerido: "gasto" | "ganho";
 };
 
+/** Dados do extrato além das linhas: o que permite ancorar o saldo confirmado e saber a cobertura. */
+export type StatementMeta = {
+  formato: "ofx" | "pdf";
+  periodo: { inicio: string; fim: string } | null;
+  /** Saldo impresso/informado pelo banco no fim do extrato. */
+  saldoFinal: { data: string; valor: number } | null;
+  /** OFX traz o saldo estruturado (confiável); no PDF ele é lido do texto e precisa de conferência. */
+  saldoConfiavel: boolean;
+};
+
 export type OfxGroup = {
   key: string;
   descricao: string;
@@ -72,8 +82,14 @@ function groupTransactions(transactions: OfxTransaction[]): OfxGroup[] {
   return [...groups.values()].sort((a, b) => b.transactions.length - a.transactions.length);
 }
 
+function ofxDateOnly(value: string | undefined) {
+  return value && value.length >= 8 ? parseOfxDate(value) : null;
+}
+
 /** Lê um arquivo .ofx/.qfx e devolve as transações agrupadas por descrição+valor parecidos. */
-export async function parseOfxFile(file: File): Promise<OfxGroup[]> {
+export async function parseOfxFile(
+  file: File,
+): Promise<{ groups: OfxGroup[]; meta: StatementMeta }> {
   const text = await file.text();
   const parsed = parseStrict(text);
 
@@ -86,15 +102,46 @@ export async function parseOfxFile(file: File): Promise<OfxGroup[]> {
     throw new Error("Nenhuma transação encontrada nesse arquivo OFX.");
   }
 
-  return groupTransactions(rawTransactions.map(normalizeTransaction));
+  const transactions = rawTransactions.map(normalizeTransaction);
+  const dates = transactions.map((transaction) => transaction.data).sort();
+  const statement = statementResponses[0]?.STMTRS;
+  const list = statement?.BANKTRANLIST;
+  const ledger = statement?.LEDGERBAL;
+  const balanceDate = ofxDateOnly(ledger?.DTASOF);
+  const balance = ledger ? Number.parseFloat(ledger.BALAMT) : Number.NaN;
+
+  return {
+    groups: groupTransactions(transactions),
+    meta: {
+      formato: "ofx",
+      periodo: {
+        inicio: ofxDateOnly(list?.DTSTART) ?? dates[0],
+        fim: ofxDateOnly(list?.DTEND) ?? dates[dates.length - 1],
+      },
+      saldoFinal:
+        balanceDate && Number.isFinite(balance) ? { data: balanceDate, valor: balance } : null,
+      saldoConfiavel: true,
+    },
+  };
 }
 
-/** Lê um extrato (.ofx/.qfx ou .pdf do Santander) e devolve os grupos para revisão, mais avisos de leitura. */
+/** Lê um extrato (.ofx/.qfx ou .pdf do Santander) e devolve os grupos para revisão, os metadados e avisos de leitura. */
 export async function parseStatementFile(file: File) {
   if (!file.name.toLowerCase().endsWith(".pdf")) {
-    return { groups: await parseOfxFile(file), warnings: [] as string[] };
+    const { groups, meta } = await parseOfxFile(file);
+    return { groups, meta, warnings: [] as string[] };
   }
 
-  const { transactions, warnings } = await parsePdfStatement(file);
-  return { groups: groupTransactions(transactions), warnings };
+  const { transactions, warnings, periodo, saldoFinal } = await parsePdfStatement(file);
+  return {
+    groups: groupTransactions(transactions),
+    warnings,
+    // Se algum trecho não bateu com o saldo impresso, o saldo lido do PDF também não merece confiança.
+    meta: {
+      formato: "pdf",
+      periodo,
+      saldoFinal,
+      saldoConfiavel: warnings.length === 0,
+    } satisfies StatementMeta,
+  };
 }

@@ -6,6 +6,7 @@ import Dialog from "@/components/ui/dialog";
 import Input from "@/components/ui/input";
 import Label from "@/components/ui/label";
 import Select from "@/components/ui/select";
+import Switch from "@/components/ui/switch";
 
 //* Libraries Imports
 import { useState, type FormEvent } from "react";
@@ -14,11 +15,17 @@ import { useState, type FormEvent } from "react";
 import type { FinanceiroInput } from "@/hooks/use-financeiro";
 import type { ClientRecord } from "@/hooks/use-clients";
 import type { BancoRecord } from "@/hooks/use-bancos";
+import type { CategoriaRecord } from "@/hooks/use-financeiro-categorias";
+import type { FinanceiroNatureza } from "@/lib/financeiro/types";
+
+//* Constants Imports
+import { NATUREZA_LABELS } from "@/lib/financeiro/natureza";
 
 type FinanceiroFormDialogProps = {
   open: boolean;
   clients: ClientRecord[];
   bancos: BancoRecord[];
+  categorias: CategoriaRecord[];
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (input: FinanceiroInput) => Promise<boolean>;
@@ -31,17 +38,23 @@ const emptyForm: FinanceiroInput = {
   descricao: "",
   cliente_id: null,
   banco_id: null,
+  status: "confirmado",
+  natureza: "normal",
+  categoria_id: null,
 };
 
 export function FinanceiroFormDialog({
   open,
   clients,
   bancos,
+  categorias,
   isSaving,
   onOpenChange,
   onSubmit,
 }: FinanceiroFormDialogProps) {
   const [form, setForm] = useState<FinanceiroInput>(emptyForm);
+  // Provisório só faz sentido com banco: é o banco que permite casar com o extrato depois.
+  const isProvisorio = form.status === "provisorio";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -163,7 +176,12 @@ export function FinanceiroFormDialog({
               <Select.SelectRoot
                 value={form.banco_id ?? "none"}
                 onValueChange={(value) =>
-                  setForm((current) => ({ ...current, banco_id: value === "none" ? null : value }))
+                  setForm((current) => ({
+                    ...current,
+                    banco_id: value === "none" ? null : value,
+                    // Escolher um banco sugere provisório (aguardando extrato); tirar o banco desfaz.
+                    status: value === "none" ? "confirmado" : "provisorio",
+                  }))
                 }
               >
                 <Select.SelectTrigger className="h-11 w-full bg-background">
@@ -182,6 +200,81 @@ export function FinanceiroFormDialog({
               </Select.SelectRoot>
             </div>
           </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Categoria (opcional)</Label>
+              <Select.SelectRoot
+                value={form.categoria_id ?? "none"}
+                onValueChange={(value) =>
+                  setForm((current) => ({
+                    ...current,
+                    categoria_id: value === "none" ? null : value,
+                  }))
+                }
+              >
+                <Select.SelectTrigger className="h-11 w-full bg-background">
+                  <Select.SelectValue>
+                    {categorias.find((categoria) => categoria.id === form.categoria_id)?.nome ??
+                      "Sem categoria"}
+                  </Select.SelectValue>
+                </Select.SelectTrigger>
+                <Select.SelectContent>
+                  <Select.SelectItem value="none">Sem categoria</Select.SelectItem>
+                  {categorias.map((categoria) => (
+                    <Select.SelectItem key={categoria.id} value={categoria.id}>
+                      {categoria.nome}
+                    </Select.SelectItem>
+                  ))}
+                </Select.SelectContent>
+              </Select.SelectRoot>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Natureza</Label>
+              <Select.SelectRoot
+                value={form.natureza ?? "normal"}
+                onValueChange={(value) =>
+                  setForm((current) => ({ ...current, natureza: value as FinanceiroNatureza }))
+                }
+              >
+                <Select.SelectTrigger className="h-11 w-full bg-background">
+                  <Select.SelectValue>
+                    {NATUREZA_LABELS[form.natureza ?? "normal"]}
+                  </Select.SelectValue>
+                </Select.SelectTrigger>
+                <Select.SelectContent>
+                  {(Object.keys(NATUREZA_LABELS) as FinanceiroNatureza[]).map((natureza) => (
+                    <Select.SelectItem key={natureza} value={natureza}>
+                      {NATUREZA_LABELS[natureza]}
+                    </Select.SelectItem>
+                  ))}
+                </Select.SelectContent>
+              </Select.SelectRoot>
+            </div>
+          </div>
+
+          {form.banco_id && (
+            <label className="flex items-start gap-3 rounded-lg border bg-card p-3">
+              <Switch
+                checked={isProvisorio}
+                onCheckedChange={(checked) =>
+                  setForm((current) => ({
+                    ...current,
+                    status: checked ? "provisorio" : "confirmado",
+                  }))
+                }
+                aria-label="Lançamento provisório"
+              />
+              <span className="text-sm">
+                Provisório (aguardando o extrato)
+                <span className="block text-xs text-muted-foreground">
+                  Quando você importar o extrato do banco, ele é conciliado com este lançamento em
+                  vez de duplicar o valor.
+                </span>
+              </span>
+            </label>
+          )}
 
           <Dialog.DialogFooter className="mt-6 border-t-0 bg-transparent p-0">
             <Button

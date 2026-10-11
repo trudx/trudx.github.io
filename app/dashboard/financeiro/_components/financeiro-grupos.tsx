@@ -16,13 +16,22 @@ import { useFinanceiroPrivacy } from "./financeiro-privacy";
 //* Types Imports
 import type { FinanceiroRecord } from "@/hooks/use-financeiro";
 import type { FinanceiroGrupoRecord } from "@/hooks/use-financeiro-grupos";
+import type { DateRange } from "@/lib/financeiro/analytics";
+import type { LedgerRow } from "@/lib/financeiro/types";
 
 //* Utils Imports
+import { computeTotals, inRange } from "@/lib/financeiro/analytics";
+import { formatPct } from "@/lib/financeiro/format";
+import { variation } from "@/lib/financeiro/money";
 import { normalizeText } from "@/lib/normalize-text";
 
 type FinanceiroGruposProps = {
   grupos: FinanceiroGrupoRecord[];
   records: FinanceiroRecord[];
+  /** Mesmos lançamentos em centavos, e o período anterior, para percentual e comparação. */
+  ledger: LedgerRow[];
+  previousLedger: LedgerRow[];
+  comparison: { current: DateRange; previous: DateRange };
   isSaving: boolean;
   deletingId: string | null;
   onCreate: (termos: string[], nome: string) => Promise<boolean>;
@@ -31,7 +40,10 @@ type FinanceiroGruposProps = {
 };
 
 /** Lançamentos cuja descrição contém QUALQUER um dos termos, sem diferenciar maiúsculas/minúsculas nem acentos. */
-export function matchGrupoRecords(records: FinanceiroRecord[], termos: string[]) {
+export function matchGrupoRecords<T extends { descricao: string | null }>(
+  records: T[],
+  termos: string[],
+) {
   const needles = termos.map((termo) => normalizeText(termo)).filter(Boolean);
   if (needles.length === 0) return [];
   return records.filter((record) => {
@@ -50,6 +62,9 @@ export function sumGrupoRecords(matching: FinanceiroRecord[]) {
 export function FinanceiroGrupos({
   grupos,
   records,
+  ledger,
+  previousLedger,
+  comparison,
   isSaving,
   deletingId,
   onCreate,
@@ -92,6 +107,9 @@ export function FinanceiroGrupos({
   const canCreate =
     pendingTermos.length === 1 || (pendingTermos.length > 1 && pendingNome.trim().length > 0);
   const openGrupo = grupos.find((grupo) => grupo.id === openGrupoId) ?? null;
+  const despesasPeriodo = computeTotals(ledger).despesas;
+  const comparedLedger = ledger.filter((row) => inRange(row, comparison.current));
+  const previousInRange = previousLedger.filter((row) => inRange(row, comparison.previous));
 
   return (
     <div className="space-y-3">
@@ -103,6 +121,16 @@ export function FinanceiroGrupos({
         {grupos.map((grupo) => {
           const total = sumGrupoRecords(matchGrupoRecords(records, grupo.termos));
           const titulo = grupo.nome ?? grupo.termos[0];
+          const matching = matchGrupoRecords(ledger, grupo.termos);
+          const gasto = computeTotals(matching).despesas;
+          const share = despesasPeriodo > 0 ? (gasto / despesasPeriodo) * 100 : null;
+          const gastoComparado = computeTotals(
+            matchGrupoRecords(comparedLedger, grupo.termos),
+          ).despesas;
+          const gastoAnterior = computeTotals(
+            matchGrupoRecords(previousInRange, grupo.termos),
+          ).despesas;
+          const change = variation(gastoComparado, gastoAnterior);
           return (
             <button
               key={grupo.id}
@@ -136,10 +164,16 @@ export function FinanceiroGrupos({
                 {formatValor(total)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {grupo.termos.length === 1
-                  ? "1 palavra-chave"
-                  : `${grupo.termos.length} palavras-chave`}
+                {matching.length} transaç{matching.length === 1 ? "ão" : "ões"}
+                {share !== null &&
+                  gasto > 0 &&
+                  ` · ${share.toFixed(share < 10 ? 1 : 0)}% das despesas`}
               </p>
+              {(gastoComparado > 0 || gastoAnterior > 0) && (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {formatPct(change.pct, gastoComparado)} vs. anterior
+                </p>
+              )}
             </button>
           );
         })}

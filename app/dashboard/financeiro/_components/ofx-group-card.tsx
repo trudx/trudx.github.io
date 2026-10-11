@@ -8,23 +8,26 @@ import Select from "@/components/ui/select";
 import { useFinanceiroPrivacy } from "./financeiro-privacy";
 
 //* Types Imports
+import type { CategoriaRecord } from "@/hooks/use-financeiro-categorias";
 import type { ClientRecord } from "@/hooks/use-clients";
+import type { GroupChoice } from "@/lib/financeiro/import-lines";
+import type { FinanceiroNatureza } from "@/lib/financeiro/types";
 import type { OfxGroup } from "@/lib/ofx";
+
+//* Constants Imports
+import { NATUREZA_LABELS } from "@/lib/financeiro/natureza";
 
 //* Utils Imports
 import { cn } from "@/lib/utils";
 
-/** Escolhas do usuário para um grupo de transações do OFX, antes de importar. */
-export type OfxReviewState = {
-  include: boolean;
-  tipo: "gasto" | "ganho";
-  cliente_id: string | null;
-};
+/** Escolhas do usuário para um grupo de transações do extrato, antes de importar. */
+export type OfxReviewState = GroupChoice;
 
 type OfxGroupCardProps = {
   group: OfxGroup;
   review: OfxReviewState;
   clients: ClientRecord[];
+  categorias: CategoriaRecord[];
   onUpdate: (patch: Partial<OfxReviewState>) => void;
 };
 
@@ -33,7 +36,7 @@ const toneStyles = {
   gasto: { border: "border-l-rose-400", text: "text-rose-700", sign: "-" },
 };
 
-export function OfxGroupCard({ group, review, clients, onUpdate }: OfxGroupCardProps) {
+export function OfxGroupCard({ group, review, clients, categorias, onUpdate }: OfxGroupCardProps) {
   const { formatValor } = useFinanceiroPrivacy();
   const tone = toneStyles[review.tipo];
   const total = group.valor * group.transactions.length;
@@ -97,6 +100,44 @@ export function OfxGroupCard({ group, review, clients, onUpdate }: OfxGroupCardP
               ))}
             </Select.SelectContent>
           </Select.SelectRoot>
+
+          <Select.SelectRoot
+            value={review.natureza}
+            onValueChange={(value) => onUpdate({ natureza: value as FinanceiroNatureza })}
+          >
+            <Select.SelectTrigger className="h-10 w-full bg-background" aria-label="Natureza">
+              <Select.SelectValue>{NATUREZA_LABELS[review.natureza]}</Select.SelectValue>
+            </Select.SelectTrigger>
+            <Select.SelectContent>
+              {(Object.keys(NATUREZA_LABELS) as FinanceiroNatureza[]).map((natureza) => (
+                <Select.SelectItem key={natureza} value={natureza}>
+                  {NATUREZA_LABELS[natureza]}
+                </Select.SelectItem>
+              ))}
+            </Select.SelectContent>
+          </Select.SelectRoot>
+
+          {categorias.length > 0 && (
+            <Select.SelectRoot
+              value={review.categoria_id ?? "none"}
+              onValueChange={(value) => onUpdate({ categoria_id: value === "none" ? null : value })}
+            >
+              <Select.SelectTrigger className="h-10 w-full bg-background" aria-label="Categoria">
+                <Select.SelectValue>
+                  {categorias.find((categoria) => categoria.id === review.categoria_id)?.nome ??
+                    "Sem categoria"}
+                </Select.SelectValue>
+              </Select.SelectTrigger>
+              <Select.SelectContent>
+                <Select.SelectItem value="none">Sem categoria</Select.SelectItem>
+                {categorias.map((categoria) => (
+                  <Select.SelectItem key={categoria.id} value={categoria.id}>
+                    {categoria.nome}
+                  </Select.SelectItem>
+                ))}
+              </Select.SelectContent>
+            </Select.SelectRoot>
+          )}
         </div>
       )}
     </div>
