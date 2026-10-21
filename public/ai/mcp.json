@@ -1,0 +1,128 @@
+{
+  "name": "trudx-internal",
+  "version": "1.0.0",
+  "protocolVersion": "2025-11-25",
+  "transport": "in-process",
+  "tools": [
+    {
+      "name": "resources_describe",
+      "description": "Descobre campos e regras para consultar/criar/editar recursos do app. Chame antes de uma escrita se não souber os campos. Tudo é restrito à conta autenticada.",
+      "inputSchema": { "type": "object", "properties": {}, "additionalProperties": false },
+      "annotations": { "readOnlyHint": true }
+    },
+    {
+      "name": "records_list",
+      "description": "Lista registros paginados. Recursos: tasks, task_columns, clients, eventos, financeiro, gastos_fixos, bancos, financeiro_categorias, financeiro_grupos, financeiro_saldos_referencia. Filtros de igualdade por campos permitidos. Respeite has_more e next_offset: uma página não é o conjunto completo. Valores financeiros de registros estão em reais.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource": { "type": "string" },
+          "filters": { "type": "object", "additionalProperties": true },
+          "date_from": { "type": "string", "description": "YYYY-MM-DD" },
+          "date_to": { "type": "string", "description": "YYYY-MM-DD inclusivo" },
+          "limit": { "type": "integer", "minimum": 1, "maximum": 200 },
+          "offset": { "type": "integer", "minimum": 0 }
+        },
+        "required": ["resource"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": true }
+    },
+    {
+      "name": "record_create",
+      "description": "Cria um registro. data deve conter apenas campos do resources_describe; IDs de referências devem vir de consultas. Para eventos use event_create_with_task. Valores monetários de entrada em reais, positivos, com duas casas decimais.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["resource", "data"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false }
+    },
+    {
+      "name": "record_update",
+      "description": "Edita um registro por ID real, incluindo mover tasks por column_id, prioridades, prazos, clientes, colunas e financeiro. Financeiro permite apenas descricao, cliente_id, banco_id, categoria_id, natureza e status; valor/data/tipo de extratos são imutáveis. Nunca invente IDs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource": { "type": "string" },
+          "id": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["resource", "id", "data"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false }
+    },
+    {
+      "name": "record_delete",
+      "description": "Exclui exatamente um registro pelo ID. Use apenas se o usuário pediu exclusão de forma clara. Consulte antes para identificar o registro e não exclua em caso de ambiguidade. Colunas com tarefas não podem ser removidas.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "resource": { "type": "string" }, "id": { "type": "string" } },
+        "required": ["resource", "id"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": true }
+    },
+    {
+      "name": "event_create_with_task",
+      "description": "Cria evento e tarefa automaticamente na coluna escolhida, igual à Agenda. data contém titulo, descricao/local opcionais, data_inicio/data_fim ISO com fuso, dia_inteiro e cliente_id opcional. Pergunte qual coluna se o usuário não informou.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "column_id": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": true }
+        },
+        "required": ["column_id", "data"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false }
+    },
+    {
+      "name": "financeiro_analyze",
+      "description": "Analisa TODOS os lançamentos de um período usando as mesmas regras do dashboard: exclui transferências/pagamentos de fatura dos resultados e trata estornos/conciliados. Retorna totais em CENTAVOS BRL, categorias, bancos, maiores despesas, fixos/variáveis e separação confirmado/provisório. Resultado do período não é saldo bancário.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "date_from": { "type": "string" },
+          "date_to": { "type": "string" },
+          "banco_id": { "type": "string" },
+          "cliente_id": { "type": "string" },
+          "categoria_id": { "type": "string" }
+        },
+        "required": ["date_from", "date_to"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": true }
+    },
+    {
+      "name": "financeiro_balances",
+      "description": "Consulta saldos bancários até uma data usando as regras do dashboard. Distingue saldo confirmado por extrato, estimado e apenas calculado sem referência. Não apresente saldo calculado como bancário confirmado. Os valores retornados são em CENTAVOS BRL.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "date": { "type": "string" } },
+        "required": ["date"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": true }
+    },
+    {
+      "name": "timer_control",
+      "description": "Consulta, inicia ou para o cronômetro de tarefas. Apenas um cronômetro pode rodar por vez. Para iniciar informe task_id real; pare o atual antes de trocar.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": { "type": "string", "enum": ["status", "start", "stop"] },
+          "task_id": { "type": "string" }
+        },
+        "required": ["action"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false }
+    }
+  ]
+}

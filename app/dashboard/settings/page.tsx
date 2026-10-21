@@ -4,10 +4,17 @@
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
 import Label from "@/components/ui/label";
+import { BrowserLogsDialog } from "@/components/browser-logs-dialog";
 import { UserRound, Settings2 } from "lucide-react";
 import { SettingsSection } from "./_components/settings-section";
 
-import { ClientsListSetting, SettingsSkeleton, TaskPushNotificationsSetting, TasksZoomSetting } from "./_components";
+import {
+  AiSettingsSetting,
+  ClientsListSetting,
+  SettingsSkeleton,
+  TaskPushNotificationsSetting,
+  TasksZoomSetting,
+} from "./_components";
 
 //* Hooks Imports
 import { useProfile } from "@/hooks/use-profile";
@@ -31,7 +38,9 @@ export default function SettingsPage() {
           <Settings2 className="size-5" />
           Configurações
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">Gerencie sua conta, a visualização e os lembretes do app.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Gerencie sua conta, a visualização e os lembretes do app.
+        </p>
       </div>
 
       {isLoading ? (
@@ -123,6 +132,12 @@ export default function SettingsPage() {
       <ClientsListSetting />
       <TasksZoomSetting />
       <TaskPushNotificationsSetting />
+      <div id="assistente-ia" className="scroll-mt-6">
+        <AiSettingsSetting />
+      </div>
+      <div className="flex justify-end">
+        <BrowserLogsDialog />
+      </div>
     </section>
   );
 }

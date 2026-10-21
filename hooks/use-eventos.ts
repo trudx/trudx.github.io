@@ -4,9 +4,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+//* Hooks Imports
+import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
+
 //* Services Imports
-import { get, patch, post, remove } from "@/services/api-service";
+import { get, patch, remove, upsert } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
+import { saveEventoWithTask } from "@/services/evento-task-service";
 
 //* Utils Imports
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -65,28 +69,25 @@ export function useEventos() {
     }
   }, []);
 
+  useAppDataRefresh(fetchEventos, ["eventos"]);
+
   useEffect(() => {
     // The initial request owns its loading state inside fetchEventos.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchEventos();
   }, [fetchEventos]);
 
-  async function createEvento(input: EventoInput) {
+  async function createEvento(input: EventoInput, columnId: string, creationId: string) {
     setIsSaving(true);
 
     try {
       const userId = await getAuthenticatedUserId();
-      await post("eventos", {
-        ...input,
-        descricao: input.descricao.trim() || null,
-        local: input.local.trim() || null,
-        user_id: userId,
-      });
+      await saveEventoWithTask(input, columnId, userId, creationId, { upsert, remove });
       await fetchEventos();
-      toast.success("Evento cadastrado");
+      toast.success("Evento e tarefa cadastrados");
       return true;
     } catch (error) {
-      toast.error("Não foi possível cadastrar o evento", {
+      toast.error("Não foi possível cadastrar o evento e a tarefa", {
         description: getApiErrorMessage(error, "Confira os dados e tente novamente."),
       });
       console.error("Erro ao cadastrar evento:", error);

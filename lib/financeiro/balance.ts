@@ -1,3 +1,35 @@
+//* Utils Imports
+import { toCents } from "./money.ts";
+
+export type SaldoResponse = {
+  banco_id: string | null;
+  ref_data: string | null;
+  ref_saldo: number | string | null;
+  mov_oficial: number | string;
+  mov_total: number | string;
+  total: number | string;
+  provisorios_qtd: number;
+  provisorios_valor: number | string;
+  provisorios_obsoletos_qtd: number;
+  ultima_cobertura: string | null;
+};
+
+/** `numeric` chega como string; UI e assistente usam a mesma conversão em centavos. */
+export function toSaldoBancoRow(response: SaldoResponse): SaldoBancoRow {
+  return {
+    banco_id: response.banco_id,
+    ref_data: response.ref_data,
+    ref_saldo_cents: response.ref_saldo === null ? null : toCents(Number(response.ref_saldo)),
+    mov_oficial_cents: toCents(Number(response.mov_oficial)),
+    mov_total_cents: toCents(Number(response.mov_total)),
+    total_cents: toCents(Number(response.total)),
+    provisorios_qtd: response.provisorios_qtd,
+    provisorios_cents: toCents(Number(response.provisorios_valor)),
+    provisorios_obsoletos_qtd: response.provisorios_obsoletos_qtd,
+    ultima_cobertura: response.ultima_cobertura,
+  };
+}
+
 /**
  * Saldo confirmado × estimado.
  *

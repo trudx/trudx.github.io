@@ -156,7 +156,7 @@ async function deliver(
   let eventId: string | null = null;
   try {
     eventId = await reserveEvent(supabase, subscription.id, eventKey);
-  } catch (error) {
+  } catch {
     console.error("Could not reserve push notification event", {
       subscriptionId: subscription.id,
     });
@@ -199,7 +199,7 @@ async function deliver(
   }
 }
 
-export default {
+const dispatcher = {
   fetch: withSupabase({ auth: "secret:task_push" }, async (request, { supabaseAdmin }) => {
     if (request.method !== "POST") return Response.json({ error: "Method not allowed" }, { status: 405 });
 
@@ -339,3 +339,5 @@ export default {
     }
   }),
 };
+
+export default dispatcher;

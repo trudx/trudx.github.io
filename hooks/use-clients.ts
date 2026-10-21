@@ -4,15 +4,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+//* Hooks Imports
+import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
+import { useClientListPreference } from "@/hooks/use-client-list-preference";
+
 //* Services Imports
 import { get, patch, post, remove } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
 
 //* Utils Imports
 import { getApiErrorMessage } from "@/lib/api-error";
-
-//* Hooks Imports
-import { useClientListPreference } from "@/hooks/use-client-list-preference";
 
 export type ClientStatus = "active" | "inactive";
 
@@ -59,6 +60,8 @@ export function useClients() {
       setIsLoading(false);
     }
   }, []);
+
+  useAppDataRefresh(fetchClients, ["clients"]);
 
   useEffect(() => {
     // The initial request owns its loading state inside fetchClients.

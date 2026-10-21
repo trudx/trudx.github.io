@@ -4,6 +4,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+//* Hooks Imports
+import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
+
 //* Services Imports
 import { getAll, patch, post, remove } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
@@ -144,6 +147,8 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
       tipoFilter === "all" ? allRecords : allRecords.filter((record) => record.tipo === tipoFilter),
     [allRecords, tipoFilter],
   );
+
+  useAppDataRefresh(fetchRecords, ["financeiro","gastos_fixos"]);
 
   useEffect(() => {
     // The initial (and every filter-change) request owns its loading state inside fetchRecords.

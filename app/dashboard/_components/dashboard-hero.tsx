@@ -27,7 +27,7 @@ import imagemTarde from "../_assets/tarde.webp";
 //* Utils Imports
 import { cn } from "@/lib/utils";
 
-// Import estático (e não `/manha.png` do public): o caminho já sai com o basePath do GitHub Pages
+// O import estático já inclui o basePath do GitHub Pages no caminho da imagem.
 // e a versão WebP pesa ~100KB contra ~2MB do PNG original.
 const IMAGE_BY_PERIOD: Record<GreetingPeriod, StaticImageData> = {
   madrugada: imagemNoite,

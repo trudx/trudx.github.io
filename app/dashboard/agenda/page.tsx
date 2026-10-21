@@ -20,6 +20,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 //* Hooks Imports
 import { useClients } from "@/hooks/use-clients";
 import { useEventos, type EventoRecord } from "@/hooks/use-eventos";
+import { useTaskColumns } from "@/hooks/use-task-columns";
 
 //* Types Imports
 import type { CalendarEvent } from "./_components/types";
@@ -72,6 +73,7 @@ export default function AgendaPage() {
   const { eventos, isLoading, isSaving, deletingId, createEvento, updateEvento, deleteEvento } =
     useEventos();
   const { selectableClients } = useClients();
+  const { columns, isLoading: isLoadingColumns, refreshColumns } = useTaskColumns();
   const [view, setView] = useState<View>(Views.MONTH);
   const [date, setDate] = useState(new Date());
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -168,11 +170,16 @@ export default function AgendaPage() {
         open={isFormOpen}
         evento={editingEvento}
         clients={selectableClients}
+        columns={columns}
+        isLoadingColumns={isLoadingColumns}
+        onRefreshColumns={refreshColumns}
         isSaving={isSaving}
         initialRange={initialRange}
         onOpenChange={setIsFormOpen}
-        onSubmit={(input) =>
-          editingEvento ? updateEvento(editingEvento.id, input) : createEvento(input)
+        onSubmit={(input, columnId, creationId) =>
+          editingEvento
+            ? updateEvento(editingEvento.id, input)
+            : createEvento(input, columnId, creationId)
         }
         onDelete={editingEvento ? handleDeleteFromForm : undefined}
       />

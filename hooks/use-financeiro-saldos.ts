@@ -4,29 +4,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+//* Hooks Imports
+import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
+
 //* Services Imports
 import { get, remove, rpc, upsert } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
 
 //* Types Imports
-import type { SaldoBancoRow } from "@/lib/financeiro/balance";
+import type { SaldoBancoRow, SaldoResponse } from "@/lib/financeiro/balance";
 
 //* Utils Imports
 import { getApiErrorMessage } from "@/lib/api-error";
-import { toCents } from "@/lib/financeiro/money";
-
-type SaldoResponse = {
-  banco_id: string | null;
-  ref_data: string | null;
-  ref_saldo: number | string | null;
-  mov_oficial: number | string;
-  mov_total: number | string;
-  total: number | string;
-  provisorios_qtd: number;
-  provisorios_valor: number | string;
-  provisorios_obsoletos_qtd: number;
-  ultima_cobertura: string | null;
-};
+import { toSaldoBancoRow } from "@/lib/financeiro/balance";
 
 export type SaldoReferenciaRecord = {
   id: string;
@@ -35,22 +25,6 @@ export type SaldoReferenciaRecord = {
   saldo: number | string;
   origem: "pdf" | "ofx" | "manual";
 };
-
-/** `numeric` chega como string; centavos inteiros daqui em diante. */
-function toRow(response: SaldoResponse): SaldoBancoRow {
-  return {
-    banco_id: response.banco_id,
-    ref_data: response.ref_data,
-    ref_saldo_cents: response.ref_saldo === null ? null : toCents(Number(response.ref_saldo)),
-    mov_oficial_cents: toCents(Number(response.mov_oficial)),
-    mov_total_cents: toCents(Number(response.mov_total)),
-    total_cents: toCents(Number(response.total)),
-    provisorios_qtd: response.provisorios_qtd,
-    provisorios_cents: toCents(Number(response.provisorios_valor)),
-    provisorios_obsoletos_qtd: response.provisorios_obsoletos_qtd,
-    ultima_cobertura: response.ultima_cobertura,
-  };
-}
 
 /**
  * Saldos por banco em duas datas: hoje e o dia anterior ao início do período (ponto de partida do
@@ -80,8 +54,8 @@ export function useFinanceiroSaldos(today: string, dayBeforePeriod: string) {
         }),
       ]);
 
-      setHoje((nowRows ?? []).map(toRow));
-      setInicio((startRows ?? []).map(toRow));
+      setHoje((nowRows ?? []).map(toSaldoBancoRow));
+      setInicio((startRows ?? []).map(toSaldoBancoRow));
       setReferencias(refs);
     } catch (error) {
       setHasError(true);
@@ -93,6 +67,13 @@ export function useFinanceiroSaldos(today: string, dayBeforePeriod: string) {
       setIsLoading(false);
     }
   }, [today, dayBeforePeriod]);
+
+  useAppDataRefresh(fetchSaldos, [
+    "financeiro",
+    "financeiro_saldos_referencia",
+    "bancos",
+    "gastos_fixos",
+  ]);
 
   useEffect(() => {
     // The request owns its loading state inside fetchSaldos.

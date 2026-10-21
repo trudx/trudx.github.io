@@ -4,6 +4,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+//* Hooks Imports
+import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
+
 //* Services Imports
 import { get, patch, post, remove, upsert } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
@@ -46,6 +49,8 @@ export function useTaskColumns() {
       setIsLoading(false);
     }
   }, []);
+
+  useAppDataRefresh(fetchColumns, ["task_columns"]);
 
   useEffect(() => {
     // The initial request owns its loading state inside fetchColumns.

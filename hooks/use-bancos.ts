@@ -4,6 +4,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+//* Hooks Imports
+import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
+
 //* Services Imports
 import { get, post, remove } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
@@ -48,6 +51,8 @@ export function useBancos() {
       setIsLoading(false);
     }
   }, []);
+
+  useAppDataRefresh(fetchBancos, ["bancos"]);
 
   useEffect(() => {
     // The initial request owns its loading state inside fetchBancos.
