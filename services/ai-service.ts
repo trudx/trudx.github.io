@@ -9,6 +9,7 @@ import {
   registerDiagnosticSecret,
 } from "../lib/browser-logs.ts";
 import { AiRequestError, describeAiTransportFailure } from "../lib/ai/request-error.ts";
+import { aiRequestEndpoint } from "../lib/ai/transport.ts";
 
 type JsonObject = Record<string, unknown>;
 
@@ -184,6 +185,8 @@ export async function requestAi(
   if (/[\r\n]/.test(settings.token))
     throw new Error("O token contém uma quebra de linha. Cole novamente apenas a chave da API.");
   const provider = AI_PROVIDERS[settings.provider];
+  const developmentProxy = process.env.NODE_ENV === "development" && typeof window !== "undefined";
+  const endpoint = aiRequestEndpoint(settings.provider, developmentProxy);
   const diagnosticId = crypto.randomUUID().slice(0, 8);
   const log = createDiagnosticLogger();
   registerDiagnosticSecret(settings.token);
@@ -192,7 +195,9 @@ export async function requestAi(
     diagnosticId,
     provider: settings.provider,
     model: settings.model,
-    endpoint: provider.endpoint,
+    endpoint,
+    upstream: provider.endpoint,
+    transport: developmentProxy ? "local-proxy" : "direct",
     online: typeof navigator === "undefined" || navigator.onLine !== false,
     origin: typeof location === "undefined" ? "server" : location.origin,
   };
@@ -215,7 +220,7 @@ export async function requestAi(
     const body = JSON.stringify(buildAiRequest(settings, messages, tools, instructions));
     let response: Response;
     try {
-      response = await fetcher(provider.endpoint, {
+      response = await fetcher(endpoint, {
         method: "POST",
         signal: requestController.signal,
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${settings.token}` },
@@ -228,7 +233,7 @@ export async function requestAi(
       const failure = describeAiTransportFailure(
         requestController.signal.reason ?? error,
         typeof navigator === "undefined" || navigator.onLine !== false,
-        provider.name,
+        developmentProxy ? `proxy local de ${provider.name}` : provider.name,
         diagnosticId,
       );
       log({
