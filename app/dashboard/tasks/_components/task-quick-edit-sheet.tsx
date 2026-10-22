@@ -3,6 +3,7 @@
 //* Components Imports
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
 import Label from "@/components/ui/label";
 import Select from "@/components/ui/select";
 import Sheet from "@/components/ui/sheet";
@@ -10,6 +11,7 @@ import Sheet from "@/components/ui/sheet";
 import { TaskTimerDisplay } from "./task-timer-display";
 
 //* Libraries Imports
+import { useState } from "react";
 import { Check, Play, Square, Trash2 } from "lucide-react";
 
 //* Types Imports
@@ -20,13 +22,17 @@ import type { TaskTimerProps } from "./task-card";
 
 //* Utils Imports
 import { formatDuration } from "@/lib/format-duration";
+import { TaskTimeProgress } from "./task-time-progress";
 import { cn } from "@/lib/utils";
 
 type TaskQuickEditSheetProps = {
   task: TaskRecord;
   clients: ClientRecord[];
   columns: TaskColumnRecord[];
-  timer: TaskTimerProps & { onDiscard: () => void };
+  timer: TaskTimerProps & {
+    onDiscard: () => void;
+    onSetSeconds: (taskId: string, seconds: number) => Promise<boolean>;
+  };
   onOpenChange: (open: boolean) => void;
   onPatch: (id: string, patch: TaskQuickPatch) => Promise<boolean>;
   onMoveToColumn: (id: string, columnId: string) => Promise<boolean>;
@@ -60,6 +66,15 @@ export function TaskQuickEditSheet({
   const selectedColumn = columns.find((column) => column.id === task.column_id);
   const isRunning = timer.runningTaskId === task.id;
   const loggedSeconds = timer.secondsByTaskId[task.id] ?? 0;
+  const [minutesDraft, setMinutesDraft] = useState<string | null>(null);
+  const minutesValue = minutesDraft ?? String(Math.round(loggedSeconds / 60));
+  const parsedMinutes = Number(minutesValue);
+  const isMinutesValid = minutesValue.trim() !== "" && Number.isFinite(parsedMinutes) && parsedMinutes >= 0;
+  const isMinutesChanged = isMinutesValid && Math.round(parsedMinutes * 60) !== loggedSeconds;
+
+  async function handleSaveMinutes() {
+    if (await timer.onSetSeconds(task.id, Math.round(parsedMinutes * 60))) setMinutesDraft(null);
+  }
 
   return (
     <Sheet.SheetRoot open onOpenChange={onOpenChange}>
@@ -119,6 +134,38 @@ export function TaskQuickEditSheet({
               </p>
             </>
           )}
+        </div>
+
+        <div className="space-y-3">
+          <Label htmlFor="task-logged-minutes">Tempo gasto (minutos)</Label>
+          <div className="flex gap-2">
+            <Input
+              id="task-logged-minutes"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              value={minutesValue}
+              onChange={(event) => setMinutesDraft(event.target.value)}
+              className="h-11 bg-background"
+            />
+            <Button
+              type="button"
+              className="h-11"
+              disabled={timer.isSaving || !isMinutesChanged}
+              onClick={() => void handleSaveMinutes()}
+            >
+              Salvar
+            </Button>
+          </div>
+          <TaskTimeProgress
+            estimatedMinutes={task.average_duration_minutes}
+            loggedSeconds={loggedSeconds}
+            className="text-muted-foreground"
+          />
+          <p className="text-xs text-muted-foreground">
+            Substitui o tempo já registrado desta tarefa (estimado: {task.average_duration_minutes}{" "}
+            min).
+          </p>
         </div>
 
         {/* No celular, mover é a necessidade mais comum — e este é o caminho sem arrastar. */}

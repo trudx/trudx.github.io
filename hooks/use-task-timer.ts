@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
 
 //* Services Imports
-import { getOne, post, remove, rpc } from "@/services/api-service";
+import { get, getOne, post, remove, rpc } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
 
 //* Utils Imports
@@ -224,6 +224,58 @@ export function useTaskTimer() {
     }
   }
 
+  /**
+   * Define o tempo total gasto numa tarefa (correção manual). Troca as entradas já finalizadas por
+   * uma só, ancorada no fim da mais recente pra o tempo continuar no mesmo dia dos totais.
+   * O cronômetro em curso, se houver, não é tocado.
+   */
+  async function setTaskSeconds(taskId: string, seconds: number) {
+    const total = Math.max(0, Math.floor(seconds));
+
+    setIsSaving(true);
+
+    try {
+      const userId = await getAuthenticatedUserId();
+      const entradas = await get<TaskTimeEntryRecord>("task_time_entries", {
+        select: SELECT_COLUMNS,
+        filters: { user_id: userId, task_id: taskId },
+      });
+      const finalizadas = entradas.filter((entry) => entry.ended_at !== null);
+      const anchorMs = finalizadas.reduce(
+        (latest, entry) => Math.max(latest, new Date(entry.ended_at ?? 0).getTime()),
+        0,
+      );
+      const endedAt = new Date(anchorMs || Date.now());
+
+      if (finalizadas.length > 0) {
+        await remove("task_time_entries", {
+          user_id: userId,
+          id: finalizadas.map((entry) => entry.id),
+        });
+      }
+      if (total > 0) {
+        await post<TaskTimeEntryRecord>("task_time_entries", {
+          user_id: userId,
+          task_id: taskId,
+          started_at: new Date(endedAt.getTime() - total * 1000).toISOString(),
+          ended_at: endedAt.toISOString(),
+        });
+      }
+
+      toast.success("Tempo da tarefa atualizado");
+      await fetchTimer();
+      return true;
+    } catch (error) {
+      toast.error("Não foi possível atualizar o tempo", {
+        description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
+      });
+      console.error("Erro ao editar tempo da tarefa:", error);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   /** Apaga o cronômetro ativo sem registrar tempo — a saída pro "deixei rodando o fim de semana". */
   async function discardTimer() {
     if (!runningEntry) return true;
@@ -260,6 +312,7 @@ export function useTaskTimer() {
     startTimer,
     stopTimer,
     discardTimer,
+    setTaskSeconds,
     refreshTimer: fetchTimer,
     secondsSince,
   };

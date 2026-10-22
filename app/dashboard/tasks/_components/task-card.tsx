@@ -4,6 +4,7 @@
 import Badge from "@/components/ui/badge";
 import Button from "@/components/ui/button";
 
+import { TaskTimeProgress } from "./task-time-progress";
 import { TaskTimerDisplay } from "./task-timer-display";
 
 //* Libraries Imports
@@ -191,6 +192,14 @@ export function TaskCard({
           </span>
         )}
       </div>
+
+      {timer && loggedSeconds > 0 && (
+        <TaskTimeProgress
+          estimatedMinutes={task.average_duration_minutes}
+          loggedSeconds={loggedSeconds}
+          className={cn("mt-3", priorityMutedTextStyles[detailPriority])}
+        />
+      )}
 
       {(onEdit || onDelete || onQuickEdit || timer) && (
         <div

@@ -11,6 +11,7 @@ import {
   TaskFilters,
   TaskFormDialog,
   TaskQuickEditSheet,
+  TaskOptimizationCard,
   TaskTimeSummary,
   TasksZoomContext,
 } from "./_components";
@@ -77,6 +78,7 @@ export default function TasksPage() {
     startTimer,
     stopTimer,
     discardTimer,
+    setTaskSeconds,
     refreshTimer,
   } = useTaskTimer();
   const {
@@ -251,6 +253,11 @@ export default function TasksPage() {
               isLoading={isLoadingTimer}
               onRefresh={refreshTimer}
             />
+            <TaskOptimizationCard
+              tasks={tasks}
+              secondsByTaskId={secondsByTaskId}
+              isLoading={isLoadingTimer || isLoadingTasks}
+            />
             <TaskFilters value={filters} clients={clients} onChange={setFilters} />
             <div
               ref={resizeRef}
@@ -303,7 +310,11 @@ export default function TasksPage() {
                 task={quickEditTask}
                 clients={selectableClients}
                 columns={columns}
-                timer={{ ...timerProps, onDiscard: () => void discardTimer() }}
+                timer={{
+                  ...timerProps,
+                  onDiscard: () => void discardTimer(),
+                  onSetSeconds: setTaskSeconds,
+                }}
                 onOpenChange={(open) => {
                   if (!open) setQuickEditTaskId(null);
                 }}
