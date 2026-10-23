@@ -9,7 +9,7 @@ import { toZoomedTranslate, useTasksZoomContext } from "./tasks-zoom-context";
 
 //* Libraries Imports
 import { useSortable } from "@dnd-kit/sortable";
-import { Columns3, GripVertical } from "lucide-react";
+import { GripVertical } from "lucide-react";
 
 //* Types Imports
 import type { TaskColumnRecord } from "@/hooks/use-task-columns";
@@ -59,15 +59,14 @@ export function KanbanColumn({
       }}
       className={cn(
         // Mobile: coluna tipo slide, ocupando quase a tela toda.
-        // Desktop: cresce pra preencher a largura quando há poucas colunas, mas nunca abaixo de
-        // 18rem — quando não couberem todas, o piso é o que empurra a rolagem lateral.
+        // Desktop: as colunas dividem a largura inteira do quadro, sem rolagem lateral.
         "w-[min(85vw,20rem)] shrink-0 snap-start",
-        "md:w-auto md:min-w-[18rem] md:flex-1 md:shrink",
+        "md:w-auto md:min-w-0 md:flex-1 md:shrink",
 
         // Estrutura principal da coluna.
         "flex min-h-[24rem] flex-col overflow-hidden",
-        "rounded-2xl border border-l-4 bg-muted/45",
-        "p-3 sm:p-4",
+        "rounded-xl border border-l-4 bg-muted/45",
+        "p-2.5",
 
         // No desktop a coluna deve respeitar exatamente a altura disponibilizada pelo pai.
         "md:h-full md:min-h-0",
@@ -80,22 +79,11 @@ export function KanbanColumn({
       aria-label={`${column.name}: ${tasks.length} tarefas`}
     >
       {/* Header fica fora da área de scroll */}
-      <header className="mb-4 flex shrink-0 items-start justify-between gap-3 px-1">
-        <div className="flex items-center gap-2">
-          <span className="flex size-7 items-center justify-center rounded-md bg-background text-muted-foreground">
-            <Columns3 className="size-4" />
-          </span>
+      <header className="mb-2.5 flex shrink-0 items-center justify-between gap-2 pl-1">
+        <h2 className="min-w-0 truncate text-base font-bold">{column.name}</h2>
 
-          <div>
-            <h2 className="text-sm font-bold">{column.name}</h2>
-            <p className="text-xs text-muted-foreground">
-              {tasks.length === 1 ? "1 tarefa" : `${tasks.length} tarefas`}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1">
-          <span className="flex size-6 items-center justify-center rounded-full bg-background text-xs font-semibold text-muted-foreground">
+        <div className="flex shrink-0 items-center gap-0.5">
+          <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-background px-1.5 text-sm font-semibold text-muted-foreground">
             {isLoading ? "—" : tasks.length}
           </span>
 
@@ -116,7 +104,7 @@ export function KanbanColumn({
       {/* Somente essa área rola */}
       <div
         className={cn(
-          "flex min-h-0 flex-1 flex-col gap-3",
+          "flex min-h-0 flex-1 flex-col gap-2",
           "overflow-y-auto",
           "[scrollbar-width:none]",
           "[&::-webkit-scrollbar]:hidden",
@@ -137,7 +125,7 @@ export function KanbanColumn({
             />
           ))
         ) : (
-          <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed bg-background/60 px-4 py-10 text-center text-sm text-muted-foreground">
+          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed bg-background/60 px-3 py-8 text-center text-sm text-muted-foreground">
             Nenhuma tarefa nesta coluna.
           </div>
         )}

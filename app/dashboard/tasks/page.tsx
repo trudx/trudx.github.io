@@ -29,7 +29,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { Plus, SlidersHorizontal } from "lucide-react";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 //* Hooks Imports
@@ -97,8 +97,6 @@ export default function TasksPage() {
   const [quickEditTaskId, setQuickEditTaskId] = useState<string | null>(null);
   const [filters, setFilters] = useState<TaskFilterValue>(EMPTY_TASK_FILTERS);
   const [isManagingColumns, setIsManagingColumns] = useState(false);
-  const [boardHeight, setBoardHeight] = useState(60);
-  const resizeRef = useRef<HTMLDivElement>(null);
   // Mouse e toque separados de propósito: um PointerSensor único atenderia os dois pelo mesmo
   // caminho, e o `delay` que o toque precisa viraria uma espera de 220ms antes de todo arrasto no
   // desktop. Assim o mouse mantém o comportamento antigo e só o dedo precisa segurar — e a escolha
@@ -108,41 +106,6 @@ export default function TasksPage() {
     useSensor(TouchSensor, { activationConstraint: { delay: 220, tolerance: 6 } }),
     useSensor(KeyboardSensor),
   );
-
-  useEffect(() => {
-    const handleMouseDown = () => {
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!resizeRef.current) return;
-        const container = resizeRef.current.closest("section");
-        if (!container) return;
-
-        const containerRect = container.getBoundingClientRect();
-        const newHeight = Math.max(
-          20,
-          Math.min(90, ((e.clientY - containerRect.top) / containerRect.height) * 100),
-        );
-        setBoardHeight(newHeight);
-      };
-
-      const handleMouseUp = () => {
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-        document.body.style.cursor = "";
-        document.body.style.userSelect = "";
-      };
-
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      document.body.style.cursor = "row-resize";
-      document.body.style.userSelect = "none";
-    };
-
-    const element = resizeRef.current;
-    if (element) {
-      element.addEventListener("mousedown", handleMouseDown);
-      return () => element.removeEventListener("mousedown", handleMouseDown);
-    }
-  }, []);
 
   function openCreateDialog() {
     setEditingTask(null);
@@ -204,10 +167,12 @@ export default function TasksPage() {
 
   return (
     <TasksZoomContext value={zoomScale}>
-      <div className="md:h-[87vh] md:min-h-0 md:overflow-hidden">
+      {/* Ocupa a altura da tela menos o respiro vertical do <main> (py-8); no lg a sidebar sai do
+          topo, então dá pra casar exatamente e a página não rola — só as colunas. */}
+      <div className="md:h-[87vh] md:min-h-0 md:overflow-hidden lg:h-[calc(100dvh-4rem)]">
         <section
           style={{ zoom: zoomScale }}
-          className="flex flex-col gap-8 md:h-full md:min-h-0 md:overflow-hidden"
+          className="flex flex-col gap-5 md:h-full md:min-h-0 md:overflow-hidden"
         >
           <div className="flex shrink-0 flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
             <div>
@@ -236,7 +201,7 @@ export default function TasksPage() {
               </Button>
               <Button
                 type="button"
-                className="h-8 px-3 text-xs font-medium"
+                className="h-11 px-3 text-xs font-medium"
                 disabled={isLoadingColumns || columns.length === 0}
                 onClick={openCreateDialog}
               >
@@ -246,25 +211,23 @@ export default function TasksPage() {
             </div>
           </div>
           <div className="flex min-h-0 flex-1 flex-col gap-4">
-            <TaskTimeSummary
-              totais={totais}
-              totaisAtualizadosEm={totaisAtualizadosEm}
-              isRunning={runningTaskId !== null}
-              isLoading={isLoadingTimer}
-              onRefresh={refreshTimer}
-            />
-            <TaskOptimizationCard
-              tasks={tasks}
-              secondsByTaskId={secondsByTaskId}
-              isLoading={isLoadingTimer || isLoadingTasks}
-            />
+            {/* Resumo em uma faixa só: 4 cards lado a lado no desktop, 2 por linha nas telas menores. */}
+            <div className="grid shrink-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <TaskTimeSummary
+                totais={totais}
+                totaisAtualizadosEm={totaisAtualizadosEm}
+                isRunning={runningTaskId !== null}
+                isLoading={isLoadingTimer}
+                onRefresh={refreshTimer}
+              />
+              <TaskOptimizationCard
+                tasks={tasks}
+                secondsByTaskId={secondsByTaskId}
+                isLoading={isLoadingTimer || isLoadingTasks}
+              />
+            </div>
             <TaskFilters value={filters} clients={clients} onChange={setFilters} />
-            <div
-              ref={resizeRef}
-              className="h-1 cursor-row-resize hover:bg-primary/20 transition-colors"
-              title="Arraste para redimensionar"
-            />
-            <div style={{ height: `calc(${boardHeight}% - 0.25rem)` }} className="min-h-0 flex-1">
+            <div className="min-h-0 flex-1">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCorners}

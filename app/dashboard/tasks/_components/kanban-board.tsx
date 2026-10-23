@@ -52,11 +52,12 @@ export function KanbanBoard({
         <div
           ref={ref}
           className={cn(
-            // Rolagem lateral em qualquer tamanho: as colunas nunca quebram pra uma linha de baixo.
+            // Mobile: trilho com rolagem lateral. Desktop: as colunas encolhem pra caber todas, então
+            // não sobra rolagem (setas e esmaecimentos só aparecem no celular).
             "flex h-full min-h-0",
-            "gap-5",
-            "overflow-x-auto overscroll-x-contain",
-            "pb-3",
+            "gap-3",
+            "overflow-x-auto overscroll-x-contain md:overflow-x-hidden",
+            "pb-3 md:pb-0",
             "trudx-scroll-x",
 
             // Snap só no mobile — no desktop ele brigaria com trackpad/shift+scroll.

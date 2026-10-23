@@ -14,10 +14,13 @@ function subscribeToLocalDate(onChange: () => void) {
   function scheduleNextDay() {
     const now = new Date();
     const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-    timeoutId = window.setTimeout(() => {
-      onChange();
-      scheduleNextDay();
-    }, nextDay.getTime() - now.getTime() + 100);
+    timeoutId = window.setTimeout(
+      () => {
+        onChange();
+        scheduleNextDay();
+      },
+      nextDay.getTime() - now.getTime() + 100,
+    );
   }
 
   function handleVisibilityChange() {
@@ -136,20 +139,21 @@ export function TaskTimeSummary({
     { period: "daily", title: "Hoje", seconds: totais.hojeSegundos, referenceDays: 1 },
     {
       period: "weekly",
-      title: "Esta semana",
+      title: "Semana",
       seconds: totais.semanaSegundos,
       referenceDays: getElapsedWeekdaysInWeek(localDate),
     },
     {
       period: "monthly",
-      title: "Este mês",
+      title: "Mês",
       seconds: totais.mesSegundos,
       referenceDays: getElapsedWeekdaysInMonth(localDate),
     },
   ] as const;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    // Fragmento: os três cards entram direto na grid da página, ao lado do card de otimização.
+    <>
       {cards.map((card) => (
         <TaskSanityLevel
           key={card.period}
@@ -160,6 +164,6 @@ export function TaskTimeSummary({
           isLoading={isLoading || !localDateSnapshot}
         />
       ))}
-    </div>
+    </>
   );
 }

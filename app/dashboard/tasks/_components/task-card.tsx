@@ -26,7 +26,7 @@ import type { MouseEvent } from "react";
 import type { TaskPriority, TaskRecord } from "@/hooks/use-tasks";
 
 //* Utils Imports
-import { formatDateLong } from "@/lib/format-date";
+import { formatDateShort } from "@/lib/format-date";
 import { formatDuration } from "@/lib/format-duration";
 import { cn } from "@/lib/utils";
 
@@ -112,7 +112,7 @@ export function TaskCard({
       }}
       aria-label={onEdit ? `Tarefa ${task.title}. Clique para editar.` : undefined}
       className={cn(
-        "group rounded-xl border p-4 shadow-sm transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
+        "group relative rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
         isRunning ? runningCardStyle : priorityCardStyles[task.priority],
         // Sem `touch-none`: os listeners cobrem o card inteiro, então ele diria ao navegador
         // "nunca role a partir daqui" e a página travaria no celular. Com o TouchSensor por
@@ -122,8 +122,8 @@ export function TaskCard({
         isDragging && "opacity-40",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="min-w-0 font-semibold leading-snug">{task.title}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="line-clamp-2 min-w-0 text-lg font-semibold leading-snug">{task.title}</h3>
         <Badge
           variant="outline"
           {...(onQuickEdit
@@ -138,7 +138,7 @@ export function TaskCard({
               }
             : {})}
           className={cn(
-            "shrink-0",
+            "shrink-0 text-sm",
             priorityBadgeStyles[detailPriority],
             onQuickEdit && "cursor-pointer hover:brightness-110",
           )}
@@ -148,46 +148,41 @@ export function TaskCard({
       </div>
 
       {task.description && (
-        <p
-          className={cn(
-            "mt-2 line-clamp-2 text-sm leading-relaxed",
-            priorityMutedTextStyles[detailPriority],
-          )}
-        >
+        <p className={cn("mt-1 line-clamp-1 text-base", priorityMutedTextStyles[detailPriority])}>
           {task.description}
         </p>
       )}
 
       <div
         className={cn(
-          "mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs",
+          "mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-base font-medium",
           priorityMutedTextStyles[detailPriority],
         )}
       >
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarDays className="size-3.5" />
-          Entrega: {formatDateLong(task.due_date)}
+        <span className="inline-flex items-center gap-1.5" title="Entrega">
+          <CalendarDays className="size-4" />
+          {formatDateShort(task.due_date)}
         </span>
-        <span className="inline-flex items-center gap-1.5">
-          <Clock3 className="size-3.5" />
-          Est.: {task.average_duration_minutes} min
+        <span className="inline-flex items-center gap-1.5" title="Tempo estimado">
+          <Clock3 className="size-4" />
+          {task.average_duration_minutes} min
         </span>
         {isRunning && timer?.runningStartedAt ? (
-          <span className="inline-flex items-center gap-1.5 font-bold">
-            <span className="size-1.5 animate-pulse rounded-full bg-current" />
+          <span className="inline-flex items-center gap-1.5 font-bold" title="Em execução">
+            <span className="size-2 animate-pulse rounded-full bg-current" />
             <TaskTimerDisplay key={timer.runningStartedAt} startedAt={timer.runningStartedAt} />
           </span>
         ) : (
           loggedSeconds > 0 && (
-            <span className="inline-flex items-center gap-1.5 font-semibold">
-              <Timer className="size-3.5" />
-              Real: {formatDuration(loggedSeconds)}
+            <span className="inline-flex items-center gap-1.5 font-bold" title="Tempo real">
+              <Timer className="size-4" />
+              {formatDuration(loggedSeconds)}
             </span>
           )
         )}
         {clientName && (
-          <span className="inline-flex min-w-0 items-center gap-1.5">
-            <User className="size-3.5 shrink-0" />
+          <span className="inline-flex min-w-0 items-center gap-1.5" title="Cliente">
+            <User className="size-4 shrink-0" />
             <span className="truncate">{clientName}</span>
           </span>
         )}
@@ -197,19 +192,22 @@ export function TaskCard({
         <TaskTimeProgress
           estimatedMinutes={task.average_duration_minutes}
           loggedSeconds={loggedSeconds}
-          className={cn("mt-3", priorityMutedTextStyles[detailPriority])}
+          className={cn("mt-2 [&>span]:text-sm", priorityMutedTextStyles[detailPriority])}
         />
       )}
 
       {(onEdit || onDelete || onQuickEdit || timer) && (
         <div
           className={cn(
-            "mt-3 flex items-center justify-end gap-1 border-t pt-2 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
+            "mt-2 flex items-center justify-end gap-1 border-t pt-2",
             priorityDividerStyles[detailPriority],
-            // Com um cronômetro rodando a linha precisa ficar visível sem hover —
-            // senão, no desktop, não há como pará-lo.
-            isRunning && "sm:opacity-100",
             timer && "justify-between",
+            // No desktop as ações flutuam sobre o canto do card só no hover, em vez de reservar uma
+            // linha vazia em todo card. O `bg-inherit` pega a cor do card pra cobrir o que estiver
+            // embaixo. Com um cronômetro rodando a linha volta pro fluxo e fica sempre visível —
+            // senão não há como pará-lo.
+            !isRunning &&
+              "sm:absolute sm:right-2 sm:bottom-2 sm:mt-0 sm:rounded-md sm:border-t-0 sm:bg-inherit sm:pt-0 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100",
           )}
         >
           {timer && (

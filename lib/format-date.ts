@@ -24,3 +24,10 @@ export function formatDateLong(date: string) {
 export function formatTimestamp(timestamp: string) {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(timestamp));
 }
+
+/** Só dia e mês abreviado (ex.: 26 de ago.), para espaços apertados como o card do Kanban. */
+export function formatDateShort(date: string) {
+  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(
+    new Date(`${date}T00:00:00`),
+  );
+}

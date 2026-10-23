@@ -47,7 +47,8 @@ function getLevel(seconds: number, referenceDays: number, period: Period): Level
     return {
       label: "Ótimo",
       detail,
-      badgeClassName: "border-emerald-600/20 bg-emerald-600/10 text-emerald-800 dark:text-emerald-300",
+      badgeClassName:
+        "border-emerald-600/20 bg-emerald-600/10 text-emerald-800 dark:text-emerald-300",
       fillClassName: "bg-emerald-600",
     };
   }
@@ -101,48 +102,38 @@ export function TaskSanityLevel({
   const hours = seconds / 3600;
   const progress = Math.min(100, (hours / surplusHours) * 100);
 
+  // Os detalhes (média por dia útil, faixas) vão pro tooltip: no card só fica o que se lê de relance.
+  const tooltip = `${level.detail} Faixas: ótimo até ${optimalHours}h, padrão até ${standardHours}h, superávit até ${surplusHours}h.`;
+
   return (
-    <div className="flex min-h-48 flex-col justify-between rounded-2xl border border-border bg-muted/60 p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background text-muted-foreground ring-1 ring-border">
-            <HeartPulse className="size-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-foreground">Nível de sanidade</p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {period === "daily"
-                ? title
-                : `${title} · ${referenceDays} ${referenceDays === 1 ? "dia útil" : "dias úteis"}`}
-            </p>
-          </div>
-        </div>
+    <div
+      className="flex flex-col gap-2 rounded-xl border border-border bg-muted/60 p-4"
+      title={tooltip}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="flex min-w-0 items-center gap-1.5 text-base font-medium text-muted-foreground">
+          <HeartPulse className="size-4 shrink-0" />
+          <span className="truncate">{title}</span>
+        </p>
         <span
-          className={`shrink-0 rounded-full border px-2 py-1 text-[10px] font-semibold ${level.badgeClassName}`}
+          className={`shrink-0 rounded-full border px-2 py-0.5 text-sm font-semibold ${level.badgeClassName}`}
         >
           {level.label}
         </span>
       </div>
 
       {isLoading ? (
-        <div className="mt-4 space-y-2" aria-label="Carregando horas trabalhadas">
+        <div className="space-y-2" aria-label="Carregando horas trabalhadas">
           <Skeleton className="h-8 w-28" />
           <Skeleton className="h-2 w-full" />
-          <Skeleton className="h-3 w-3/4" />
         </div>
       ) : (
         <>
-          <div className="mt-4">
-            <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-              {seconds > 0 ? formatDuration(seconds) : "0h"}
-            </p>
-            <p className="mt-1 min-h-7 text-[10px] leading-relaxed text-muted-foreground">
-              {level.detail}
-            </p>
-          </div>
+          <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+            {seconds > 0 ? formatDuration(seconds) : "0h"}
+          </p>
 
           <div
-            className="mt-3"
             role="progressbar"
             aria-label={`Horas trabalhadas: ${title.toLowerCase()}`}
             aria-valuemin={0}
@@ -160,24 +151,15 @@ export function TaskSanityLevel({
                 className={`absolute inset-y-0 left-0 rounded-full transition-[width] duration-700 ease-out ${level.fillClassName}`}
                 style={{ width: `${progress}%` }}
               />
-              <span aria-hidden="true" className="absolute inset-y-0 left-[60%] z-10 w-px bg-background/90" />
-              <span aria-hidden="true" className="absolute inset-y-0 left-[80%] z-10 w-px bg-background/90" />
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-[60%] z-10 w-px bg-background/90"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute inset-y-0 left-[80%] z-10 w-px bg-background/90"
+              />
             </div>
-          </div>
-
-          <div className="mt-2 grid grid-cols-3 text-[9px] leading-tight text-muted-foreground">
-            <span>
-              <strong className="block font-semibold text-foreground">{optimalHours}h</strong>
-              Ótimo · 6h/dia
-            </span>
-            <span className="text-center">
-              <strong className="block font-semibold text-foreground">{standardHours}h</strong>
-              Padrão · 8h/dia
-            </span>
-            <span className="text-right">
-              <strong className="block font-semibold text-foreground">{surplusHours}h</strong>
-              Superávit · 10h/dia
-            </span>
           </div>
         </>
       )}
