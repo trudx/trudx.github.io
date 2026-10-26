@@ -14,6 +14,15 @@ import type { AiSettings } from "@/lib/ai/types";
 import { AiContext } from "@/lib/ai/context";
 import { DEFAULT_AI_SETTINGS } from "@/lib/ai/models";
 import { aiStorageKey, readAiSettings, writeAiSettings } from "@/lib/ai/settings-store";
+import { mergeRemoteAiChats, readAiChats } from "@/lib/ai/chat-store";
+import {
+  deleteRemoteAiSettings,
+  fetchRemoteAiSettings,
+  fetchRemoteChats,
+  pushRemoteAiSettings,
+  pushRemoteChat,
+} from "@/lib/ai/remote-store";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { captureBrowserLogs } from "@/lib/browser-logs";
 
 export function AiProvider({ children }: { children: ReactNode }) {
@@ -55,20 +64,71 @@ export function AiProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", handleStorage);
   }, [userId]);
 
+  // A conta é a fonte da verdade: traz configuração e conversas de outros dispositivos e, na
+  // primeira vez, sobe o que só existia neste navegador.
+  useEffect(() => {
+    if (!userId) return;
+    let active = true;
+    async function syncAccount(id: string) {
+      try {
+        // Garante um access token válido (renova se vencido) antes de falar com o banco.
+        await supabase.auth.getUser();
+        const remoteSettings = await fetchRemoteAiSettings(id);
+        if (!active) return;
+        if (remoteSettings) {
+          writeAiSettings(id, remoteSettings);
+          setSettings(remoteSettings);
+        } else {
+          const local = readAiSettings(id);
+          if (local.token) await pushRemoteAiSettings(id, local);
+        }
+
+        const remoteChats = await fetchRemoteChats(id);
+        if (!active) return;
+        if (remoteChats.length === 0) {
+          for (const chat of readAiChats(id)) await pushRemoteChat(id, chat);
+        } else {
+          mergeRemoteAiChats(id, remoteChats);
+        }
+      } catch (error) {
+        console.error("Erro ao sincronizar a IA com a conta:", error);
+      }
+    }
+    void syncAccount(userId);
+    return () => {
+      active = false;
+    };
+  }, [userId]);
+
   useEffect(
     () => (userId ? captureBrowserLogs(userId, settings.token) : undefined),
     [userId, settings.token],
   );
 
-  function saveSettings(next: AiSettings) {
+  async function saveSettings(next: AiSettings) {
     if (!userId) throw new Error("Sua sessão expirou. Entre novamente.");
     writeAiSettings(userId, next);
     setSettings({ ...next, token: next.token.trim(), model: next.model.trim() });
+    try {
+      await pushRemoteAiSettings(userId, next);
+    } catch (error) {
+      console.error("Erro ao salvar a configuração da IA na conta:", error);
+      throw new Error(
+        `Salvo só neste navegador: não foi possível gravar na sua conta. ${getApiErrorMessage(error, "Erro desconhecido.")}`,
+      );
+    }
   }
 
-  function clearSettings() {
+  async function clearSettings() {
     if (userId) localStorage.removeItem(aiStorageKey(userId));
     setSettings({ ...DEFAULT_AI_SETTINGS });
+    if (!userId) return;
+    try {
+      await deleteRemoteAiSettings(userId);
+    } catch (error) {
+      console.error("Erro ao remover a configuração da IA da conta:", error);
+      throw new Error("Removido deste navegador, mas não foi possível remover da sua conta.");
+    }
   }
 
   return (

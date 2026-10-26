@@ -73,6 +73,26 @@ const analyzeSchema = z
   })
   .strict();
 
+const BULK_CHUNK = 100;
+const bulkUpdateSchema = z
+  .object({
+    ids: z.array(z.uuid()).min(1).max(200),
+    descricao: z.string().nullable().optional(),
+    cliente_id: z.uuid().nullable().optional(),
+    banco_id: z.uuid().nullable().optional(),
+    categoria_id: z.uuid().nullable().optional(),
+    natureza: z.string().optional(),
+    status: z.string().optional(),
+  })
+  .strict();
+
+function chunks<T>(items: T[], size: number) {
+  const result: T[][] = [];
+  for (let index = 0; index < items.length; index += size)
+    result.push(items.slice(index, index + size));
+  return result;
+}
+
 function assertDateRange(start?: string, end?: string) {
   if (start && end && start > end) throw new Error("A data inicial deve ser anterior à final.");
 }
@@ -210,6 +230,52 @@ export function createInternalMcp({
         throw new Error("Nenhum registro foi alterado. Confira a sessão e as permissões.");
       onChanged(args.resource);
       return { updated: rows[0] };
+    }
+
+    if (name === "financeiro_bulk_update") {
+      const { ids: rawIds, ...changes } = bulkUpdateSchema.parse(raw);
+      const ids = [...new Set(rawIds)];
+      // Mesma validação da edição individual; só chaves enviadas entram na alteração.
+      const data = parseRecordData("financeiro", changes, true);
+      await validateReferences(data);
+
+      // Tudo é conferido antes da primeira escrita: um ID alheio ou inexistente cancela a chamada.
+      let found = 0;
+      for (const part of chunks(ids, BULK_CHUNK)) {
+        const rows = await api.getAll<JsonObject>("financeiro", {
+          select: "id",
+          filters: { id: part, user_id: userId },
+        });
+        found += rows.length;
+      }
+      if (found !== ids.length)
+        throw new Error(
+          `${ids.length - found} dos ${ids.length} lançamentos não foram encontrados na sua conta. Nada foi alterado; consulte os dados novamente.`,
+        );
+
+      await assertSession();
+      let updated = 0;
+      try {
+        for (const part of chunks(ids, BULK_CHUNK)) {
+          const rows = await api.patch<JsonObject>(
+            "financeiro",
+            data,
+            {
+              id: part,
+              user_id: userId,
+            },
+            { select: "id" },
+          );
+          updated += rows.length;
+        }
+      } finally {
+        if (updated > 0) onChanged("financeiro");
+      }
+      if (updated !== ids.length)
+        throw new Error(
+          `Apenas ${updated} de ${ids.length} lançamentos foram alterados. Consulte os dados antes de repetir.`,
+        );
+      return { updated: updated, changes: data };
     }
 
     if (name === "record_delete") {

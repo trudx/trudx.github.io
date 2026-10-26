@@ -10,6 +10,6 @@ export const AiContext = createContext<{
   userId: string | null;
   settings: AiSettings;
   isLoading: boolean;
-  saveSettings: (settings: AiSettings) => void;
-  clearSettings: () => void;
+  saveSettings: (settings: AiSettings) => Promise<void>;
+  clearSettings: () => Promise<void>;
 } | null>(null);

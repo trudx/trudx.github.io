@@ -62,9 +62,7 @@ export type FinanceiroInput = {
 export type FinanceiroEditInput = Pick<FinanceiroInput, "descricao" | "cliente_id" | "banco_id"> &
   Partial<Pick<FinanceiroRecord, "categoria_id" | "natureza" | "status">>;
 
-export type PeriodFilter =
-  | { mode: "month"; month: string }
-  | { mode: "range"; start: string; end: string };
+export type PeriodFilter = { mode: "month"; month: string } | { mode: "range"; start: string; end: string };
 
 const TABLE = "financeiro";
 export const FINANCEIRO_SELECT_COLUMNS =
@@ -94,8 +92,7 @@ export function getPeriodRange(period: PeriodFilter) {
 export function getLastDaysPeriod(days: number): PeriodFilter {
   const end = new Date();
   const start = new Date(end.getFullYear(), end.getMonth(), end.getDate() - (days - 1));
-  const toIso = (date: Date) =>
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  const toIso = (date: Date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   return { mode: "range", start: toIso(start), end: toIso(end) };
 }
 
@@ -143,12 +140,11 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
   }, [periodFilter]);
 
   const records = useMemo(
-    () =>
-      tipoFilter === "all" ? allRecords : allRecords.filter((record) => record.tipo === tipoFilter),
+    () => (tipoFilter === "all" ? allRecords : allRecords.filter((record) => record.tipo === tipoFilter)),
     [allRecords, tipoFilter],
   );
 
-  useAppDataRefresh(fetchRecords, ["financeiro","gastos_fixos"]);
+  useAppDataRefresh(fetchRecords, ["financeiro", "gastos_fixos"]);
 
   useEffect(() => {
     // The initial (and every filter-change) request owns its loading state inside fetchRecords.
@@ -168,9 +164,7 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
       return true;
     } catch (error) {
       toast.error(
-        isUniqueViolation(error)
-          ? "Esse lançamento já foi importado"
-          : "Não foi possível cadastrar o lançamento",
+        isUniqueViolation(error) ? "Esse lançamento já foi importado" : "Não foi possível cadastrar o lançamento",
         {
           description: isUniqueViolation(error)
             ? "Essa transação do extrato já está no financeiro."
@@ -204,15 +198,38 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
         data.map((record) => duplicateKey(record.data, record.valor, record.descricao ?? "")),
       );
 
-      return inputs.filter((input) =>
-        existingKeys.has(duplicateKey(input.data, input.valor, input.descricao)),
-      );
+      return inputs.filter((input) => existingKeys.has(duplicateKey(input.data, input.valor, input.descricao)));
     } catch (error) {
       toast.error("Não foi possível checar lançamentos duplicados", {
         description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
       });
       console.error("Erro ao checar lançamentos duplicados:", error);
       return [];
+    }
+  }
+
+  /** Lançamentos do banco e período escolhidos, usados para a IA comparar com o extrato que está sendo importado. */
+  async function findExistingInRange(minDate: string, maxDate: string, bancoId: string) {
+    try {
+      const userId = await getAuthenticatedUserId();
+      const data = await getAll<Pick<FinanceiroRecord, "id" | "data" | "tipo" | "valor" | "descricao">>(TABLE, {
+        select: "id,data,tipo,valor,descricao",
+        filters: { user_id: userId, banco_id: bancoId, data: { gte: minDate, lte: maxDate } },
+        order: [
+          { column: "data", ascending: true },
+          { column: "id", ascending: true },
+        ],
+      });
+      return data.map((record) => ({
+        id: record.id,
+        data: record.data,
+        tipo: record.tipo === "ganho" ? ("ganho" as const) : ("gasto" as const),
+        valor: record.valor,
+        descricao: record.descricao ?? "",
+      }));
+    } catch (error) {
+      console.error("Erro ao buscar lançamentos para a checagem da IA:", error);
+      return null;
     }
   }
 
@@ -224,12 +241,9 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
       const userId = await getAuthenticatedUserId();
       const changes = { ...input, descricao: input.descricao.trim() || null };
       const [updated] = await patch<FinanceiroRecord>(TABLE, changes, { id, user_id: userId });
-      if (!updated)
-        throw new Error("Nenhum lançamento foi atualizado (verifique a policy de update).");
+      if (!updated) throw new Error("Nenhum lançamento foi atualizado (verifique a policy de update).");
 
-      setAllRecords((current) =>
-        current.map((record) => (record.id === id ? { ...record, ...changes } : record)),
-      );
+      setAllRecords((current) => current.map((record) => (record.id === id ? { ...record, ...changes } : record)));
       toast.success("Lançamento atualizado");
       return true;
     } catch (error) {
@@ -275,9 +289,7 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
 
       const idSet = new Set(ids);
       setAllRecords((current) => current.filter((record) => !idSet.has(record.id)));
-      toast.success(
-        `${ids.length} lançamento${ids.length === 1 ? "" : "s"} excluído${ids.length === 1 ? "" : "s"}`,
-      );
+      toast.success(`${ids.length} lançamento${ids.length === 1 ? "" : "s"} excluído${ids.length === 1 ? "" : "s"}`);
       return true;
     } catch (error) {
       toast.error("Não foi possível excluir os lançamentos", {
@@ -303,6 +315,7 @@ export function useFinanceiro(initialPeriod?: PeriodFilter) {
     isBulkDeleting,
     createRecord,
     findDuplicates,
+    findExistingInRange,
     updateRecord,
     deleteRecord,
     deleteRecords,

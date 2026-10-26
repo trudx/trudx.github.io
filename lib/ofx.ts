@@ -2,6 +2,7 @@
 import { parseStrict, type ofxTypes } from "ofx-js";
 
 //* Utils Imports
+import { parseCsvStatement } from "@/lib/csv-statement";
 import { parsePdfStatement } from "@/lib/pdf-statement";
 
 export type OfxTransaction = {
@@ -14,7 +15,7 @@ export type OfxTransaction = {
 
 /** Dados do extrato além das linhas: o que permite ancorar o saldo confirmado e saber a cobertura. */
 export type StatementMeta = {
-  formato: "ofx" | "pdf";
+  formato: "ofx" | "pdf" | "csv";
   periodo: { inicio: string; fim: string } | null;
   /** Saldo impresso/informado pelo banco no fim do extrato. */
   saldoFinal: { data: string; valor: number } | null;
@@ -125,9 +126,21 @@ export async function parseOfxFile(
   };
 }
 
-/** Lê um extrato (.ofx/.qfx ou .pdf do Santander) e devolve os grupos para revisão, os metadados e avisos de leitura. */
+/** Lê um extrato (.ofx/.qfx, .csv ou .pdf do Santander) e devolve os grupos para revisão, os metadados e avisos de leitura. */
 export async function parseStatementFile(file: File) {
-  if (!file.name.toLowerCase().endsWith(".pdf")) {
+  const name = file.name.toLowerCase();
+
+  if (name.endsWith(".csv")) {
+    const { transactions, warnings, periodo } = await parseCsvStatement(file);
+    return {
+      groups: groupTransactions(transactions),
+      warnings,
+      // CSV não traz saldo: não há âncora para o saldo confirmado.
+      meta: { formato: "csv", periodo, saldoFinal: null, saldoConfiavel: false } satisfies StatementMeta,
+    };
+  }
+
+  if (!name.endsWith(".pdf")) {
     const { groups, meta } = await parseOfxFile(file);
     return { groups, meta, warnings: [] as string[] };
   }

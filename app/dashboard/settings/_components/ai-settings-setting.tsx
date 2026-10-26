@@ -47,13 +47,13 @@ export function AiSettingsSetting() {
 
   useEffect(() => () => controller.current?.abort(), [userId]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
       if (!draft.token.trim() || !draft.model.trim())
         throw new Error("Informe o token e o modelo.");
-      saveSettings(draft);
-      toast.success("Configuração da IA salva neste navegador");
+      await saveSettings(draft);
+      toast.success("Configuração da IA salva na sua conta");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Não foi possível salvar a configuração.",
@@ -213,10 +213,9 @@ export function AiSettingsSetting() {
           </div>
           <div className="rounded-lg border bg-muted/40 p-3 text-xs leading-5 text-muted-foreground">
             <p>
-              O token fica salvo neste navegador, separado por conta, e é enviado somente ao
-              provedor escolhido. As mensagens e os dados consultados pelo assistente também são
-              enviados a ele. As últimas três conversas e seu contexto recente ficam salvos neste
-              navegador, separados por conta.
+              O token, o modelo e as últimas três conversas ficam salvos na sua conta, para
+              valer em todos os seus dispositivos. O token é enviado somente ao provedor escolhido.
+              As mensagens e os dados consultados pelo assistente também são enviados a ele.
             </p>
             <p className="mt-1">
               Use uma chave pessoal com limite de gastos. O uso da API, incluindo o teste de
@@ -229,12 +228,14 @@ export function AiSettingsSetting() {
               type="button"
               variant="ghost"
               disabled={!settings.token}
-              onClick={() => {
+              onClick={async () => {
                 try {
-                  clearSettings();
-                  toast.success("Token removido deste navegador");
-                } catch {
-                  toast.error("Não foi possível remover o token.");
+                  await clearSettings();
+                  toast.success("Token removido da sua conta");
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error ? error.message : "Não foi possível remover o token.",
+                  );
                 }
               }}
             >

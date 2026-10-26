@@ -115,6 +115,7 @@ export default function FinanceiroPage() {
     isBulkDeleting,
     createRecord,
     findDuplicates,
+    findExistingInRange,
     updateRecord,
     deleteRecord,
     deleteRecords,
@@ -812,6 +813,7 @@ export default function FinanceiroPage() {
           onOpenChange={setIsImportOpen}
           onFindProvisionals={importacao.findProvisionals}
           onFindDuplicates={findDuplicates}
+          onFindExisting={findExistingInRange}
           onApply={importacao.applyImport}
         />
         <CategoriasDialog

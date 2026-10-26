@@ -30,6 +30,7 @@ function database(initial: Record<string, Row[]> = {}) {
           (!value.lte || String(row[key]) <= String(value.lte))
         );
       }
+      if (Array.isArray(value)) return value.includes(String(row[key]));
       return row[key] === value;
     });
   }
@@ -186,6 +187,50 @@ describe("MCP interno", () => {
       true,
     );
     assert.equal((await db.call("records_list", { resource: "push_subscriptions" })).isError, true);
+  });
+
+  it("altera vários lançamentos de uma vez, validando tudo antes de escrever", async () => {
+    const CATEGORY = "55555555-5555-4555-8555-555555555555";
+    const ids = [ID, "66666666-6666-4666-8666-666666666666"];
+    const foreign = "77777777-7777-4777-8777-777777777777";
+    const db = database({
+      financeiro: [
+        { id: ids[0], user_id: USER, categoria_id: null },
+        { id: ids[1], user_id: USER, categoria_id: null },
+        { id: foreign, user_id: OTHER, categoria_id: null },
+      ],
+      financeiro_categorias: [{ id: CATEGORY, user_id: USER, nome: "Mercado" }],
+    });
+
+    const ok = await db.call("financeiro_bulk_update", { ids, categoria_id: CATEGORY });
+    assert.equal(ok.isError, false);
+    assert.equal(ok.value?.updated, 2);
+    assert.deepEqual(
+      db.rows.financeiro.filter((row) => row.user_id === USER).map((row) => row.categoria_id),
+      [CATEGORY, CATEGORY],
+    );
+    assert.deepEqual(db.changed, ["financeiro"]);
+
+    // ID de outra conta cancela tudo, sem nenhuma escrita.
+    db.rows.financeiro[0].categoria_id = null;
+    db.rows.financeiro[1].categoria_id = null;
+    const patchesBefore = db.calls.filter((call) => call.operation === "patch").length;
+    const blocked = await db.call("financeiro_bulk_update", {
+      ids: [...ids, foreign],
+      categoria_id: CATEGORY,
+    });
+    assert.equal(blocked.isError, true);
+    assert.equal(db.calls.filter((call) => call.operation === "patch").length, patchesBefore);
+    assert.equal(db.rows.financeiro[0].categoria_id, null);
+
+    // Campos imutáveis, conciliação e lista vazia continuam proibidos.
+    for (const args of [
+      { ids, valor: 1 },
+      { ids, status: "conciliado" },
+      { ids: [] as string[], categoria_id: CATEGORY },
+      { ids },
+    ])
+      assert.equal((await db.call("financeiro_bulk_update", args)).isError, true);
   });
 
   it("protege identidade, campos imutáveis e dados monetários", async () => {

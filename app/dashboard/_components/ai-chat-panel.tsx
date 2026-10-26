@@ -274,7 +274,7 @@ export function AiChatPanel() {
               provedor.
             </p>
             <p className="text-[0.6rem] text-muted-foreground">
-              Últimas 3 conversas salvas neste navegador, com até 40 mensagens por conversa.
+              Últimas 3 conversas salvas na sua conta, com até 40 mensagens por conversa.
             </p>
           </form>
         </Dialog.Popup>

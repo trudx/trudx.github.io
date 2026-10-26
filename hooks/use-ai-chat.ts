@@ -28,6 +28,7 @@ import {
   savedAiChatsSnapshot,
   subscribeAiChats,
 } from "@/lib/ai/chat-store";
+import { deleteRemoteChat, pushRemoteChat } from "@/lib/ai/remote-store";
 import { createDiagnosticLogger } from "@/lib/browser-logs";
 
 export function useAiChat() {
@@ -97,6 +98,20 @@ export function useAiChat() {
       );
     }
   }, [entries, userId, chatId, createdAt]);
+
+  // Envia a conversa (já com segredos removidos) para a conta; o debounce evita uma escrita por trecho
+  // de texto durante a resposta.
+  useEffect(() => {
+    if (!userId || !entries.length) return;
+    const timer = setTimeout(() => {
+      const saved = readAiChats(userId).find((chat) => chat.id === chatId);
+      if (saved)
+        pushRemoteChat(userId, saved).catch((error) =>
+          console.error("Erro ao sincronizar a conversa com a conta:", error),
+        );
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [entries, userId, chatId]);
 
   function updateAssistant(id: string, change: Partial<ChatEntry>) {
     if (mounted.current)
@@ -195,7 +210,12 @@ export function useAiChat() {
   function clearConversation() {
     if (controller.current) return;
     try {
-      if (userId) deleteAiChat(userId, chatId);
+      if (userId) {
+        deleteAiChat(userId, chatId);
+        deleteRemoteChat(userId, chatId).catch((error) =>
+          console.error("Erro ao excluir a conversa da conta:", error),
+        );
+      }
     } catch {
       setStorageError("Não foi possível excluir a conversa salva.");
       return;

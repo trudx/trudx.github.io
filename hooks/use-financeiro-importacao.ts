@@ -21,7 +21,7 @@ export type ImportacaoRecord = {
   id: string;
   banco_id: string | null;
   arquivo: string | null;
-  formato: "ofx" | "pdf" | null;
+  formato: "ofx" | "pdf" | "csv" | null;
   periodo_inicio: string | null;
   periodo_fim: string | null;
   inseridas: number;
@@ -44,7 +44,7 @@ export type ImportLinePayload = {
 export type ApplyImportParams = {
   bancoId: string | null;
   arquivo: string;
-  formato: "ofx" | "pdf";
+  formato: "ofx" | "pdf" | "csv";
   periodo: { inicio: string; fim: string } | null;
   saldoReferencia: { data: string; valor: number } | null;
   novas: ImportLinePayload[];

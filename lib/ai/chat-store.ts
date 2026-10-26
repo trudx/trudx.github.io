@@ -32,6 +32,11 @@ const chatSchema = z.object({
 });
 export type SavedAiChat = z.infer<typeof chatSchema>;
 
+export function parseSavedAiChat(value: unknown): SavedAiChat | null {
+  const parsed = chatSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
 export function aiChatsKey(userId: string) {
   return `trudx:ai-chats:v1:${userId}`;
 }
@@ -148,6 +153,27 @@ export function saveAiChat(userId: string, chat: SavedAiChat) {
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
     .slice(0, MAX_SAVED_CHATS);
   writeChats(userId, chats);
+}
+
+/** Junta conversas vindas da conta ao histórico local; vence a mais recente de cada id. */
+export function mergeRemoteAiChats(userId: string, remote: SavedAiChat[]) {
+  const local = readAiChats(userId);
+  const byId = new Map(local.map((chat) => [chat.id, chat]));
+  let changed = false;
+  for (const chat of remote) {
+    const current = byId.get(chat.id);
+    if (!current || chat.updatedAt > current.updatedAt) {
+      byId.set(chat.id, chat);
+      changed = true;
+    }
+  }
+  if (!changed) return;
+  writeChats(
+    userId,
+    [...byId.values()]
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+      .slice(0, MAX_SAVED_CHATS),
+  );
 }
 
 export function deleteAiChat(userId: string, id: string) {

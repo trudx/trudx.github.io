@@ -37,7 +37,7 @@ create table if not exists public.financeiro_importacoes (
   user_id uuid not null references auth.users (id) on delete cascade,
   banco_id uuid references public.bancos (id) on delete set null,
   arquivo text,
-  formato text check (formato in ('ofx', 'pdf')),
+  formato text check (formato in ('ofx', 'pdf', 'csv')),
   periodo_inicio date,
   periodo_fim date,
   total_linhas integer not null default 0,

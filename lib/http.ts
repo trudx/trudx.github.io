@@ -7,7 +7,7 @@ import axios from "axios";
 import { supabase } from "@/hooks/supabase";
 
 //* Types Imports
-import type { AxiosError, AxiosInstance } from "axios";
+import type { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
 //* Utils Imports
 import env from "@/lib/env";
@@ -72,9 +72,39 @@ type PostgrestErrorBody = {
   hint?: string;
 };
 
+type RetriableConfig = InternalAxiosRequestConfig & { _authRetried?: boolean };
+
+/** Renovações simultâneas dividem a mesma chamada, para não gastar o refresh token duas vezes. */
+let refreshing: Promise<boolean> | null = null;
+
+function refreshSession() {
+  refreshing ??= supabase.auth
+    .refreshSession()
+    .then(({ data, error }) => Boolean(data.session) && !error)
+    .catch(() => false)
+    .finally(() => {
+      refreshing = null;
+    });
+  return refreshing;
+}
+
+/** O PostgREST responde 401 (`PGRST301`, "JWT expired") quando o access token em cache já venceu. */
+function isExpiredJwt(error: AxiosError<PostgrestErrorBody>) {
+  const message = error.response?.data?.message ?? "";
+  return error.response?.status === 401 && (error.response.data?.code === "PGRST301" || /jwt/i.test(message));
+}
+
 http.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<PostgrestErrorBody>) => {
+  async (error: AxiosError<PostgrestErrorBody>) => {
+    const config = error.config as RetriableConfig | undefined;
+
+    // Ao abrir o app com a aba parada, o token em cache pode ter vencido: renova e repete uma vez.
+    if (config && !config._authRetried && isExpiredJwt(error) && (await refreshSession())) {
+      config._authRetried = true;
+      return http.request(config);
+    }
+
     const body = error.response?.data;
 
     throw new HttpError(body?.message ?? error.message ?? "Falha na comunicação com o servidor", {

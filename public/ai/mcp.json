@@ -58,6 +58,25 @@
       "annotations": { "readOnlyHint": false, "destructiveHint": false }
     },
     {
+      "name": "financeiro_bulk_update",
+      "description": "Aplica a MESMA alteração a vários lançamentos financeiros de uma vez (até 200 IDs reais por chamada), por exemplo definir a categoria, o banco ou o cliente de todos os lançamentos de um estabelecimento. Campos permitidos: descricao, cliente_id, banco_id, categoria_id, natureza e status (provisorio ou confirmado); valor/data/tipo são imutáveis. Envie null em cliente_id, banco_id ou categoria_id para remover o vínculo. Todos os IDs são validados antes de qualquer escrita e a chamada falha inteira se algum não for da conta. Para valores diferentes por lançamento, faça uma chamada por conjunto de valores. Consulte os IDs com records_list antes e confirme com o usuário quando o pedido for amplo.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "ids": { "type": "array", "items": { "type": "string" } },
+          "descricao": { "type": "string" },
+          "cliente_id": { "type": "string" },
+          "banco_id": { "type": "string" },
+          "categoria_id": { "type": "string" },
+          "natureza": { "type": "string" },
+          "status": { "type": "string" }
+        },
+        "required": ["ids"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false }
+    },
+    {
       "name": "record_delete",
       "description": "Exclui exatamente um registro pelo ID. Use apenas se o usuário pediu exclusão de forma clara. Consulte antes para identificar o registro e não exclua em caso de ambiguidade. Colunas com tarefas não podem ser removidas.",
       "inputSchema": {
