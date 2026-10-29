@@ -129,7 +129,7 @@ export function TaskSanityLevel({
         </div>
       ) : (
         <>
-          <p className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+          <p className="text-2xl font-display font-bold text-foreground tabular-nums">
             {seconds > 0 ? formatDuration(seconds) : "0h"}
           </p>
 

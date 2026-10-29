@@ -49,7 +49,7 @@ export function AuthShell({ kicker, title, description, children }: AuthShellPro
             <div className="relative flex h-full flex-col justify-between gap-12">
               <div>
                 <p className="trudx-kicker text-background/60">{kicker}</p>
-                <h1 className="mt-7 max-w-xl text-4xl leading-[1.06] sm:text-5xl font-semibold tracking-[-0.03em]">
+                <h1 className="mt-7 max-w-xl text-4xl leading-[1.06] sm:text-5xl font-display font-bold">
                   {title}
                 </h1>
                 <p className="mt-7 max-w-md text-sm leading-6 text-background/75">{description}</p>

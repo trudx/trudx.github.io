@@ -37,7 +37,7 @@ export function SignupForm() {
   return (
     <form className="w-full space-y-6" onSubmit={handleSubmit}>
       <div className="border-b pb-5">
-        <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Criar conta</h1>
+        <h1 className="text-xl font-display font-bold text-foreground">Criar conta</h1>
         <p className="mt-3 text-[0.8rem] leading-5 text-muted-foreground">
           Comece a organizar seu negócio freelance.
         </p>

@@ -3,7 +3,7 @@
 //* Components Imports
 import Button from "@/components/ui/button";
 
-import { BrandMark } from "@/app/_components/brand-mark";
+import { BrandMark, BrandWordmark } from "@/app/_components/brand-mark";
 
 import { ThemeToggle } from "./theme-toggle";
 
@@ -51,9 +51,7 @@ export function DashboardSidebar() {
         aria-label="Ir para a visão geral"
       >
         <BrandMark className="size-6 rounded-md" />
-        <span className="text-[0.8rem] font-semibold tracking-[-0.01em] text-foreground">
-          trudx
-        </span>
+        <BrandWordmark className="h-2.5 text-foreground" />
         <span className="ml-auto rounded-sm bg-muted px-1.5 py-0.5 text-[0.65rem] font-medium text-muted-foreground">
           Free
         </span>

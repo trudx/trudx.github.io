@@ -6,15 +6,20 @@ import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
 
 //* Libraries Imports
-import { Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 
 //* Types Imports
 import type { Metadata, Viewport } from "next";
 
-// Inter é a fonte da interface do Figma — base da linguagem visual densa e neutra do app.
-const inter = Inter({
-  variable: "--font-inter",
+// Fontes da identidade: Geist na interface, Unbounded nos títulos e Geist Mono nos rótulos.
+const geist = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const unbounded = Unbounded({
+  variable: "--font-unbounded",
   subsets: ["latin"],
 });
 
@@ -40,8 +45,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+    { media: "(prefers-color-scheme: light)", color: "#e4e4e1" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0b0b" },
   ],
 };
 
@@ -49,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geist.variable} ${unbounded.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">

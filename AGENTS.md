@@ -1,11 +1,14 @@
-## Contexto do projeto https://trudx.github.io/ — uso OBRIGATÓRIO do MCP `devbrain-https-trudx-github-io`
+## Contexto do projeto https://trudx.github.io/ — uso OBRIGATÓRIO do MCP `devbrain`
 
-> **Regra inegociável:** neste projeto, a **primeira ação de toda sessão** é carregar o contexto pelo MCP `devbrain-https-trudx-github-io`.
+> **Regra inegociável:** neste projeto, a **primeira ação de toda sessão** é carregar o contexto pelo MCP `devbrain`.
 > Isso **não é opcional**: vale para qualquer task, grande ou pequena, e não pode ser substituído por cópias locais,
 > pelo código nem pela sua memória.
 
-O contexto do projeto (regras, skills, visão geral, tasks e notas) está no servidor MCP **`devbrain-https-trudx-github-io`**.
-Ele é a **fonte da verdade**.
+O contexto do projeto (regras, skills, visão geral, tasks e notas) está no servidor MCP **`devbrain`**, no
+repositório de contexto **`https-trudx-github-io`**. Ele é a **fonte da verdade**.
+
+**Projeto no DevBrain: `https-trudx-github-io`.** Passe `project: "https-trudx-github-io"` em **toda** chamada de ferramenta do `devbrain`
+(exceto `list_projects` e `create_project`). Nunca leia nem grave o contexto de outro projeto.
 
 ### Antes de qualquer task (sempre, nesta ordem)
 
@@ -26,5 +29,6 @@ Se o contexto e o código divergirem, o código vence: avise o usuário.
 
 ### Se o MCP não estiver disponível
 
-Se o servidor `devbrain-https-trudx-github-io` não aparecer ou uma chamada falhar, **pare e avise o usuário** antes de continuar.
-Não improvise o contexto. Só prossiga sem o MCP se o usuário autorizar de forma explícita, e diga que está sem contexto.
+Se o servidor `devbrain` não aparecer, o projeto `https-trudx-github-io` estiver desativado ou uma chamada falhar,
+**pare e avise o usuário** antes de continuar. Não improvise o contexto. Só prossiga sem o MCP se o usuário autorizar
+de forma explícita, e diga que está sem contexto.

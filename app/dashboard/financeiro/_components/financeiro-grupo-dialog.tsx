@@ -87,7 +87,7 @@ export function FinanceiroGrupoDialog({
           className={`min-w-0 rounded-xl border bg-muted p-4 ${!isHidden && total < 0 ? "text-rose-700" : "text-foreground"}`}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.12em] opacity-75">Total</p>
-          <p className="mt-1 text-2xl font-black tracking-[-0.04em]">{formatValor(total)}</p>
+          <p className="mt-1 text-2xl font-display font-bold">{formatValor(total)}</p>
           <p className="mt-1 text-xs opacity-75">
             {matching.length === 0
               ? "Nenhum lançamento"

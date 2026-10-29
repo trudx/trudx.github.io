@@ -34,7 +34,7 @@ export default function SettingsPage() {
     <section className="flex w-full max-w-4xl flex-col gap-6">
       <div className="border-b pb-5">
         <p className="trudx-kicker mb-1.5 text-muted-foreground">Preferências</p>
-        <h1 className="flex items-center gap-2 text-xl font-semibold tracking-[-0.01em] text-foreground">
+        <h1 className="flex items-center gap-2 text-xl font-display font-bold text-foreground">
           <Settings2 className="size-5" />
           Configurações
         </h1>

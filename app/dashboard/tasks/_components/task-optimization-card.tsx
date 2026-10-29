@@ -55,7 +55,7 @@ export function TaskOptimizationCard({
         <>
           <p
             className={cn(
-              "text-2xl font-bold tracking-tight tabular-nums",
+              "text-2xl font-display font-bold tabular-nums",
               isFaster
                 ? "text-emerald-700 dark:text-emerald-300"
                 : "text-rose-700 dark:text-rose-300",

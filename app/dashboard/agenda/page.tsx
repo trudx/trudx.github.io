@@ -125,7 +125,7 @@ export default function AgendaPage() {
       <div className="flex flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="trudx-kicker mb-1.5 text-muted-foreground">Agenda</p>
-          <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Eventos</h1>
+          <h1 className="text-xl font-display font-bold text-foreground">Eventos</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Organize compromissos, reuniões e prazos.
           </p>

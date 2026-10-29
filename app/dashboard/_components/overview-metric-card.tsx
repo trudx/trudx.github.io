@@ -70,7 +70,7 @@ export function OverviewMetricCard({
         ) : (
           <p
             className={cn(
-              "text-3xl font-semibold tracking-[-0.03em] tabular-nums",
+              "text-3xl font-display font-bold tabular-nums",
               isEmpty
                 ? cn("text-lg font-normal", isHero ? "text-zinc-400" : "text-muted-foreground")
                 : valueClassName,

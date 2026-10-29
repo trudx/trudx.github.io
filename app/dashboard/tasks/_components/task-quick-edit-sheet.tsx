@@ -69,7 +69,8 @@ export function TaskQuickEditSheet({
   const [minutesDraft, setMinutesDraft] = useState<string | null>(null);
   const minutesValue = minutesDraft ?? String(Math.round(loggedSeconds / 60));
   const parsedMinutes = Number(minutesValue);
-  const isMinutesValid = minutesValue.trim() !== "" && Number.isFinite(parsedMinutes) && parsedMinutes >= 0;
+  const isMinutesValid =
+    minutesValue.trim() !== "" && Number.isFinite(parsedMinutes) && parsedMinutes >= 0;
   const isMinutesChanged = isMinutesValid && Math.round(parsedMinutes * 60) !== loggedSeconds;
 
   async function handleSaveMinutes() {
@@ -95,7 +96,7 @@ export function TaskQuickEditSheet({
                 <TaskTimerDisplay
                   key={timer.runningStartedAt}
                   startedAt={timer.runningStartedAt}
-                  className="text-2xl font-black tracking-[-0.04em]"
+                  className="text-2xl font-display font-bold"
                 />
               </div>
               <div className="flex flex-wrap gap-2">

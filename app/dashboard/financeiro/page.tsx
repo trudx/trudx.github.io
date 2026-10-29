@@ -386,7 +386,7 @@ export default function FinanceiroPage() {
         <div className="flex flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
           <div>
             <p className="trudx-kicker mb-1.5 text-muted-foreground">Financeiro</p>
-            <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Extrato</h1>
+            <h1 className="text-xl font-display font-bold text-foreground">Extrato</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Acompanhe gastos, gastos fixos e ganhos num único lugar.
             </p>

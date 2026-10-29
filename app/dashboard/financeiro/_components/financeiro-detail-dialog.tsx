@@ -124,7 +124,7 @@ function DetailBody({
       </Dialog.DialogHeader>
 
       <p
-        className={`my-3 text-3xl font-black tracking-[-0.06em] ${record.tipo === "ganho" ? "text-emerald-700" : "text-foreground"}`}
+        className={`my-3 text-3xl font-display font-bold ${record.tipo === "ganho" ? "text-emerald-700" : "text-foreground"}`}
       >
         {record.tipo === "ganho" ? "+" : "-"}
         {formatCurrencyPrivate(record.valor, isValoresHidden)}

@@ -23,7 +23,7 @@ export function StatCard({ label, value, icon, tone }: StatCardProps) {
           {icon}
         </span>
       </div>
-      <p className="mt-4 text-3xl font-black tracking-[-0.06em]">{value}</p>
+      <p className="mt-4 text-3xl font-display font-bold">{value}</p>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 //* Components Imports
-import { BrandMark } from "./brand-mark";
+import { BrandMark, BrandWordmark } from "./brand-mark";
 
 export function SiteFooter() {
   return (
@@ -7,7 +7,7 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-[92rem] flex-col gap-4 px-5 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
         <div className="flex items-center gap-3">
           <BrandMark className="size-7" />
-          <span className="text-sm text-foreground font-semibold tracking-[-0.03em]">trudx</span>
+          <BrandWordmark className="h-3 text-foreground" />
         </div>
 
         <p className="text-xs text-muted-foreground">

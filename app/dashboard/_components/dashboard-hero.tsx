@@ -120,7 +120,7 @@ export function DashboardHero({
             {isLoading || !greeting ? (
               <Skeleton className="h-10 w-72" />
             ) : (
-              <h1 className="text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-4xl">
+              <h1 className="text-3xl font-display font-bold text-foreground sm:text-4xl">
                 {greeting}
               </h1>
             )}

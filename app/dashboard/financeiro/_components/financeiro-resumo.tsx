@@ -89,7 +89,7 @@ export function FinanceiroResumo({
           ) : (
             <p
               className={cn(
-                "mt-4 text-3xl font-black tracking-[-0.06em]",
+                "mt-4 text-3xl font-display font-bold",
                 negative(balance.estimado) && "text-rose-700",
               )}
             >
@@ -106,7 +106,7 @@ export function FinanceiroResumo({
 
         <div className="rounded-2xl border bg-background p-5">
           <p className="text-xs font-semibold text-muted-foreground">Receitas do período</p>
-          <p className="mt-4 text-3xl font-black tracking-[-0.06em] text-emerald-700 dark:text-emerald-400">
+          <p className="mt-4 text-3xl font-display font-bold text-emerald-700 dark:text-emerald-400">
             {formatValor(totals.receitas / 100)}
           </p>
           <VariationLine
@@ -118,7 +118,7 @@ export function FinanceiroResumo({
 
         <div className="rounded-2xl border bg-background p-5">
           <p className="text-xs font-semibold text-muted-foreground">Despesas do período</p>
-          <p className="mt-4 text-3xl font-black tracking-[-0.06em]">
+          <p className="mt-4 text-3xl font-display font-bold">
             {formatValor(totals.despesas / 100)}
           </p>
           <VariationLine
@@ -132,7 +132,7 @@ export function FinanceiroResumo({
           <p className="text-xs font-semibold text-muted-foreground">Resultado líquido</p>
           <p
             className={cn(
-              "mt-4 text-3xl font-black tracking-[-0.06em]",
+              "mt-4 text-3xl font-display font-bold",
               negative(totals.resultado) && "text-rose-700",
             )}
           >

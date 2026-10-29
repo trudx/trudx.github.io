@@ -1,0 +1,64 @@
+/* trudx — tokens shadcn/ui. Cole no globals.css (substitui :root e .dark). */
+:root {
+  --radius: 0.625rem;
+  --background: #E4E4E1;          /* osso */
+  --foreground: #0B0B0B;          /* piche */
+  --card: #EDEDEB;
+  --card-foreground: #0B0B0B;
+  --popover: #EDEDEB;
+  --popover-foreground: #0B0B0B;
+  --primary: #0B0B0B;
+  --primary-foreground: #E4E4E1;
+  --secondary: #D4D4D1;
+  --secondary-foreground: #0B0B0B;
+  --muted: #D4D4D1;
+  --muted-foreground: #5A5A5A;
+  --accent: #D4D4D1;
+  --accent-foreground: #0B0B0B;
+  --destructive: #0B0B0B;
+  --border: #C4C4C1;
+  --input: #C4C4C1;
+  --ring: #6E6E6E;
+  --sidebar: #DADAD7;
+  --sidebar-foreground: #0B0B0B;
+  --sidebar-primary: #0B0B0B;
+  --sidebar-primary-foreground: #E4E4E1;
+  --sidebar-accent: #CDCDCA;
+  --sidebar-accent-foreground: #0B0B0B;
+  --sidebar-border: #C4C4C1;
+  --sidebar-ring: #6E6E6E;
+}
+
+.dark {
+  --background: #0B0B0B;          /* piche */
+  --foreground: #E4E4E1;          /* osso */
+  --card: #151515;                /* grafite */
+  --card-foreground: #E4E4E1;
+  --popover: #151515;
+  --popover-foreground: #E4E4E1;
+  --primary: #6E6E6E;             /* chumbo */
+  --primary-foreground: #FFFFFF;
+  --secondary: #1C1C1C;
+  --secondary-foreground: #E4E4E1;
+  --muted: #1C1C1C;
+  --muted-foreground: #A3A3A3;    /* cinéreo */
+  --accent: #1C1C1C;
+  --accent-foreground: #E4E4E1;
+  --destructive: #E4E4E1;         /* sem cor: urgência por contraste */
+  --border: #2A2A2A;              /* aço */
+  --input: #2A2A2A;
+  --ring: #A3A3A3;
+  --sidebar: #0B0B0B;
+  --sidebar-foreground: #E4E4E1;
+  --sidebar-primary: #E4E4E1;
+  --sidebar-primary-foreground: #0B0B0B;
+  --sidebar-accent: #1C1C1C;
+  --sidebar-accent-foreground: #E4E4E1;
+  --sidebar-border: #2A2A2A;
+  --sidebar-ring: #A3A3A3;
+}
+
+/* Fontes (next/font ou <link>):
+   Unbounded 700  -> títulos e números grandes   (--font-display)
+   Geist 400/500  -> texto e interface           (--font-sans)
+   Geist Mono 400/500 -> rótulos em caixa-alta, +0.12em de tracking (--font-mono) */

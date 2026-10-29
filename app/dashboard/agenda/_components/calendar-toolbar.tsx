@@ -64,9 +64,7 @@ export function CalendarToolbar({
             <ChevronRight />
           </Button>
         </div>
-        <h2 className="text-xl font-semibold tracking-[-0.03em] text-foreground capitalize">
-          {label}
-        </h2>
+        <h2 className="text-xl font-display font-bold text-foreground capitalize">{label}</h2>
       </div>
 
       <div className="flex w-fit gap-0.5 rounded-lg border bg-muted/40 p-0.5">

@@ -222,13 +222,13 @@ export function LandingPage() {
             <div className="px-5 py-14 sm:px-8 lg:border-r lg:px-12 lg:py-20">
               <p className="trudx-kicker text-muted-foreground">Manifesto</p>
 
-              <h1 className="mt-7 text-5xl leading-[1.04] text-foreground sm:text-6xl lg:text-[4.2rem] font-semibold tracking-[-0.03em]">
+              <h1 className="mt-7 text-5xl leading-[1.04] text-foreground sm:text-6xl lg:text-[4.2rem] font-display font-bold">
                 Menos planilha.
                 <span className="block text-muted-foreground">Mais trabalho entregue.</span>
               </h1>
 
               <div className="mt-9 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-start">
-                <BrandMark className="size-14" />
+                <BrandMark faceted className="size-14" />
                 <p className="max-w-md text-base leading-7 text-muted-foreground">
                   O <span className="font-semibold text-foreground">trudx</span> reúne clientes,
                   tarefas, agenda e financeiro sob uma única ordem — feito pra quem toca o negócio
@@ -278,9 +278,7 @@ export function LandingPage() {
                 <div className="relative flex h-full flex-col justify-between gap-12 px-5 py-14 sm:px-8 lg:px-10 lg:py-20">
                   <div>
                     <p className="trudx-kicker text-background/60">Plano único</p>
-                    <p className="mt-5 text-7xl leading-none font-semibold tracking-[-0.03em]">
-                      R$ 0
-                    </p>
+                    <p className="mt-5 text-7xl leading-none font-display font-bold">R$ 0</p>
                     <p className="mt-3 text-xs text-background/70">Para sempre · Sem cartão</p>
                   </div>
 
@@ -329,7 +327,7 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-[92rem] lg:grid-cols-[0.34fr_0.66fr]">
           <div className="px-5 py-12 sm:px-8 lg:border-r lg:px-12 lg:py-20">
             <p className="trudx-kicker text-muted-foreground">Princípios</p>
-            <h2 className="mt-6 text-3xl leading-[1.1] text-foreground lg:text-5xl font-semibold tracking-[-0.03em]">
+            <h2 className="mt-6 text-3xl leading-[1.1] text-foreground lg:text-5xl font-display font-bold">
               Feito pra quem toca o negócio sozinho
             </h2>
             <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
@@ -366,7 +364,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-[92rem] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
           <div className="flex flex-wrap items-end justify-between gap-6 border-b pb-5">
             <p className="trudx-kicker text-muted-foreground">Procedimento</p>
-            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-semibold tracking-[-0.03em]">
+            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-display font-bold">
               Em três passos você já está usando
             </h2>
           </div>
@@ -377,7 +375,7 @@ export function LandingPage() {
                 key={number}
                 className="border-b border-foreground/20 px-0 py-8 last:border-b-0 md:border-b-0 md:border-r md:px-8 md:py-12 md:first:pl-0 md:last:border-r-0 md:last:pr-0"
               >
-                <span className="block text-6xl leading-none text-foreground/20 lg:text-7xl font-semibold tracking-[-0.03em]">
+                <span className="block text-6xl leading-none text-foreground/20 lg:text-7xl font-display font-bold">
                   {number}
                 </span>
                 <div className="mt-6 border-t pt-5">
@@ -399,7 +397,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-[92rem]">
           <div className="flex flex-wrap items-end justify-between gap-6 border-b px-5 py-10 sm:px-8 lg:px-12">
             <p className="trudx-kicker text-muted-foreground">Módulos</p>
-            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-semibold tracking-[-0.03em]">
+            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-display font-bold">
               Três frentes, um só login
             </h2>
           </div>
@@ -443,7 +441,7 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-[92rem] lg:grid-cols-[0.34fr_0.66fr]">
           <div className="px-5 py-12 sm:px-8 lg:border-r lg:px-12 lg:py-20">
             <p className="trudx-kicker text-muted-foreground">Destinatários</p>
-            <h2 className="mt-6 text-3xl leading-[1.1] text-foreground lg:text-5xl font-semibold tracking-[-0.03em]">
+            <h2 className="mt-6 text-3xl leading-[1.1] text-foreground lg:text-5xl font-display font-bold">
               Pra quem responde por tudo
             </h2>
             <p className="mt-6 max-w-sm text-sm leading-6 text-muted-foreground">
@@ -474,7 +472,7 @@ export function LandingPage() {
           <div className="relative overflow-hidden bg-foreground px-5 py-14 text-background sm:px-8 lg:border-r lg:px-12 lg:py-20">
             <div className="relative">
               <p className="trudx-kicker text-background/60">Plano único</p>
-              <p className="mt-8 text-7xl leading-none font-semibold tracking-[-0.03em]">R$ 0</p>
+              <p className="mt-8 text-7xl leading-none font-display font-bold">R$ 0</p>
               <p className="mt-4 text-xs text-background/70">
                 Para sempre · Sem cobrança escondida
               </p>
@@ -513,7 +511,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-[92rem] px-5 py-12 sm:px-8 lg:px-12 lg:py-16">
           <div className="flex flex-wrap items-end justify-between gap-6 border-b pb-5">
             <p className="trudx-kicker text-muted-foreground">Esclarecimentos</p>
-            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-semibold tracking-[-0.03em]">
+            <h2 className="text-3xl leading-none text-foreground lg:text-4xl font-display font-bold">
               Ainda tem dúvida? Sem stress
             </h2>
           </div>
@@ -570,7 +568,7 @@ export function LandingPage() {
             100% grátis
           </Badge>
 
-          <h2 className="mt-8 max-w-4xl text-4xl leading-[1.06] sm:text-5xl font-semibold tracking-[-0.03em]">
+          <h2 className="mt-8 max-w-4xl text-4xl leading-[1.06] sm:text-5xl font-display font-bold">
             Pronto para parar de pular entre planilhas?
           </h2>
 

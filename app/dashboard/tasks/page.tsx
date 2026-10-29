@@ -177,7 +177,7 @@ export default function TasksPage() {
           <div className="flex shrink-0 flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
             <div>
               <p className="trudx-kicker mb-1.5 text-muted-foreground">Organização</p>
-              <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Tarefas</h1>
+              <h1 className="text-xl font-display font-bold text-foreground">Tarefas</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 <span className="hidden md:inline">
                   Arraste as tarefas entre as colunas para acompanhar cada etapa. Use a alça no

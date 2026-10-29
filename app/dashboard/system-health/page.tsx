@@ -171,7 +171,7 @@ export default function SystemHealthPage() {
       <div className="flex flex-col justify-between gap-4 border-b pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="trudx-kicker mb-1.5 text-muted-foreground">Monitoramento</p>
-          <h1 className="flex items-center gap-2 text-xl font-semibold tracking-[-0.01em] text-foreground">
+          <h1 className="flex items-center gap-2 text-xl font-display font-bold text-foreground">
             <HeartPulse className="size-5" />
             Saúde de sistemas
           </h1>
@@ -235,7 +235,7 @@ export default function SystemHealthPage() {
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Sistemas cadastrados</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums">{systems.length}</p>
+              <p className="mt-1 text-2xl font-display font-bold tabular-nums">{systems.length}</p>
             </div>
             <Activity className="size-4 text-muted-foreground" />
           </Card.CardContent>
@@ -244,7 +244,7 @@ export default function SystemHealthPage() {
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Online · HTTP 200</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-400">
+              <p className="mt-1 text-2xl font-display font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
                 {onlineCount}
               </p>
             </div>
@@ -255,7 +255,7 @@ export default function SystemHealthPage() {
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Offline</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-red-700 dark:text-red-400">{offlineCount}</p>
+              <p className="mt-1 text-2xl font-display font-bold tabular-nums text-red-700 dark:text-red-400">{offlineCount}</p>
             </div>
             <CircleX className="size-5 text-red-600 dark:text-red-400" />
           </Card.CardContent>
@@ -264,7 +264,7 @@ export default function SystemHealthPage() {
           <Card.CardContent className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground">Não verificados</p>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-amber-700 dark:text-amber-400">
+              <p className="mt-1 text-2xl font-display font-bold tabular-nums text-amber-700 dark:text-amber-400">
                 {unverifiedCount}
               </p>
             </div>

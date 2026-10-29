@@ -48,12 +48,7 @@ export function OverviewDetailDialog({
             <p className="text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
               Total
             </p>
-            <p
-              className={cn(
-                "mt-1 text-2xl font-semibold tracking-[-0.03em] tabular-nums",
-                totalClassName,
-              )}
-            >
+            <p className={cn("mt-1 text-2xl font-display font-bold tabular-nums", totalClassName)}>
               {total}
             </p>
           </div>

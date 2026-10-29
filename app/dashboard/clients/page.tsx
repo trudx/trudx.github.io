@@ -76,7 +76,7 @@ export default function ClientsPage() {
       <div className="flex flex-col justify-between gap-5 border-b pb-5 sm:flex-row sm:items-end">
         <div>
           <p className="trudx-kicker mb-1.5 text-muted-foreground">Gestão</p>
-          <h1 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Clientes</h1>
+          <h1 className="text-xl font-display font-bold text-foreground">Clientes</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Gerencie os contatos da sua carteira em um só lugar.
           </p>
