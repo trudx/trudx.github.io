@@ -15,31 +15,42 @@ import { useHorizontalScroll } from "@/hooks/use-horizontal-scroll";
 
 //* Types Imports
 import type { TaskColumnRecord } from "@/hooks/use-task-columns";
-import type { TaskRecord } from "@/hooks/use-tasks";
+import type { TaskFlagRecord } from "@/hooks/use-task-flags";
+import type { TaskColumnCount, TaskColumnPage } from "@/lib/task-board";
 import type { TaskCardHandlers } from "./draggable-task-card";
 
 //* Utils Imports
+import { EMPTY_COLUMN_PAGE } from "@/lib/task-board";
+import { getStageByColumnId } from "@/lib/task-stages";
 import { cn } from "@/lib/utils";
 
 export type KanbanBoardProps = TaskCardHandlers & {
-  tasks: TaskRecord[];
   columns: TaskColumnRecord[];
+  pages: Record<string, TaskColumnPage>;
+  counts: Record<string, TaskColumnCount>;
+  isLoadingCounts: boolean;
   clientNameById: Record<string, string>;
-  isLoading: boolean;
+  flagById: Record<string, TaskFlagRecord>;
+  onLoadMore: (columnId: string) => void;
 };
 
 export function KanbanBoard({
-  tasks,
   columns,
+  pages,
+  counts,
+  isLoadingCounts,
   clientNameById,
+  flagById,
   timer,
-  isLoading,
   onEdit,
   onDelete,
   onQuickEdit,
+  onLoadMore,
 }: KanbanBoardProps) {
   const { ref, canScrollLeft, canScrollRight, scrollByColumn, updateEdges } =
     useHorizontalScroll<HTMLDivElement>();
+
+  const stageByColumnId = getStageByColumnId(columns);
 
   // Criar/remover coluna muda a largura do trilho sem disparar scroll nem resize do container.
   useEffect(() => {
@@ -68,13 +79,16 @@ export function KanbanBoard({
             <KanbanColumn
               key={column.id}
               column={column}
-              tasks={tasks.filter((task) => task.column_id === column.id)}
+              page={pages[column.id] ?? EMPTY_COLUMN_PAGE}
+              taskCount={isLoadingCounts ? undefined : (counts[column.id]?.filtered ?? 0)}
+              stage={stageByColumnId[column.id]}
               clientNameById={clientNameById}
+              flagById={flagById}
               timer={timer}
-              isLoading={isLoading}
               onEdit={onEdit}
               onDelete={onDelete}
               onQuickEdit={onQuickEdit}
+              onLoadMore={onLoadMore}
             />
           ))}
         </div>

@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
 
 //* Services Imports
-import { get, patch, post, remove } from "@/services/api-service";
+import { get, post, remove } from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
 
 //* Utils Imports
@@ -28,6 +28,8 @@ export type TaskRecord = {
   due_date: string;
   created_at: string;
   updated_at: string;
+  /** Vem do vínculo `task_flag_links`, não de uma coluna da tabela `tasks`. */
+  flag_ids: string[];
 };
 
 export type TaskInput = {
@@ -43,26 +45,56 @@ export type TaskInput = {
 /** Campos editáveis direto no card, sem abrir o formulário completo. */
 export type TaskQuickPatch = Partial<Pick<TaskRecord, "priority" | "cliente_id">>;
 
-const SELECT_COLUMNS =
-  "id, user_id, title, description, priority, column_id, cliente_id, average_duration_minutes, due_date, created_at, updated_at";
+export const TASK_SELECT =
+  "id, user_id, title, description, priority, column_id, cliente_id, average_duration_minutes, due_date, created_at, updated_at, task_flag_links(flag_id)";
 
+export type TaskRow = Omit<TaskRecord, "flag_ids"> & {
+  task_flag_links: { flag_id: string }[] | null;
+};
+
+export function toTaskRecord({ task_flag_links, ...task }: TaskRow): TaskRecord {
+  return { ...task, flag_ids: (task_flag_links ?? []).map((link) => link.flag_id) };
+}
+
+/** Deixa os vínculos da tarefa iguais a `flagIds`: remove o que saiu antes de inserir o que entrou (limite de 5 no banco). */
+export async function syncTaskFlags(
+  taskId: string,
+  userId: string,
+  currentIds: string[],
+  flagIds: string[],
+) {
+  const removedIds = currentIds.filter((id) => !flagIds.includes(id));
+  const addedIds = flagIds.filter((id) => !currentIds.includes(id));
+
+  if (removedIds.length)
+    await remove("task_flag_links", { task_id: taskId, flag_id: removedIds, user_id: userId });
+  if (addedIds.length)
+    await post(
+      "task_flag_links",
+      addedIds.map((flagId) => ({ task_id: taskId, flag_id: flagId, user_id: userId })),
+      { select: "task_id" },
+    );
+}
+
+/**
+ * Lista TODAS as tarefas do usuário, sem paginação. Serve a visões de resumo (dashboard); o quadro
+ * kanban usa `useTaskBoard`, que pagina por coluna.
+ */
 export function useTasks() {
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   const fetchTasks = useCallback(async () => {
     setIsLoading(true);
 
     try {
       const userId = await getAuthenticatedUserId();
-      const data = await get<TaskRecord>("tasks", {
-        select: SELECT_COLUMNS,
+      const data = await get<TaskRow>("tasks", {
+        select: TASK_SELECT,
         filters: { user_id: userId },
         order: [{ column: "created_at", ascending: false }],
       });
-      setTasks(data);
+      setTasks(data.map(toTaskRecord));
     } catch (error) {
       toast.error("Não foi possível carregar as tarefas", {
         description: getApiErrorMessage(error, "Tente atualizar a página novamente."),
@@ -81,133 +113,5 @@ export function useTasks() {
     void fetchTasks();
   }, [fetchTasks]);
 
-  async function createTask(input: TaskInput) {
-    setIsSaving(true);
-
-    try {
-      const userId = await getAuthenticatedUserId();
-      await post("tasks", { ...input, user_id: userId });
-      await fetchTasks();
-      toast.success("Tarefa cadastrada");
-      return true;
-    } catch (error) {
-      toast.error("Não foi possível cadastrar a tarefa", {
-        description: getApiErrorMessage(error, "Confira os dados e tente novamente."),
-      });
-      console.error("Erro ao cadastrar tarefa:", error);
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function updateTask(id: string, input: TaskInput) {
-    setIsSaving(true);
-
-    try {
-      const userId = await getAuthenticatedUserId();
-      await patch("tasks", input, { id: id, user_id: userId });
-      await fetchTasks();
-      toast.success("Tarefa atualizada");
-      return true;
-    } catch (error) {
-      toast.error("Não foi possível atualizar a tarefa", {
-        description: getApiErrorMessage(error, "Confira os dados e tente novamente."),
-      });
-      console.error("Erro ao atualizar tarefa:", error);
-      return false;
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function updateTaskColumn(id: string, columnId: string) {
-    const previousTasks = tasks;
-    const task = previousTasks.find((currentTask) => currentTask.id === id);
-
-    if (!task || task.column_id === columnId) return true;
-
-    setTasks((currentTasks) =>
-      currentTasks.map((currentTask) =>
-        currentTask.id === id ? { ...currentTask, column_id: columnId } : currentTask,
-      ),
-    );
-
-    try {
-      const userId = await getAuthenticatedUserId();
-      await patch("tasks", { column_id: columnId }, { id: id, user_id: userId });
-      return true;
-    } catch (error) {
-      setTasks(previousTasks);
-      toast.error("Não foi possível mover a tarefa", {
-        description: getApiErrorMessage(error, "A alteração foi desfeita. Tente novamente."),
-      });
-      console.error("Erro ao atualizar coluna da tarefa:", error);
-      return false;
-    }
-  }
-
-  /** Atualiza prioridade/cliente direto do card (Sheet de edição rápida), sem recarregar a lista inteira. */
-  async function quickUpdateTask(id: string, changes: TaskQuickPatch) {
-    const previousTasks = tasks;
-    const task = previousTasks.find((currentTask) => currentTask.id === id);
-
-    if (!task) return false;
-    if (
-      Object.entries(changes).every(([key, value]) => task[key as keyof TaskQuickPatch] === value)
-    )
-      return true;
-
-    setTasks((currentTasks) =>
-      currentTasks.map((currentTask) =>
-        currentTask.id === id ? { ...currentTask, ...changes } : currentTask,
-      ),
-    );
-
-    try {
-      const userId = await getAuthenticatedUserId();
-      await patch("tasks", changes, { id: id, user_id: userId });
-      return true;
-    } catch (error) {
-      setTasks(previousTasks);
-      toast.error("Não foi possível atualizar a tarefa", {
-        description: getApiErrorMessage(error, "A alteração foi desfeita. Tente novamente."),
-      });
-      console.error("Erro ao atualizar tarefa pelo card:", error);
-      return false;
-    }
-  }
-
-  async function deleteTask(id: string) {
-    setDeletingTaskId(id);
-
-    try {
-      const userId = await getAuthenticatedUserId();
-      await remove("tasks", { id: id, user_id: userId });
-      setTasks((currentTasks) => currentTasks.filter((task) => task.id !== id));
-      toast.success("Tarefa excluída");
-      return true;
-    } catch (error) {
-      toast.error("Não foi possível excluir a tarefa", {
-        description: getApiErrorMessage(error, "Tente novamente em alguns instantes."),
-      });
-      console.error("Erro ao excluir tarefa:", error);
-      return false;
-    } finally {
-      setDeletingTaskId(null);
-    }
-  }
-
-  return {
-    tasks,
-    isLoading,
-    isSaving,
-    deletingTaskId,
-    createTask,
-    updateTask,
-    updateTaskColumn,
-    quickUpdateTask,
-    deleteTask,
-    refreshTasks: fetchTasks,
-  };
+  return { tasks, isLoading, refreshTasks: fetchTasks };
 }

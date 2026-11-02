@@ -12,6 +12,9 @@ import { useState } from "react";
 //* Types Imports
 import type { TaskColumnRecord } from "@/hooks/use-task-columns";
 
+//* Constants Imports
+import { taskColumnStageLabels } from "@/lib/task-stages";
+
 //* Utils Imports
 import { cn } from "@/lib/utils";
 
@@ -83,7 +86,21 @@ export function SortableColumn({
           />
         ) : (
           <>
-            <p className="truncate text-sm font-medium">{column.name}</p>
+            <p className="flex min-w-0 items-center gap-2 text-sm font-medium">
+              <span className="truncate">{column.name}</span>
+              {column.stage && (
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
+                    column.stage === "done"
+                      ? "border border-emerald-200 bg-emerald-50 text-zinc-600 dark:border-emerald-900/70 dark:bg-emerald-950 dark:text-zinc-400"
+                      : "border bg-card text-card-foreground",
+                  )}
+                >
+                  {taskColumnStageLabels[column.stage]}
+                </span>
+              )}
+            </p>
             <p className="text-xs text-muted-foreground">
               {hasTasks ? `${taskCount} ${taskCount === 1 ? "tarefa" : "tarefas"}` : "Sem tarefas"}
             </p>

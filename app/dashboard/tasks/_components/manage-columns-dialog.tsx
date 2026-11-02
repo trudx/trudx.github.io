@@ -4,6 +4,8 @@
 import Button from "@/components/ui/button";
 import Dialog from "@/components/ui/dialog";
 import Input from "@/components/ui/input";
+import Label from "@/components/ui/label";
+import Select from "@/components/ui/select";
 
 import { SortableColumn } from "./sortable-column";
 
@@ -15,7 +17,10 @@ import { useState } from "react";
 
 //* Types Imports
 import type { DragEndEvent } from "@dnd-kit/core";
-import type { TaskColumnRecord } from "@/hooks/use-task-columns";
+import type { TaskColumnRecord, TaskColumnStage } from "@/hooks/use-task-columns";
+
+//* Constants Imports
+import { taskColumnStageLabels } from "@/lib/task-stages";
 
 type ManageColumnsDialogProps = {
   open: boolean;
@@ -27,6 +32,13 @@ type ManageColumnsDialogProps = {
   onRename: (id: string, name: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
   onReorder: (orderedIds: string[]) => Promise<boolean>;
+  onSetStage: (stage: TaskColumnStage, columnId: string | null) => Promise<boolean>;
+};
+
+const NO_STAGE_COLUMN = "none";
+const stageDescriptions: Record<TaskColumnStage, string> = {
+  pending: "Ela e as anteriores ficam neutras: ainda na fila.",
+  done: "Ela e as posteriores ficam em verde apagado: concluídas ou canceladas.",
 };
 
 export function ManageColumnsDialog({
@@ -39,6 +51,7 @@ export function ManageColumnsDialog({
   onRename,
   onDelete,
   onReorder,
+  onSetStage,
 }: ManageColumnsDialogProps) {
   const [newColumnName, setNewColumnName] = useState("");
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -106,6 +119,38 @@ export function ManageColumnsDialog({
             </ul>
           </SortableContext>
         </DndContext>
+        <div className="grid gap-4 border-t pt-4 sm:grid-cols-2">
+          {(["pending", "done"] as TaskColumnStage[]).map((stage) => {
+            const selectedColumn = columns.find((column) => column.stage === stage);
+            return (
+              <div key={stage} className="space-y-2">
+                <Label>Coluna de {taskColumnStageLabels[stage].toLowerCase()}</Label>
+                <Select.SelectRoot
+                  value={selectedColumn?.id ?? NO_STAGE_COLUMN}
+                  onValueChange={(value) => {
+                    if (value) void onSetStage(stage, value === NO_STAGE_COLUMN ? null : value);
+                  }}
+                >
+                  <Select.SelectTrigger
+                    className="h-10 w-full bg-background"
+                    disabled={isSaving || columns.length === 0}
+                  >
+                    <Select.SelectValue>{selectedColumn?.name ?? "Nenhuma"}</Select.SelectValue>
+                  </Select.SelectTrigger>
+                  <Select.SelectContent>
+                    <Select.SelectItem value={NO_STAGE_COLUMN}>Nenhuma</Select.SelectItem>
+                    {columns.map((column) => (
+                      <Select.SelectItem key={column.id} value={column.id}>
+                        {column.name}
+                      </Select.SelectItem>
+                    ))}
+                  </Select.SelectContent>
+                </Select.SelectRoot>
+                <p className="text-xs text-muted-foreground">{stageDescriptions[stage]}</p>
+              </div>
+            );
+          })}
+        </div>
         <Dialog.DialogFooter className="mt-4 border-t-0 bg-transparent p-0">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Concluir

@@ -14,6 +14,9 @@ import { getAuthenticatedUserId } from "@/services/auth-service";
 //* Utils Imports
 import { getApiErrorMessage, isForeignKeyViolation } from "@/lib/api-error";
 
+/** Coluna-marco: define onde começam os cards concluídos e até onde vão os pendentes. */
+export type TaskColumnStage = "pending" | "done";
+
 export type TaskColumnRecord = {
   id: string;
   user_id: string;
@@ -21,6 +24,7 @@ export type TaskColumnRecord = {
   name: string;
   color: string | null;
   position: number;
+  stage: TaskColumnStage | null;
   created_at: string;
   updated_at: string;
 };
@@ -35,7 +39,7 @@ export function useTaskColumns() {
     try {
       const userId = await getAuthenticatedUserId();
       const data = await get<TaskColumnRecord>("task_columns", {
-        select: "id,user_id,key,name,color,position,created_at,updated_at",
+        select: "id,user_id,key,name,color,position,stage,created_at,updated_at",
         filters: { user_id: userId },
         order: [{ column: "position", ascending: true }],
       });
@@ -144,6 +148,37 @@ export function useTaskColumns() {
     }
   }
 
+  /** Marca `columnId` como a coluna da etapa (`null` desmarca). Só uma coluna por etapa. */
+  async function setColumnStage(stage: TaskColumnStage, columnId: string | null) {
+    const previousColumns = columns;
+    setColumns((current) =>
+      current.map((column) => {
+        if (column.id === columnId) return { ...column, stage };
+        return column.stage === stage ? { ...column, stage: null } : column;
+      }),
+    );
+
+    setIsSaving(true);
+    try {
+      const userId = await getAuthenticatedUserId();
+      // Desmarca a anterior antes: o índice único (user_id, stage) recusaria duas marcadas.
+      await patch("task_columns", { stage: null }, { stage: stage, user_id: userId });
+      if (columnId)
+        await patch("task_columns", { stage: stage }, { id: columnId, user_id: userId });
+      return true;
+    } catch (error) {
+      setColumns(previousColumns);
+      toast.error("Não foi possível salvar a coluna-marco", {
+        description: getApiErrorMessage(error, "A configuração anterior foi restaurada."),
+      });
+      console.error("Erro ao definir etapa da coluna de tarefas:", error);
+      void fetchColumns();
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   async function reorderColumns(orderedIds: string[]) {
     const previousColumns = columns;
     const reorderedColumns = orderedIds.map((id, position) => ({
@@ -186,6 +221,7 @@ export function useTaskColumns() {
     renameColumn,
     deleteColumn,
     reorderColumns,
+    setColumnStage,
     refreshColumns: fetchColumns,
   };
 }

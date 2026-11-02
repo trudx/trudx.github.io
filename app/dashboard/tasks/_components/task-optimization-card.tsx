@@ -7,14 +7,14 @@ import Skeleton from "@/components/ui/skeleton";
 import { Gauge } from "lucide-react";
 
 //* Types Imports
-import type { TaskRecord } from "@/hooks/use-tasks";
+import type { TaskEstimate } from "@/hooks/use-task-estimates";
 
 //* Utils Imports
 import { getAverageTimeUsage } from "@/lib/task-time-efficiency";
 import { cn } from "@/lib/utils";
 
 type TaskOptimizationCardProps = {
-  tasks: TaskRecord[];
+  tasks: TaskEstimate[];
   secondsByTaskId: Record<string, number>;
   isLoading: boolean;
 };

@@ -8,22 +8,29 @@ import Label from "@/components/ui/label";
 import Select from "@/components/ui/select";
 import Textarea from "@/components/ui/textarea";
 
+import { TaskFlagPicker } from "./task-flag-picker";
+
 //* Libraries Imports
 import { useState, type FormEvent } from "react";
 
 //* Types Imports
 import type { ClientRecord } from "@/hooks/use-clients";
 import type { TaskColumnRecord } from "@/hooks/use-task-columns";
+import type { TaskFlagRecord } from "@/hooks/use-task-flags";
 import type { TaskInput, TaskPriority, TaskRecord } from "@/hooks/use-tasks";
+
+//* Constants Imports
+import { MAX_FLAGS_PER_TASK } from "@/hooks/use-task-flags";
 
 type TaskFormDialogProps = {
   open: boolean;
   task: TaskRecord | null;
   columns: TaskColumnRecord[];
   clients: ClientRecord[];
+  flags: TaskFlagRecord[];
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: TaskInput) => Promise<boolean>;
+  onSubmit: (input: TaskInput, flagIds: string[]) => Promise<boolean>;
 };
 
 function createEmptyForm(columnId: string): TaskInput {
@@ -43,6 +50,7 @@ export function TaskFormDialog({
   task,
   columns,
   clients,
+  flags,
   isSaving,
   onOpenChange,
   onSubmit,
@@ -60,15 +68,22 @@ export function TaskFormDialog({
         }
       : createEmptyForm(columns[0]?.id ?? ""),
   );
+  // Ignora vínculos a flags que já não existem, pra não reenviá-los ao salvar.
+  const [flagIds, setFlagIds] = useState<string[]>(() =>
+    (task?.flag_ids ?? []).filter((id) => flags.some((flag) => flag.id === id)),
+  );
   const isEditing = Boolean(task);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const saved = await onSubmit({
-      ...form,
-      title: form.title.trim(),
-      description: form.description.trim(),
-    });
+    const saved = await onSubmit(
+      {
+        ...form,
+        title: form.title.trim(),
+        description: form.description.trim(),
+      },
+      flagIds,
+    );
     if (saved) onOpenChange(false);
   }
 
@@ -193,6 +208,10 @@ export function TaskFormDialog({
                 ))}
               </Select.SelectContent>
             </Select.SelectRoot>
+          </div>
+          <div className="space-y-2">
+            <Label>Flags (até {MAX_FLAGS_PER_TASK})</Label>
+            <TaskFlagPicker flags={flags} selected={flagIds} onChange={setFlagIds} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="task-duration">Tempo estimado (minutos)</Label>

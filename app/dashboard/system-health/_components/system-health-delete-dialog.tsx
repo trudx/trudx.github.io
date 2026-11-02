@@ -22,7 +22,7 @@ export function SystemHealthDeleteDialog({
         <AlertDialog.AlertDialogHeader>
           <AlertDialog.AlertDialogTitle>Remover sistema?</AlertDialog.AlertDialogTitle>
           <AlertDialog.AlertDialogDescription>
-            “{systemName}” e o histórico local de disponibilidade serão removidos deste navegador.
+            “{systemName}” e a contagem de disponibilidade serão removidos da sua conta.
           </AlertDialog.AlertDialogDescription>
         </AlertDialog.AlertDialogHeader>
         <AlertDialog.AlertDialogFooter>

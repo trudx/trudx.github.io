@@ -8,7 +8,9 @@ import { toZoomedTranslate, useTasksZoomContext } from "./tasks-zoom-context";
 import { useDraggable } from "@dnd-kit/core";
 
 //* Types Imports
+import type { TaskFlagRecord } from "@/hooks/use-task-flags";
 import type { TaskRecord } from "@/hooks/use-tasks";
+import type { TaskStage } from "@/lib/task-stages";
 import type { TaskTimerProps } from "./task-card";
 
 /**
@@ -27,11 +29,15 @@ export type TaskCardHandlers = {
 type DraggableTaskCardProps = TaskCardHandlers & {
   task: TaskRecord;
   clientName?: string;
+  flags: TaskFlagRecord[];
+  stage: TaskStage;
 };
 
 export function DraggableTaskCard({
   task,
   clientName,
+  flags,
+  stage,
   timer,
   onEdit,
   onDelete,
@@ -53,6 +59,8 @@ export function DraggableTaskCard({
       <TaskCard
         task={task}
         clientName={clientName}
+        flags={flags}
+        stage={stage}
         timer={timer}
         isDragging={isDragging}
         draggableAttributes={attributes}

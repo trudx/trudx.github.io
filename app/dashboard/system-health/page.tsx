@@ -14,9 +14,9 @@ import {
   Activity,
   CircleCheck,
   CircleX,
+  Cloud,
   Download,
   ExternalLink,
-  HardDrive,
   HeartPulse,
   LoaderCircle,
   Pencil,
@@ -141,7 +141,7 @@ export default function SystemHealthPage() {
       }
 
       const parsedConfig = parseSystemHealthConfig(JSON.parse(await file.text()));
-      const { importedCount, skippedCount } = importSystems(parsedConfig);
+      const { importedCount, skippedCount } = await importSystems(parsedConfig);
 
       if (importedCount === 0 && skippedCount === 0) {
         toast.info("O arquivo não contém sistemas para importar.");
@@ -447,12 +447,12 @@ export default function SystemHealthPage() {
         <summary className="cursor-pointer text-sm font-medium">Sobre as verificações e o backup dos sistemas</summary>
         <div className="mt-4 space-y-3">
           <Alert.AlertRoot className="items-start gap-3 border-foreground/15 bg-muted/40 p-4">
-            <HardDrive className="mt-0.5 size-4" />
+            <Cloud className="mt-0.5 size-4" />
             <div>
-              <Alert.AlertTitle className="font-semibold">Configurações salvas localmente</Alert.AlertTitle>
+              <Alert.AlertTitle className="font-semibold">Configurações salvas na sua conta</Alert.AlertTitle>
               <Alert.AlertDescription>
-                Os sistemas ficam neste navegador e não são sincronizados com outros dispositivos. Baixe o JSON para
-                guardar uma cópia dos nomes e URLs. Importar adiciona URLs novas, ignora as repetidas e inicia uma nova
+                Os sistemas e a contagem de disponibilidade ficam salvos no trudx e aparecem em qualquer dispositivo.
+                Baixe o JSON para guardar uma cópia dos nomes e URLs. Importar adiciona URLs novas, ignora as repetidas e inicia uma nova
                 contagem após a próxima resposta 200.
               </Alert.AlertDescription>
             </div>
@@ -497,7 +497,7 @@ export default function SystemHealthPage() {
           if (!open) setDeletingSystem(null);
         }}
         onConfirm={() => {
-          if (deletingSystem) deleteSystem(deletingSystem.id);
+          if (deletingSystem) void deleteSystem(deletingSystem.id);
           setDeletingSystem(null);
         }}
       />

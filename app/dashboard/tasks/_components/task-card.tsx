@@ -23,7 +23,9 @@ import {
 //* Types Imports
 import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import type { MouseEvent } from "react";
+import type { TaskFlagRecord } from "@/hooks/use-task-flags";
 import type { TaskPriority, TaskRecord } from "@/hooks/use-tasks";
+import type { TaskStage } from "@/lib/task-stages";
 
 //* Utils Imports
 import { formatDateShort } from "@/lib/format-date";
@@ -43,6 +45,8 @@ export type TaskTimerProps = {
 type TaskCardProps = {
   task: TaskRecord;
   clientName?: string;
+  flags?: TaskFlagRecord[];
+  stage?: TaskStage;
   isDragging?: boolean;
   draggableAttributes?: DraggableAttributes;
   draggableListeners?: DraggableSyntheticListeners;
@@ -63,31 +67,59 @@ const priorityCardStyles: Record<TaskPriority, string> = {
     "border-amber-400 bg-amber-400 text-amber-950 dark:border-amber-400 dark:bg-amber-400 dark:text-amber-950",
   high: "border-red-600 bg-red-600 text-white dark:border-red-500 dark:bg-red-500 dark:text-white",
 };
-const priorityBadgeStyles: Record<TaskPriority, string> = {
-  low: "border-white/40 bg-white/15 text-white",
-  medium: "border-amber-950/30 bg-amber-950/10 text-amber-950",
-  high: "border-white/40 bg-white/15 text-white",
-};
-const priorityMutedTextStyles: Record<TaskPriority, string> = {
-  low: "text-white/75",
-  medium: "text-amber-950/75",
-  high: "text-white/80",
-};
-const priorityDividerStyles: Record<TaskPriority, string> = {
-  low: "border-white/20",
-  medium: "border-amber-950/20",
-  high: "border-white/25",
-};
 
-// Executando: o card assume o azul e ignora a cor da prioridade, pra dar pra ver de longe o que
-// está rodando. Como o azul é fundo escuro com texto branco, os detalhes reaproveitam as
-// variantes da prioridade "low", que já são feitas pra esse contraste.
+// Executando: o card assume o azul e ignora etapa e prioridade, pra dar pra ver de longe o que está
+// rodando. Concluído (coluna de conclusão em diante) fica num verde bem apagado, que recua atrás das
+// cores cheias de quem está em produção. Pendente (coluna de pendência pra trás) fica neutro, "ainda
+// na fila", e a prioridade continua visível só no badge.
 const runningCardStyle =
   "border-blue-600 bg-blue-600 text-white dark:border-blue-500 dark:bg-blue-500 dark:text-white";
+const doneCardStyle =
+  "border-emerald-200 bg-emerald-50 text-zinc-600 dark:border-emerald-900/70 dark:bg-emerald-950 dark:text-zinc-400";
+const pendingCardStyle = "border-border bg-card text-card-foreground";
+const doneBadgeStyle = "border-emerald-700/25 bg-transparent text-muted-foreground";
+
+/** Paleta dos detalhes (badge, textos secundários, divisória) conforme o fundo do card. */
+type CardTone = "onDark" | "onAmber" | "onSurface";
+
+const priorityTones: Record<TaskPriority, CardTone> = {
+  low: "onDark",
+  medium: "onAmber",
+  high: "onDark",
+};
+const toneBadgeStyles: Record<Exclude<CardTone, "onSurface">, string> = {
+  onDark: "border-white/40 bg-white/15 text-white",
+  onAmber: "border-amber-950/30 bg-amber-950/10 text-amber-950",
+};
+const toneMutedTextStyles: Record<CardTone, string> = {
+  onDark: "text-white/80",
+  onAmber: "text-amber-950/75",
+  onSurface: "text-muted-foreground",
+};
+const toneDividerStyles: Record<CardTone, string> = {
+  onDark: "border-white/25",
+  onAmber: "border-amber-950/20",
+  onSurface: "border-border",
+};
+
+function getCardStyle(task: TaskRecord, stage: TaskStage, isRunning: boolean) {
+  if (isRunning) return runningCardStyle;
+  if (stage === "done") return doneCardStyle;
+  if (stage === "pending") return pendingCardStyle;
+  return priorityCardStyles[task.priority];
+}
+
+function getCardTone(task: TaskRecord, stage: TaskStage, isRunning: boolean): CardTone {
+  if (isRunning) return "onDark";
+  if (stage === "pending" || stage === "done") return "onSurface";
+  return priorityTones[task.priority];
+}
 
 export function TaskCard({
   task,
   clientName,
+  flags = [],
+  stage = "progress",
   isDragging,
   draggableAttributes,
   draggableListeners,
@@ -98,8 +130,15 @@ export function TaskCard({
 }: TaskCardProps) {
   const isRunning = timer?.runningTaskId === task.id;
   const loggedSeconds = timer?.secondsByTaskId[task.id] ?? 0;
-  // Enquanto executa, os detalhes seguem a paleta clara-sobre-escuro da prioridade "low".
-  const detailPriority: TaskPriority = isRunning ? "low" : task.priority;
+  const tone = getCardTone(task, stage, isRunning);
+  const isDone = stage === "done" && !isRunning;
+  // No pendente o badge usa a cor cheia da prioridade, que aí é o único sinal dela; no concluído a
+  // prioridade já não importa e o badge também se apaga.
+  const badgeStyle = isDone
+    ? doneBadgeStyle
+    : tone === "onSurface"
+      ? priorityCardStyles[task.priority]
+      : toneBadgeStyles[tone];
 
   return (
     <article
@@ -113,7 +152,7 @@ export function TaskCard({
       aria-label={onEdit ? `Tarefa ${task.title}. Clique para editar.` : undefined}
       className={cn(
         "group relative rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring",
-        isRunning ? runningCardStyle : priorityCardStyles[task.priority],
+        getCardStyle(task, stage, isRunning),
         // Sem `touch-none`: os listeners cobrem o card inteiro, então ele diria ao navegador
         // "nunca role a partir daqui" e a página travaria no celular. Com o TouchSensor por
         // atraso, o navegador precisa mesmo ser dono do gesto até a ativação.
@@ -122,6 +161,23 @@ export function TaskCard({
         isDragging && "opacity-40",
       )}
     >
+      {flags.length > 0 && (
+        <ul
+          className={cn("mb-1.5 flex flex-wrap gap-1", isDone && "opacity-60")}
+          aria-label="Flags"
+        >
+          {flags.map((flag) => (
+            <li
+              key={flag.id}
+              style={{ backgroundColor: flag.color }}
+              className="max-w-full truncate rounded-full px-2 py-0.5 text-sm leading-tight font-bold text-white ring-1 ring-white/40"
+            >
+              {flag.name}
+            </li>
+          ))}
+        </ul>
+      )}
+
       <div className="flex items-start justify-between gap-2">
         <h3 className="line-clamp-2 min-w-0 text-lg font-semibold leading-snug">{task.title}</h3>
         <Badge
@@ -139,7 +195,7 @@ export function TaskCard({
             : {})}
           className={cn(
             "shrink-0 text-sm",
-            priorityBadgeStyles[detailPriority],
+            badgeStyle,
             onQuickEdit && "cursor-pointer hover:brightness-110",
           )}
         >
@@ -148,7 +204,7 @@ export function TaskCard({
       </div>
 
       {task.description && (
-        <p className={cn("mt-1 line-clamp-1 text-base", priorityMutedTextStyles[detailPriority])}>
+        <p className={cn("mt-1 line-clamp-1 text-base", toneMutedTextStyles[tone])}>
           {task.description}
         </p>
       )}
@@ -156,7 +212,7 @@ export function TaskCard({
       <div
         className={cn(
           "mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-base font-medium",
-          priorityMutedTextStyles[detailPriority],
+          toneMutedTextStyles[tone],
         )}
       >
         <span className="inline-flex items-center gap-1.5" title="Entrega">
@@ -192,7 +248,7 @@ export function TaskCard({
         <TaskTimeProgress
           estimatedMinutes={task.average_duration_minutes}
           loggedSeconds={loggedSeconds}
-          className={cn("mt-2 [&>span]:text-sm", priorityMutedTextStyles[detailPriority])}
+          className={cn("mt-2 [&>span]:text-sm", toneMutedTextStyles[tone])}
         />
       )}
 
@@ -200,7 +256,7 @@ export function TaskCard({
         <div
           className={cn(
             "mt-2 flex items-center justify-end gap-1 border-t pt-2",
-            priorityDividerStyles[detailPriority],
+            toneDividerStyles[tone],
             timer && "justify-between",
             // No desktop as ações flutuam sobre o canto do card só no hover, em vez de reservar uma
             // linha vazia em todo card. O `bg-inherit` pega a cor do card pra cobrir o que estiver

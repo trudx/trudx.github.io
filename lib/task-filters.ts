@@ -12,6 +12,8 @@ export type TaskFilterValue = {
   /** Ids de cliente; `SEM_CLIENTE` representa as tarefas sem cliente. */
   clienteIds: string[];
   priorities: TaskPriority[];
+  /** Ids de flag; `SEM_FLAG` representa as tarefas sem nenhuma flag. */
+  flagIds: string[];
   /** Domingo da semana filtrada, "YYYY-MM-DD". `null` = qualquer semana. */
   weekStart: string | null;
   /** Busca por título ou descrição. */
@@ -19,10 +21,12 @@ export type TaskFilterValue = {
 };
 
 export const SEM_CLIENTE = "sem-cliente";
+export const SEM_FLAG = "sem-flag";
 
 export const EMPTY_TASK_FILTERS: TaskFilterValue = {
   clienteIds: [],
   priorities: [],
+  flagIds: [],
   weekStart: null,
   searchText: "",
 };
@@ -82,6 +86,12 @@ export function filterTasks(tasks: TaskRecord[], filters: TaskFilterValue) {
 
     if (filters.priorities.length > 0 && !filters.priorities.includes(task.priority)) return false;
 
+    // Dentro do filtro de flag vale OU: basta a tarefa ter uma das flags marcadas.
+    if (filters.flagIds.length > 0) {
+      const keys = task.flag_ids.length > 0 ? task.flag_ids : [SEM_FLAG];
+      if (!keys.some((key) => filters.flagIds.includes(key))) return false;
+    }
+
     if (filters.weekStart) {
       const end = getWeekEnd(filters.weekStart);
       if (task.due_date < filters.weekStart || task.due_date > end) return false;
@@ -102,6 +112,7 @@ export function countActiveFilters(filters: TaskFilterValue) {
   return (
     filters.clienteIds.length +
     filters.priorities.length +
+    filters.flagIds.length +
     (filters.weekStart ? 1 : 0) +
     (filters.searchText ? 1 : 0)
   );

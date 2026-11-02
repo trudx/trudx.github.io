@@ -7,6 +7,7 @@ import {
   DeleteTaskDialog,
   KanbanBoard,
   ManageColumnsDialog,
+  ManageFlagsDialog,
   TaskCard,
   TaskFilters,
   TaskFormDialog,
@@ -28,15 +29,17 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { Plus, SlidersHorizontal } from "lucide-react";
+import { Flag, Plus, SlidersHorizontal } from "lucide-react";
 import { useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 //* Hooks Imports
 import { useClients } from "@/hooks/use-clients";
 import { useTaskColumns } from "@/hooks/use-task-columns";
+import { useTaskBoard } from "@/hooks/use-task-board";
+import { useTaskEstimates } from "@/hooks/use-task-estimates";
+import { useTaskFlags } from "@/hooks/use-task-flags";
 import { useTaskTimer } from "@/hooks/use-task-timer";
-import { useTasks } from "@/hooks/use-tasks";
 import { useTasksZoomScale } from "@/hooks/use-tasks-zoom";
 
 //* Types Imports
@@ -45,20 +48,10 @@ import type { TaskRecord } from "@/hooks/use-tasks";
 import type { TaskFilterValue } from "@/lib/task-filters";
 
 //* Utils Imports
-import { EMPTY_TASK_FILTERS, filterTasks } from "@/lib/task-filters";
+import { EMPTY_TASK_FILTERS } from "@/lib/task-filters";
+import { getStageByColumnId } from "@/lib/task-stages";
 
 export default function TasksPage() {
-  const {
-    tasks,
-    isLoading: isLoadingTasks,
-    isSaving,
-    deletingTaskId,
-    createTask,
-    updateTask,
-    updateTaskColumn,
-    quickUpdateTask,
-    deleteTask,
-  } = useTasks();
   const { clients, selectableClients } = useClients();
   const zoomScale = useTasksZoomScale();
   // O overlay de arraste vai por portal para o body; portal só existe no cliente.
@@ -89,7 +82,17 @@ export default function TasksPage() {
     renameColumn,
     deleteColumn,
     reorderColumns,
+    setColumnStage,
   } = useTaskColumns();
+  const {
+    flags,
+    taskCountByFlagId,
+    isSaving: isSavingFlags,
+    refreshFlagCounts,
+    createFlag,
+    updateFlag,
+    deleteFlag,
+  } = useTaskFlags();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskRecord | null>(null);
   const [deletingTask, setDeletingTask] = useState<TaskRecord | null>(null);
@@ -97,6 +100,24 @@ export default function TasksPage() {
   const [quickEditTaskId, setQuickEditTaskId] = useState<string | null>(null);
   const [filters, setFilters] = useState<TaskFilterValue>(EMPTY_TASK_FILTERS);
   const [isManagingColumns, setIsManagingColumns] = useState(false);
+  const [isManagingFlags, setIsManagingFlags] = useState(false);
+  const {
+    pages,
+    counts,
+    isLoadingCounts,
+    isSaving,
+    deletingTaskId,
+    loadMore,
+    createTask,
+    updateTask,
+    updateTaskColumn,
+    quickUpdateTask,
+    deleteTask,
+  } = useTaskBoard(
+    columns.map((column) => column.id),
+    filters,
+  );
+  const { estimates, isLoading: isLoadingEstimates } = useTaskEstimates();
   // Mouse e toque separados de propósito: um PointerSensor único atenderia os dois pelo mesmo
   // caminho, e o `delay` que o toque precisa viraria uma espera de 220ms antes de todo arrasto no
   // desktop. Assim o mouse mantém o comportamento antigo e só o dedo precisa segurar — e a escolha
@@ -134,18 +155,18 @@ export default function TasksPage() {
     if (type === "task" && columns.some((column) => column.id === overId))
       void updateTaskColumn(String(event.active.id), overId);
   }
-  const taskCountByColumnId = tasks.reduce<Record<string, number>>(
-    (counts, task) => ({
-      ...counts,
-      [task.column_id]: (counts[task.column_id] ?? 0) + 1,
-    }),
-    {},
+  // Usa o `total` (sem filtro) de propósito: ele decide se uma coluna pode ser excluída, e um
+  // filtro ativo não pode mentir sobre isso. O cabeçalho das colunas mostra o `filtered`.
+  const taskCountByColumnId = Object.fromEntries(
+    Object.entries(counts).map(([columnId, count]) => [columnId, count.total]),
   );
-  const isLoading = isLoadingTasks || isLoadingColumns;
-  // Só o quadro é filtrado. `taskCountByColumnId` acima segue sobre TODAS as tarefas de propósito:
-  // ele decide se uma coluna pode ser excluída, e um filtro ativo não pode mentir sobre isso.
-  const visibleTasks = filterTasks(tasks, filters);
+  const loadedTasks = Object.values(pages).flatMap((page) => page.tasks);
+  // O tempo previsto de cards já carregados pode ter sido editado agora; vale sobre a consulta leve.
+  const loadedById = new Map(loadedTasks.map((task) => [task.id, task]));
+  const taskEstimates = estimates.map((estimate) => loadedById.get(estimate.id) ?? estimate);
   const clientNameById = Object.fromEntries(clients.map((client) => [client.id, client.name]));
+  const flagById = Object.fromEntries(flags.map((flag) => [flag.id, flag]));
+  const stageByColumnId = getStageByColumnId(columns);
   const timerProps = {
     runningTaskId,
     runningStartedAt,
@@ -163,7 +184,7 @@ export default function TasksPage() {
     return success;
   }
   // Lido da lista (e não guardado em estado) pro Sheet refletir cada alteração salva na hora.
-  const quickEditTask = tasks.find((task) => task.id === quickEditTaskId) ?? null;
+  const quickEditTask = (quickEditTaskId && loadedById.get(quickEditTaskId)) || null;
 
   return (
     <TasksZoomContext value={zoomScale}>
@@ -190,6 +211,18 @@ export default function TasksPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 px-4"
+                onClick={() => {
+                  void refreshFlagCounts();
+                  setIsManagingFlags(true);
+                }}
+              >
+                <Flag />
+                Flags
+              </Button>
               <Button
                 type="button"
                 variant="outline"
@@ -221,12 +254,12 @@ export default function TasksPage() {
                 onRefresh={refreshTimer}
               />
               <TaskOptimizationCard
-                tasks={tasks}
+                tasks={taskEstimates}
                 secondsByTaskId={secondsByTaskId}
-                isLoading={isLoadingTimer || isLoadingTasks}
+                isLoading={isLoadingTimer || isLoadingEstimates}
               />
             </div>
-            <TaskFilters value={filters} clients={clients} onChange={setFilters} />
+            <TaskFilters value={filters} clients={clients} flags={flags} onChange={setFilters} />
             <div className="min-h-0 flex-1">
               <DndContext
                 sensors={sensors}
@@ -235,14 +268,17 @@ export default function TasksPage() {
                 onDragEnd={handleDragEnd}
               >
                 <KanbanBoard
-                  tasks={visibleTasks}
                   columns={columns}
+                  pages={pages}
+                  counts={counts}
+                  isLoadingCounts={isLoadingCounts || isLoadingColumns}
                   clientNameById={clientNameById}
+                  flagById={flagById}
                   timer={timerProps}
-                  isLoading={isLoading}
                   onEdit={openEditDialog}
                   onDelete={setDeletingTask}
                   onQuickEdit={(task) => setQuickEditTaskId(task.id)}
+                  onLoadMore={loadMore}
                 />
                 {isClient
                   ? createPortal(
@@ -259,6 +295,8 @@ export default function TasksPage() {
                                   ? clientNameById[activeTask.cliente_id]
                                   : undefined
                               }
+                              flags={activeTask.flag_ids.flatMap((id) => flagById[id] ?? [])}
+                              stage={stageByColumnId[activeTask.column_id]}
                             />
                           </div>
                         ) : null}
@@ -291,10 +329,13 @@ export default function TasksPage() {
               task={editingTask}
               columns={columns}
               clients={selectableClients}
+              flags={flags}
               isSaving={isSaving}
               onOpenChange={setIsFormOpen}
-              onSubmit={(input) =>
-                editingTask ? updateTask(editingTask.id, input) : createTask(input)
+              onSubmit={(input, flagIds) =>
+                editingTask
+                  ? updateTask(editingTask.id, input, flagIds)
+                  : createTask(input, flagIds)
               }
             />
             <ManageColumnsDialog
@@ -307,6 +348,17 @@ export default function TasksPage() {
               onRename={renameColumn}
               onDelete={deleteColumn}
               onReorder={reorderColumns}
+              onSetStage={setColumnStage}
+            />
+            <ManageFlagsDialog
+              open={isManagingFlags}
+              flags={flags}
+              taskCountByFlagId={taskCountByFlagId}
+              isSaving={isSavingFlags}
+              onOpenChange={setIsManagingFlags}
+              onCreate={createFlag}
+              onUpdate={updateFlag}
+              onDelete={deleteFlag}
             />
             <DeleteTaskDialog
               open={Boolean(deletingTask)}

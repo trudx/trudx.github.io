@@ -12,6 +12,7 @@ import { ListFilter, Search, X } from "lucide-react";
 
 //* Types Imports
 import type { ClientRecord } from "@/hooks/use-clients";
+import type { TaskFlagRecord } from "@/hooks/use-task-flags";
 import type { TaskPriority } from "@/hooks/use-tasks";
 import type { TaskFilterValue } from "@/lib/task-filters";
 
@@ -19,6 +20,7 @@ import type { TaskFilterValue } from "@/lib/task-filters";
 import {
   EMPTY_TASK_FILTERS,
   SEM_CLIENTE,
+  SEM_FLAG,
   countActiveFilters,
   taskPriorityLabels,
 } from "@/lib/task-filters";
@@ -26,15 +28,21 @@ import {
 type TaskFiltersProps = {
   value: TaskFilterValue;
   clients: ClientRecord[];
+  flags: TaskFlagRecord[];
   onChange: (value: TaskFilterValue) => void;
 };
 
-export function TaskFilters({ value, clients, onChange }: TaskFiltersProps) {
+export function TaskFilters({ value, clients, flags, onChange }: TaskFiltersProps) {
   const activeCount = countActiveFilters(value);
 
   const clientOptions = [
     ...clients.map((client) => ({ value: client.id, label: client.name })),
     { value: SEM_CLIENTE, label: "Sem cliente" },
+  ];
+
+  const flagOptions = [
+    ...flags.map((flag) => ({ value: flag.id, label: flag.name })),
+    { value: SEM_FLAG, label: "Sem flag" },
   ];
 
   const priorityOptions = (Object.keys(taskPriorityLabels) as TaskPriority[]).map((priority) => ({
@@ -73,6 +81,14 @@ export function TaskFilters({ value, clients, onChange }: TaskFiltersProps) {
         options={priorityOptions}
         selected={value.priorities}
         onChange={(priorities) => onChange({ ...value, priorities: priorities as TaskPriority[] })}
+      />
+
+      <FacetedFilter
+        label="Flag"
+        options={flagOptions}
+        selected={value.flagIds}
+        emptyMessage="Nenhuma flag."
+        onChange={(flagIds) => onChange({ ...value, flagIds })}
       />
 
       <WeekFilter
