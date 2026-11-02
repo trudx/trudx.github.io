@@ -6,9 +6,12 @@ import { DashboardHero, OverviewDetailDialog, OverviewMetricCard } from "./_comp
 //* Libraries Imports
 import { useState } from "react";
 import {
+  Activity,
   CalendarCheck,
   CalendarClock,
   CircleAlert,
+  CircleCheckBig,
+  Hourglass,
   TrendingDown,
   TrendingUp,
   UserPlus,
@@ -18,7 +21,7 @@ import {
 import { useClients } from "@/hooks/use-clients";
 import { getLastDaysPeriod, useFinanceiro } from "@/hooks/use-financeiro";
 import { useProfile } from "@/hooks/use-profile";
-import { useTasks } from "@/hooks/use-tasks";
+import { useTaskSummary } from "@/hooks/use-task-summary";
 
 //* Types Imports
 import type { OverviewDetailItem } from "./_components";
@@ -53,17 +56,16 @@ export default function DashboardPage() {
       agora,
       seed: Math.random(),
       hojeIso: toIsoDate(agora),
-      amanhaIso: toIsoDate(addDays(agora, 1)),
       seteDiasAtras: toIsoDate(addDays(agora, -6)),
       periodo: getLastDaysPeriod(7),
     };
   });
   const { allRecords, isLoading: isLoadingFinanceiro } = useFinanceiro(sessao.periodo);
   const { clients, isLoading: isLoadingClients } = useClients();
-  const { tasks, isLoading: isLoadingTasks } = useTasks();
+  const { summary: tarefas, isLoading: isLoadingTasks } = useTaskSummary(sessao.hojeIso);
   const [openDetail, setOpenDetail] = useState<DetailKey | null>(null);
 
-  const { hojeIso, amanhaIso, seteDiasAtras } = sessao;
+  const { hojeIso, seteDiasAtras } = sessao;
 
   const ganhos = allRecords.filter((record) => record.tipo === "ganho");
   const gastos = allRecords.filter((record) => record.tipo !== "ganho");
@@ -74,11 +76,6 @@ export default function DashboardPage() {
   const clientesRecentes = clients.filter(
     (client) => client.created_at.slice(0, 10) >= seteDiasAtras,
   );
-
-  const tarefasHoje = tasks.filter((task) => task.due_date === hojeIso);
-  const tarefasAmanha = tasks.filter((task) => task.due_date === amanhaIso);
-  // "Pendentes": entrega já chegou (hoje ou antes) — é o que ainda está devendo.
-  const tarefasPendentes = tasks.filter((task) => task.due_date <= hojeIso);
 
   const firstName = profile.name.trim().split(" ")[0];
   const greeting = firstName ? buildGreeting(firstName, sessao.seed, sessao.agora) : "";
@@ -183,27 +180,56 @@ export default function DashboardPage() {
         <h2 id="dashboard-tarefas-title" className="trudx-kicker">
           Tarefas
         </h2>
+        {/* Por data: o que está devendo entrega. As concluídas não entram — já saíram da fila. */}
         <div className="grid gap-4 md:grid-cols-3">
           <OverviewMetricCard
             icon={CalendarCheck}
             label="Para hoje"
-            value={String(tarefasHoje.length)}
+            value={String(tarefas.dueToday)}
             emptyLabel="—"
             isLoading={isLoadingTasks}
           />
           <OverviewMetricCard
             icon={CalendarClock}
             label="Para amanhã"
-            value={String(tarefasAmanha.length)}
+            value={String(tarefas.dueTomorrow)}
             emptyLabel="—"
             isLoading={isLoadingTasks}
           />
           <OverviewMetricCard
             icon={CircleAlert}
-            label="Pendentes"
-            value={String(tarefasPendentes.length)}
+            label="Atrasadas"
+            value={String(tarefas.overdue)}
             emptyLabel="—"
-            hint="Entrega hoje ou antes"
+            hint="Entrega antes de hoje"
+            isLoading={isLoadingTasks}
+          />
+        </div>
+        {/* Por etapa, seguindo as colunas-marco do kanban. Sem a marca configurada, o card avisa
+            em vez de mostrar um número que não quer dizer nada. */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <OverviewMetricCard
+            icon={Hourglass}
+            label="Pendentes"
+            value={tarefas.hasPendingColumn ? String(tarefas.pending) : null}
+            emptyLabel="Defina a coluna de pendência"
+            hint="Na fila, ainda não começaram"
+            isLoading={isLoadingTasks}
+          />
+          <OverviewMetricCard
+            icon={Activity}
+            label="Em produção"
+            value={String(tarefas.inProgress)}
+            emptyLabel="—"
+            hint="Entre pendência e conclusão"
+            isLoading={isLoadingTasks}
+          />
+          <OverviewMetricCard
+            icon={CircleCheckBig}
+            label="Concluídas"
+            value={tarefas.hasDoneColumn ? String(tarefas.done) : null}
+            emptyLabel="Defina a coluna de conclusão"
+            hint="Concluídas ou canceladas"
             isLoading={isLoadingTasks}
           />
         </div>

@@ -1,18 +1,7 @@
 "use client";
 
-//* Libraries Imports
-import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-
-//* Hooks Imports
-import { useAppDataRefresh } from "@/hooks/use-app-data-refresh";
-
 //* Services Imports
-import { get, post, remove } from "@/services/api-service";
-import { getAuthenticatedUserId } from "@/services/auth-service";
-
-//* Utils Imports
-import { getApiErrorMessage } from "@/lib/api-error";
+import { post, remove } from "@/services/api-service";
 
 export type TaskPriority = "low" | "medium" | "high";
 
@@ -74,44 +63,4 @@ export async function syncTaskFlags(
       addedIds.map((flagId) => ({ task_id: taskId, flag_id: flagId, user_id: userId })),
       { select: "task_id" },
     );
-}
-
-/**
- * Lista TODAS as tarefas do usuário, sem paginação. Serve a visões de resumo (dashboard); o quadro
- * kanban usa `useTaskBoard`, que pagina por coluna.
- */
-export function useTasks() {
-  const [tasks, setTasks] = useState<TaskRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchTasks = useCallback(async () => {
-    setIsLoading(true);
-
-    try {
-      const userId = await getAuthenticatedUserId();
-      const data = await get<TaskRow>("tasks", {
-        select: TASK_SELECT,
-        filters: { user_id: userId },
-        order: [{ column: "created_at", ascending: false }],
-      });
-      setTasks(data.map(toTaskRecord));
-    } catch (error) {
-      toast.error("Não foi possível carregar as tarefas", {
-        description: getApiErrorMessage(error, "Tente atualizar a página novamente."),
-      });
-      console.error("Erro ao listar tarefas:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useAppDataRefresh(fetchTasks, ["tasks"]);
-
-  useEffect(() => {
-    // The initial request owns its loading state inside fetchTasks.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchTasks();
-  }, [fetchTasks]);
-
-  return { tasks, isLoading, refreshTasks: fetchTasks };
 }
