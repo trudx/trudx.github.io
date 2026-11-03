@@ -86,6 +86,15 @@ const bulkUpdateSchema = z
   })
   .strict();
 
+const MAX_TASK_FLAGS = 5;
+const taskFlagsSchema = z
+  .object({
+    task_ids: z.array(z.uuid()).min(1).max(200),
+    add_flag_ids: z.array(z.uuid()).max(MAX_TASK_FLAGS).default([]),
+    remove_flag_ids: z.array(z.uuid()).max(50).default([]),
+  })
+  .strict();
+
 function chunks<T>(items: T[], size: number) {
   const result: T[][] = [];
   for (let index = 0; index < items.length; index += size)
@@ -146,7 +155,7 @@ export function createInternalMcp({
           ]),
         ),
         rules:
-          "Não alterar IDs, usuário, chaves ou credenciais. Criar eventos via event_create_with_task. Para editar financeiro: descricao,cliente_id,banco_id,categoria_id,natureza,status; conciliado exige importação. Exclusões não sincronizam automaticamente eventos e tarefas.",
+          "Não alterar IDs, usuário, chaves ou credenciais. Criar eventos via event_create_with_task. Para editar financeiro: descricao,cliente_id,banco_id,categoria_id,natureza,status; conciliado exige importação. Exclusões não sincronizam automaticamente eventos e tarefas. Flags de tarefas são cadastradas em task_flags e aplicadas/removidas com task_flags_bulk_update (máximo 5 por tarefa); records_list de tasks traz flag_ids.",
       };
     }
 
@@ -178,8 +187,19 @@ export function createInternalMcp({
         offset: args.offset,
       });
       const hasMore = rows.length > args.limit;
+      const records = rows.slice(0, args.limit);
+      if (args.resource === "tasks" && records.length) {
+        const links = await api.getAll<{ task_id: string; flag_id: string }>("task_flag_links", {
+          select: "task_id,flag_id",
+          filters: { task_id: records.map((row) => String(row.id)), user_id: userId },
+        });
+        for (const row of records)
+          row.flag_ids = links
+            .filter((link) => link.task_id === row.id)
+            .map((link) => link.flag_id);
+      }
       return {
-        records: rows.slice(0, args.limit),
+        records,
         has_more: hasMore,
         next_offset: hasMore ? args.offset + args.limit : null,
       };
@@ -278,6 +298,84 @@ export function createInternalMcp({
       return { updated: updated, changes: data };
     }
 
+    if (name === "task_flags_bulk_update") {
+      const args = taskFlagsSchema.parse(raw);
+      const taskIds = [...new Set(args.task_ids)];
+      const addIds = [...new Set(args.add_flag_ids)];
+      const removeIds = [...new Set(args.remove_flag_ids)].filter((id) => !addIds.includes(id));
+      if (!addIds.length && !removeIds.length)
+        throw new Error("Informe ao menos uma flag para adicionar ou remover.");
+
+      // Tarefas, flags e o limite por tarefa são conferidos antes da primeira escrita.
+      const flagIds = [...addIds, ...removeIds];
+      const flags = await api.getAll<JsonObject>("task_flags", {
+        select: RESOURCE_COLUMNS.task_flags,
+        filters: { id: flagIds, user_id: userId },
+      });
+      if (flags.length !== flagIds.length)
+        throw new Error("Flag não encontrada na sua conta. Consulte task_flags novamente.");
+      let found = 0;
+      const links: { task_id: string; flag_id: string }[] = [];
+      for (const part of chunks(taskIds, BULK_CHUNK)) {
+        found += (
+          await api.getAll<JsonObject>("tasks", {
+            select: "id",
+            filters: { id: part, user_id: userId },
+          })
+        ).length;
+        links.push(
+          ...(await api.getAll<{ task_id: string; flag_id: string }>("task_flag_links", {
+            select: "task_id,flag_id",
+            filters: { task_id: part, user_id: userId },
+          })),
+        );
+      }
+      if (found !== taskIds.length)
+        throw new Error(
+          `${taskIds.length - found} das ${taskIds.length} tarefas não foram encontradas na sua conta. Nada foi alterado; consulte os dados novamente.`,
+        );
+
+      const inserts: { task_id: string; flag_id: string; user_id: string }[] = [];
+      const overLimit: string[] = [];
+      for (const taskId of taskIds) {
+        const current = links.filter((link) => link.task_id === taskId).map((link) => link.flag_id);
+        const kept = current.filter((id) => !removeIds.includes(id));
+        const added = addIds.filter((id) => !kept.includes(id));
+        if (kept.length + added.length > MAX_TASK_FLAGS) overLimit.push(taskId);
+        inserts.push(
+          ...added.map((flagId) => ({ task_id: taskId, flag_id: flagId, user_id: userId })),
+        );
+      }
+      if (overLimit.length)
+        throw new Error(
+          `Uma tarefa pode ter no máximo ${MAX_TASK_FLAGS} flags. Excederiam o limite: ${overLimit.join(", ")}. Nada foi alterado.`,
+        );
+
+      await assertSession();
+      let removed = 0;
+      let added = 0;
+      try {
+        // Remove antes de inserir, por causa do limite de flags por tarefa no banco.
+        if (removeIds.length) {
+          const removing = links.filter((link) => removeIds.includes(link.flag_id));
+          for (const part of chunks(taskIds, BULK_CHUNK))
+            await api.remove("task_flag_links", {
+              task_id: part,
+              flag_id: removeIds,
+              user_id: userId,
+            });
+          removed = removing.length;
+        }
+        for (const part of chunks(inserts, BULK_CHUNK)) {
+          await api.post("task_flag_links", part, { select: "task_id" });
+          added += part.length;
+        }
+      } finally {
+        if (removed > 0 || added > 0) onChanged("tasks");
+      }
+      return { tasks: taskIds.length, links_added: added, links_removed: removed, flags };
+    }
+
     if (name === "record_delete") {
       const args = deleteSchema.parse(raw);
       const current = await owned(args.resource, args.id);
@@ -296,6 +394,7 @@ export function createInternalMcp({
         throw new Error("A exclusão não foi confirmada. Confira as permissões do registro.");
       }
       onChanged(args.resource);
+      if (args.resource === "task_flags") onChanged("tasks");
       return { deleted: current };
     }
 

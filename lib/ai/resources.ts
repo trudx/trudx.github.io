@@ -35,6 +35,12 @@ export const RESOURCE_SCHEMAS = {
       position: z.number().int().min(0).max(10000).optional(),
     })
     .strict(),
+  task_flags: z
+    .object({
+      name: z.string().trim().min(1).max(40),
+      color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Use uma cor no formato #rrggbb."),
+    })
+    .strict(),
   clients: z
     .object({
       name: text,
@@ -102,6 +108,7 @@ export const RESOURCE_COLUMNS: Record<ResourceName, string> = {
   tasks:
     "id,title,description,priority,column_id,cliente_id,average_duration_minutes,due_date,created_at,updated_at",
   task_columns: "id,key,name,color,position",
+  task_flags: "id,name,color",
   clients: "id,name,contact,status",
   eventos: "id,titulo,descricao,local,data_inicio,data_fim,dia_inteiro,cliente_id",
   financeiro:

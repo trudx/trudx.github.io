@@ -157,7 +157,7 @@ describe("MCP interno", () => {
     const result = await db.call("resources_describe");
     assert.equal(result.isError, false);
     const resources = result.value?.resources as Record<string, { create: { properties: object } }>;
-    assert.equal(Object.keys(resources).length, 10);
+    assert.equal(Object.keys(resources).length, 11);
     for (const resource of Object.values(resources))
       assert.ok(!Object.hasOwn(resource.create.properties, "user_id"));
   });
@@ -231,6 +231,68 @@ describe("MCP interno", () => {
       { ids },
     ])
       assert.equal((await db.call("financeiro_bulk_update", args)).isError, true);
+  });
+
+  it("aplica e remove flags em várias tarefas, validando posse e limite antes de escrever", async () => {
+    const TASK2 = "66666666-6666-4666-8666-666666666666";
+    const FLAG = "55555555-5555-4555-8555-555555555555";
+    const OLD = "77777777-7777-4777-8777-777777777777";
+    const FOREIGN = "88888888-8888-4888-8888-888888888888";
+    const db = database({
+      tasks: [
+        { id: ID, user_id: USER, title: "TV-1" },
+        { id: TASK2, user_id: USER, title: "TV-2" },
+      ],
+      task_flags: [
+        { id: FLAG, user_id: USER, name: "Tele.Visão", color: "#ff0000" },
+        { id: OLD, user_id: USER, name: "Antiga", color: "#00ff00" },
+        { id: FOREIGN, user_id: OTHER, name: "Alheia", color: "#0000ff" },
+      ],
+      task_flag_links: [{ task_id: ID, flag_id: OLD, user_id: USER }],
+    });
+
+    const foreign = await db.call("task_flags_bulk_update", {
+      task_ids: [ID],
+      add_flag_ids: [FOREIGN],
+    });
+    assert.equal(foreign.isError, true);
+    assert.equal(db.calls.filter((call) => call.operation === "post").length, 0);
+
+    const result = await db.call("task_flags_bulk_update", {
+      task_ids: [ID, TASK2, ID],
+      add_flag_ids: [FLAG],
+      remove_flag_ids: [OLD],
+    });
+    assert.equal(result.isError, false);
+    assert.equal(result.value?.links_added, 2);
+    assert.equal(result.value?.links_removed, 1);
+    assert.deepEqual(
+      db.rows.task_flag_links.map((link) => [link.task_id, link.flag_id]),
+      [
+        [ID, FLAG],
+        [TASK2, FLAG],
+      ],
+    );
+    assert.deepEqual(db.changed, ["tasks"]);
+
+    const listed = await db.call("records_list", { resource: "tasks" });
+    assert.deepEqual(
+      (listed.value?.records as Row[]).map((row) => row.flag_ids),
+      [[FLAG], [FLAG]],
+    );
+
+    const flags = Array.from(
+      { length: 5 },
+      (_, index) => `9999999${index}-9999-4999-8999-999999999999`,
+    );
+    db.rows.task_flags.push(
+      ...flags.map((id) => ({ id, user_id: USER, name: id, color: "#000000" })),
+    );
+    const posts = db.calls.filter((call) => call.operation === "post").length;
+    const limit = await db.call("task_flags_bulk_update", { task_ids: [ID], add_flag_ids: flags });
+    assert.equal(limit.isError, true);
+    assert.match(limit.text, /no máximo 5/);
+    assert.equal(db.calls.filter((call) => call.operation === "post").length, posts);
   });
 
   it("protege identidade, campos imutáveis e dados monetários", async () => {

@@ -12,7 +12,7 @@
     },
     {
       "name": "records_list",
-      "description": "Lista registros paginados. Recursos: tasks, task_columns, clients, eventos, financeiro, gastos_fixos, bancos, financeiro_categorias, financeiro_grupos, financeiro_saldos_referencia. Filtros de igualdade por campos permitidos. Respeite has_more e next_offset: uma página não é o conjunto completo. Valores financeiros de registros estão em reais.",
+      "description": "Lista registros paginados. Recursos: tasks, task_columns, task_flags, clients, eventos, financeiro, gastos_fixos, bancos, financeiro_categorias, financeiro_grupos, financeiro_saldos_referencia. Filtros de igualdade por campos permitidos. Respeite has_more e next_offset: uma página não é o conjunto completo. Valores financeiros de registros estão em reais. Tarefas vêm com flag_ids (IDs de task_flags).",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -72,6 +72,21 @@
           "status": { "type": "string" }
         },
         "required": ["ids"],
+        "additionalProperties": false
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false }
+    },
+    {
+      "name": "task_flags_bulk_update",
+      "description": "Adiciona e/ou remove flags (etiquetas de task_flags) em várias tarefas de uma vez (até 200 IDs reais por chamada). As flags já existentes na tarefa são mantidas, exceto as de remove_flag_ids. Uma tarefa pode ter no máximo 5 flags. Se a flag pedida não existir, crie-a antes com record_create em task_flags (name e color #rrggbb). Tarefas e flags são validadas antes de qualquer escrita e a chamada falha inteira se alguma não for da conta ou se exceder o limite. Consulte os IDs com records_list e confirme com o usuário quando o pedido for amplo.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_ids": { "type": "array", "items": { "type": "string" } },
+          "add_flag_ids": { "type": "array", "items": { "type": "string" } },
+          "remove_flag_ids": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["task_ids"],
         "additionalProperties": false
       },
       "annotations": { "readOnlyHint": false, "destructiveHint": false }

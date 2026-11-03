@@ -12,6 +12,7 @@ const ACTION_LABELS: Record<string, string> = {
   record_create: "Criando registro",
   record_update: "Atualizando registro",
   financeiro_bulk_update: "Atualizando vários lançamentos",
+  task_flags_bulk_update: "Atualizando flags das tarefas",
   record_delete: "Excluindo registro",
   event_create_with_task: "Criando evento e tarefa",
   financeiro_analyze: "Analisando o financeiro",
