@@ -23,7 +23,7 @@ import type { FormEvent } from "react";
 import type { AiProviderId } from "@/lib/ai/types";
 
 //* Utils Imports
-import { AI_PROVIDERS } from "@/lib/ai/models";
+import { AI_PROVIDERS, switchAiProvider } from "@/lib/ai/models";
 
 export function AiSettingsSetting() {
   const { userId, settings, isLoading, saveSettings, clearSettings } = useAiSettings();
@@ -103,7 +103,16 @@ export function AiSettingsSetting() {
                   if (!value || !Object.hasOwn(AI_PROVIDERS, value)) return;
                   const next = value as AiProviderId;
                   if (next === draft.provider) return;
-                  setDraft({ provider: next, model: AI_PROVIDERS[next].models[0].id, token: "" });
+                  // Guarda o token digitado do provedor anterior e traz o já salvo do novo.
+                  const token = draft.token.trim();
+                  setDraft(
+                    switchAiProvider(
+                      token
+                        ? { ...draft, tokens: { ...draft.tokens, [draft.provider]: token } }
+                        : draft,
+                      next,
+                    ),
+                  );
                   setCustom(false);
                   setTested(false);
                 }}
@@ -115,6 +124,7 @@ export function AiSettingsSetting() {
                   {Object.entries(AI_PROVIDERS).map(([id, option]) => (
                     <Select.SelectItem key={id} value={id}>
                       {option.name}
+                      {draft.tokens[id as AiProviderId] ? " · token salvo" : ""}
                     </Select.SelectItem>
                   ))}
                 </Select.SelectContent>
@@ -143,6 +153,7 @@ export function AiSettingsSetting() {
                   {provider.models.map((model) => (
                     <Select.SelectItem key={model.id} value={model.id}>
                       {model.name}
+                      {model.vision ? " · imagem" : ""}
                     </Select.SelectItem>
                   ))}
                   <Select.SelectItem value="custom">Personalizado...</Select.SelectItem>
@@ -213,9 +224,10 @@ export function AiSettingsSetting() {
           </div>
           <div className="rounded-lg border bg-muted/40 p-3 text-xs leading-5 text-muted-foreground">
             <p>
-              O token, o modelo e as últimas três conversas ficam salvos na sua conta, para
-              valer em todos os seus dispositivos. O token é enviado somente ao provedor escolhido.
-              As mensagens e os dados consultados pelo assistente também são enviados a ele.
+              O token de cada provedor, o modelo e as últimas três conversas ficam salvos na sua
+              conta, para valer em todos os seus dispositivos e para trocar de provedor direto no
+              chat. Cada token é enviado somente ao seu provedor. As mensagens e os dados
+              consultados pelo assistente também são enviados a ele.
             </p>
             <p className="mt-1">
               Use uma chave pessoal com limite de gastos. O uso da API, incluindo o teste de
@@ -266,6 +278,10 @@ export function AiSettingsSetting() {
               O assistente consulta e altera tarefas, colunas, clientes, eventos, lançamentos,
               gastos fixos, bancos, categorias e grupos. Também analisa o financeiro, consulta
               saldos e controla o cronômetro.
+            </p>
+            <p>
+              Modelos marcados com &ldquo;imagem&rdquo; aceitam imagens no chat (anexar ou colar com
+              Ctrl+V). Os demais recusam o envio.
             </p>
             <p>
               Seleção de modelos consultada em 21/10/2026:{" "}

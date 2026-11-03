@@ -20,26 +20,39 @@ type ChatRow = {
   updated_at: string;
 };
 
+// Banco sem `ia-tokens-por-provedor.sql`: a coluna `tokens` não existe (42703 no select, PGRST204 no upsert).
+function missingTokensColumn(error: { code?: string } | null) {
+  return error?.code === "42703" || error?.code === "PGRST204";
+}
+
 /** Configuração da IA salva na conta, ou null quando ainda não existe. */
 export async function fetchRemoteAiSettings(userId: string): Promise<AiSettings | null> {
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from(SETTINGS_TABLE)
-    .select("provider,model,token")
+    .select("provider,model,token,tokens")
     .eq("user_id", userId)
     .maybeSingle();
+  if (missingTokensColumn(error))
+    ({ data, error } = await supabase
+      .from(SETTINGS_TABLE)
+      .select("provider,model,token")
+      .eq("user_id", userId)
+      .maybeSingle());
   if (error) throw error;
   if (!data?.token) return null;
   return parseAiSettings(data);
 }
 
 export async function pushRemoteAiSettings(userId: string, settings: AiSettings) {
-  const { error } = await supabase.from(SETTINGS_TABLE).upsert({
+  const row = {
     user_id: userId,
     provider: settings.provider,
     model: settings.model.trim(),
     token: settings.token.trim(),
     updated_at: new Date().toISOString(),
-  });
+  };
+  let { error } = await supabase.from(SETTINGS_TABLE).upsert({ ...row, tokens: settings.tokens });
+  if (missingTokensColumn(error)) ({ error } = await supabase.from(SETTINGS_TABLE).upsert(row));
   if (error) throw error;
 }
 

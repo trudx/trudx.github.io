@@ -22,6 +22,7 @@ const entrySchema = z.object({
   content: z.string().max(4000),
   activities: z.array(activitySchema).max(12).optional(),
   error: z.boolean().optional(),
+  imageCount: z.number().int().min(0).max(10).optional(),
 });
 const chatSchema = z.object({
   id: z.uuid(),
@@ -113,7 +114,10 @@ export function restoredChatContext(entries: ChatEntry[]): AiMessage[] {
     const actions = entry.activities
       ?.map((activity) => `${activity.name}: ${activity.status}`)
       .join(", ");
-    const text = `${entry.role === "user" ? "Usuário" : "Assistente"}: ${entry.content}${actions ? `\nAções registradas: ${actions}` : ""}`;
+    const images = entry.imageCount
+      ? ` [enviou ${entry.imageCount} imagem(ns), não disponíveis]`
+      : "";
+    const text = `${entry.role === "user" ? "Usuário" : "Assistente"}: ${entry.content}${images}${actions ? `\nAções registradas: ${actions}` : ""}`;
     if (length + text.length > 48000) break;
     recent.unshift(text);
     length += text.length;

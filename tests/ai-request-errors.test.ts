@@ -15,6 +15,7 @@ const settings: AiSettings = {
   provider: "deepseek",
   model: "deepseek-flash",
   token: "test-private-key",
+  tokens: { deepseek: "test-private-key" },
 };
 
 describe("diagnóstico das chamadas de IA", () => {

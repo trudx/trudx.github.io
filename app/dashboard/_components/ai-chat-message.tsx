@@ -1,7 +1,7 @@
 "use client";
 
 //* Libraries Imports
-import { Check, CircleAlert, Loader2 } from "lucide-react";
+import { Check, CircleAlert, ImageIcon, Loader2 } from "lucide-react";
 
 //* Types Imports
 import type { ChatEntry } from "@/lib/ai/types";
@@ -60,6 +60,24 @@ export function AiChatMessage({ entry, pending }: { entry: ChatEntry; pending: b
           ))}
         </ul>
       )}
+      {entry.images?.length ? (
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {entry.images.map((url, index) => (
+            // eslint-disable-next-line @next/next/no-img-element -- data URL local, sem otimização do Next.
+            <img
+              key={index}
+              src={url}
+              alt={`Imagem ${index + 1} enviada`}
+              className="size-20 rounded-md border object-cover"
+            />
+          ))}
+        </div>
+      ) : entry.imageCount ? (
+        <p className="mb-1 flex items-center gap-1.5 text-xs opacity-75">
+          <ImageIcon className="size-3.5" />
+          {entry.imageCount === 1 ? "1 imagem enviada" : `${entry.imageCount} imagens enviadas`}
+        </p>
+      ) : null}
       {entry.content && (
         <p
           className={`whitespace-pre-wrap break-words text-sm leading-6 ${entry.error ? "text-destructive" : ""}`}

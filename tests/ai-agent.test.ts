@@ -28,7 +28,12 @@ function setup() {
   const requests: unknown[] = [];
   const controller = new AbortController();
   const options: Parameters<typeof runAiTurn>[0] = {
-    settings: { provider: "openai", model: "gpt-6.1-sol", token: "test" },
+    settings: {
+      provider: "openai",
+      model: "gpt-6.1-sol",
+      token: "test",
+      tokens: { openai: "test" },
+    },
     messages,
     tools: MCP_TOOLS,
     signal: controller.signal,

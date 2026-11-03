@@ -46,8 +46,34 @@ export function toResponsesInput(messages: AiMessage[]): unknown[] {
       ];
     if (message.role === "assistant" && Array.isArray(message.responseItems))
       return message.responseItems;
+    if (message.role === "user" && message.images?.length)
+      return [
+        {
+          role: "user",
+          content: [
+            ...(message.content ? [{ type: "input_text", text: message.content }] : []),
+            ...message.images.map((url) => ({ type: "input_image", image_url: url })),
+          ],
+        },
+      ];
     return [{ role: message.role, content: message.content ?? "" }];
   });
+}
+
+/** Mensagem no formato Chat Completions: imagens viram partes `image_url` do conteúdo. */
+export function toChatMessage(message: AiMessage): JsonObject {
+  const copy: JsonObject = { ...message };
+  delete copy.responseItems;
+  delete copy.images;
+  const images = message.images;
+  if (message.role !== "user" || !images?.length) return copy;
+  return {
+    ...copy,
+    content: [
+      ...(message.content ? [{ type: "text", text: message.content }] : []),
+      ...images.map((url) => ({ type: "image_url", image_url: { url } })),
+    ],
+  };
 }
 
 export function buildAiRequest(
@@ -76,14 +102,7 @@ export function buildAiRequest(
   }
   return {
     model: settings.model,
-    messages: [
-      { role: "system", content: instructions },
-      ...messages.map((message) => {
-        const copy = { ...message };
-        delete copy.responseItems;
-        return copy;
-      }),
-    ],
+    messages: [{ role: "system", content: instructions }, ...messages.map(toChatMessage)],
     tools: tools.map((tool) => ({
       type: "function",
       function: {

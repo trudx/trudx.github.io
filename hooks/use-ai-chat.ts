@@ -30,6 +30,8 @@ import {
 } from "@/lib/ai/chat-store";
 import { deleteRemoteChat, pushRemoteChat } from "@/lib/ai/remote-store";
 import { createDiagnosticLogger } from "@/lib/browser-logs";
+import { modelAcceptsImages } from "@/lib/ai/models";
+import { MAX_CHAT_IMAGES } from "@/lib/ai/images";
 
 export function useAiChat() {
   const { userId, settings } = useAiSettings();
@@ -86,7 +88,9 @@ export function useAiChat() {
         id: chatId,
         createdAt,
         updatedAt: new Date().toISOString(),
-        title: entries.find((entry) => entry.role === "user")?.content.slice(0, 80) ?? "Conversa",
+        title:
+          entries.find((entry) => entry.role === "user" && entry.content)?.content.slice(0, 80) ??
+          "Conversa",
         entries,
       });
       // Feedback de uma escrita no armazenamento externo.
@@ -120,14 +124,21 @@ export function useAiChat() {
       );
   }
 
-  async function send(content: string) {
-    if (controller.current || !content.trim() || !dispatch || !userId) return false;
+  async function send(content: string, images: string[] = []) {
+    if (controller.current || (!content.trim() && !images.length) || !dispatch || !userId)
+      return false;
     if (!settings.token.trim()) return false;
     if (content.trim().length > 12000) return false;
+    if (
+      images.length > MAX_CHAT_IMAGES ||
+      (images.length && modelAcceptsImages(settings) === false)
+    )
+      return false;
     const log = createDiagnosticLogger();
     const signature = `${settings.provider}:${settings.model}`;
     if (configuration.current !== signature) {
       // Históricos assinados e itens de raciocínio não são portáveis entre provedores/modelos.
+      // Imagens também saem: o novo modelo pode não aceitá-las.
       history.current = history.current
         .filter((message) => message.role !== "tool" && message.content)
         .map((message) => ({ role: message.role, content: message.content }));
@@ -139,10 +150,19 @@ export function useAiChat() {
     const assistantId = crypto.randomUUID();
     setEntries((current) => [
       ...current,
-      { id: crypto.randomUUID(), role: "user", content: content.trim() },
+      {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: content.trim(),
+        ...(images.length ? { images, imageCount: images.length } : {}),
+      },
       { id: assistantId, role: "assistant", content: "", activities: [] },
     ]);
-    history.current.push({ role: "user", content: content.trim() });
+    history.current.push({
+      role: "user",
+      content: content.trim(),
+      ...(images.length ? { images } : {}),
+    });
     let lastText = "";
     try {
       await runAiTurn({

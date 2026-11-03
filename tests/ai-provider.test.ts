@@ -14,7 +14,13 @@ import {
 import type { AiMessage, AiSettings } from "../lib/ai/types.ts";
 
 //* Utils Imports
-import { DEFAULT_AI_SETTINGS, parseAiSettings, AI_PROVIDERS } from "../lib/ai/models.ts";
+import {
+  DEFAULT_AI_SETTINGS,
+  parseAiSettings,
+  AI_PROVIDERS,
+  modelAcceptsImages,
+  switchAiProvider,
+} from "../lib/ai/models.ts";
 import { aiStorageKey, readAiSettings, writeAiSettings } from "../lib/ai/settings-store.ts";
 import { MCP_TOOLS } from "../lib/ai/mcp.ts";
 
@@ -22,6 +28,7 @@ const settings: AiSettings = {
   provider: "openai",
   model: "gpt-6.1-sol",
   token: "private-test-token",
+  tokens: { openai: "private-test-token" },
 };
 
 describe("configuração da IA", () => {
@@ -32,6 +39,7 @@ describe("configuração da IA", () => {
         provider: "gemini",
         model: "custom-model",
         token: "key",
+        tokens: { gemini: "key" },
       },
     );
     assert.deepEqual(parseAiSettings({ provider: "__proto__", token: "key" }), DEFAULT_AI_SETTINGS);
@@ -41,6 +49,31 @@ describe("configuração da IA", () => {
     );
     for (const provider of Object.values(AI_PROVIDERS))
       assert.equal(new URL(provider.endpoint).protocol, "https:");
+  });
+
+  it("guarda um token por provedor e troca de provedor sem perder os demais", () => {
+    const parsed = parseAiSettings({
+      provider: "openai",
+      model: "gpt-6.1-sol",
+      token: " novo ",
+      tokens: { openai: "antigo", deepseek: " ds ", "https://evil": "x", gemini: 3 },
+    });
+    assert.deepEqual(parsed.tokens, { openai: "novo", deepseek: "ds" });
+    const deepseek = switchAiProvider(parsed, "deepseek");
+    assert.equal(deepseek.token, "ds");
+    assert.equal(deepseek.model, AI_PROVIDERS.deepseek.models[0].id);
+    assert.equal(switchAiProvider(parsed, "gemini").token, "");
+    // Token ativo vazio tira o provedor do mapa.
+    assert.deepEqual(parseAiSettings({ ...parsed, token: "" }).tokens, { deepseek: "ds" });
+  });
+
+  it("sabe quais modelos aceitam imagem e deixa IDs personalizados para o provedor", () => {
+    assert.equal(modelAcceptsImages({ provider: "deepseek", model: "deepseek-flash" }), false);
+    assert.equal(
+      modelAcceptsImages({ provider: "deepseek", model: "deepseek-v4-flash-vision-exp" }),
+      true,
+    );
+    assert.equal(modelAcceptsImages({ provider: "openrouter", model: "x/y" }), null);
   });
 
   it("salva tokens separados por conta e tolera dados locais corrompidos", () => {
@@ -75,6 +108,7 @@ describe("adaptadores de provedores", () => {
       provider: "deepseek",
       model: "deepseek-flash",
       token: "deepseek-test-key",
+      tokens: { deepseek: "deepseek-test-key" },
     };
     assert.deepEqual(parseAiSettings(deepseek), deepseek);
     assert.equal(AI_PROVIDERS.deepseek.models[1].id, "deepseek-v4-pro");
@@ -161,6 +195,36 @@ describe("adaptadores de provedores", () => {
       ...output,
       { type: "function_call_output", call_id: "call1", output: "Resultado" },
     ]);
+  });
+
+  it("envia imagens como partes do conteúdo nos dois formatos de API", () => {
+    const image = "data:image/jpeg;base64,AAAA";
+    const message: AiMessage = { role: "user", content: "O que é isto?", images: [image] };
+    assert.deepEqual(toResponsesInput([message]), [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: "O que é isto?" },
+          { type: "input_image", image_url: image },
+        ],
+      },
+    ]);
+    const body = buildAiRequest(
+      { ...settings, provider: "deepseek", model: "deepseek-v4-flash-vision-exp" },
+      [message, { role: "user", content: "Sem imagem" }],
+      [],
+      "Instruções",
+    );
+    const messages = body.messages as Record<string, unknown>[];
+    assert.deepEqual(messages[1], {
+      role: "user",
+      content: [
+        { type: "text", text: "O que é isto?" },
+        { type: "image_url", image_url: { url: image } },
+      ],
+    });
+    assert.deepEqual(messages[2], { role: "user", content: "Sem imagem" });
+    assert.equal(body.thinking, undefined);
   });
 
   it("preserva assinaturas/extra_content no OpenRouter e Gemini", () => {

@@ -12,7 +12,7 @@ import type { AiSettings } from "@/lib/ai/types";
 
 //* Utils Imports
 import { AiContext } from "@/lib/ai/context";
-import { DEFAULT_AI_SETTINGS } from "@/lib/ai/models";
+import { DEFAULT_AI_SETTINGS, parseAiSettings } from "@/lib/ai/models";
 import { aiStorageKey, readAiSettings, writeAiSettings } from "@/lib/ai/settings-store";
 import { mergeRemoteAiChats, readAiChats } from "@/lib/ai/chat-store";
 import {
@@ -107,10 +107,12 @@ export function AiProvider({ children }: { children: ReactNode }) {
 
   async function saveSettings(next: AiSettings) {
     if (!userId) throw new Error("Sua sessão expirou. Entre novamente.");
-    writeAiSettings(userId, next);
-    setSettings({ ...next, token: next.token.trim(), model: next.model.trim() });
+    // Normaliza e grava o token ativo também no mapa por provedor.
+    const parsed = parseAiSettings(next);
+    writeAiSettings(userId, parsed);
+    setSettings(parsed);
     try {
-      await pushRemoteAiSettings(userId, next);
+      await pushRemoteAiSettings(userId, parsed);
     } catch (error) {
       console.error("Erro ao salvar a configuração da IA na conta:", error);
       throw new Error(
