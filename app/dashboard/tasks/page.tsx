@@ -331,6 +331,9 @@ export default function TasksPage() {
               clients={selectableClients}
               flags={flags}
               isSaving={isSaving}
+              loggedSeconds={editingTask ? secondsByTaskId[editingTask.id] ?? 0 : 0}
+              isTimerSaving={isSavingTimer}
+              onSetSeconds={editingTask ? (seconds) => setTaskSeconds(editingTask.id, seconds) : undefined}
               onOpenChange={setIsFormOpen}
               onSubmit={(input, flagIds) =>
                 editingTask

@@ -31,6 +31,9 @@ type TaskFormDialogProps = {
   isSaving: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (input: TaskInput, flagIds: string[]) => Promise<boolean>;
+  loggedSeconds?: number;
+  isTimerSaving?: boolean;
+  onSetSeconds?: (seconds: number) => Promise<boolean>;
 };
 
 function createEmptyForm(columnId: string): TaskInput {
@@ -54,6 +57,9 @@ export function TaskFormDialog({
   isSaving,
   onOpenChange,
   onSubmit,
+  loggedSeconds = 0,
+  isTimerSaving = false,
+  onSetSeconds,
 }: TaskFormDialogProps) {
   const [form, setForm] = useState<TaskInput>(() =>
     task
@@ -73,9 +79,17 @@ export function TaskFormDialog({
     (task?.flag_ids ?? []).filter((id) => flags.some((flag) => flag.id === id)),
   );
   const isEditing = Boolean(task);
+  const [loggedHours, setLoggedHours] = useState(() => String(Math.floor(loggedSeconds / 3600)));
+  const [loggedMinutes, setLoggedMinutes] = useState(() => String(Math.floor((loggedSeconds % 3600) / 60)));
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (task && onSetSeconds) {
+      const hours = Number(loggedHours);
+      const minutes = Number(loggedMinutes);
+      if (!Number.isInteger(hours) || hours < 0 || !Number.isInteger(minutes) || minutes < 0 || minutes > 59) return;
+      if (!(await onSetSeconds(hours * 3600 + minutes * 60))) return;
+    }
     const saved = await onSubmit(
       {
         ...form,
@@ -230,6 +244,21 @@ export function TaskFormDialog({
               className="h-11"
             />
           </div>
+          {isEditing && onSetSeconds && (
+            <div className="space-y-2">
+              <Label>Tempo executado</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="task-logged-hours" className="text-xs text-muted-foreground">Horas</Label>
+                  <Input id="task-logged-hours" type="number" min="0" step="1" value={loggedHours} onChange={(event) => setLoggedHours(event.target.value)} className="h-11" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="task-logged-minutes" className="text-xs text-muted-foreground">Minutos (0–59)</Label>
+                  <Input id="task-logged-minutes" type="number" min="0" max="59" step="1" value={loggedMinutes} onChange={(event) => setLoggedMinutes(event.target.value)} className="h-11" />
+                </div>
+              </div>
+            </div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="task-due-date">Data prevista de entrega</Label>
             <Input
