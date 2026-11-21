@@ -14,6 +14,7 @@ trudx é uma aplicação web para gestão de freelancers e pequenos negócios. A
 - Indicadores de clientes ativos e inativos.
 - Configurações de nome, e-mail e senha.
 - Assistente IA com chat flutuante, token pessoal e modelos pré-selecionados ou personalizados.
+- MCP remoto de tarefas para Claude, ChatGPT e outras IAs, com token por conta e log de cada requisição.
 - Logout automático após alteração de e-mail ou senha.
 - Interface responsiva em estilo shadcn, com paleta monocromática.
 
@@ -35,6 +36,17 @@ Análises e saldos reaproveitam as funções do dashboard e trabalham com centav
 
 Modelos consultados em 21/10/2026 nas documentações de [OpenAI](https://developers.openai.com/api/docs/models), [Claude](https://platform.claude.com/docs/en/models/overview), [Gemini](https://ai.google.dev/gemini-api/docs/models), [DeepSeek](https://api-docs.deepseek.com/) e no [catálogo OpenRouter](https://openrouter.ai/api/v1/models). Modelos personalizados precisam oferecer suporte a ferramentas. Se um provedor direto bloquear acesso pelo navegador, use OpenRouter; a integração mantém a exportação estática do GitHub Pages.
 
+## MCP remoto de tarefas
+
+A aba **MCP / IA** (`/dashboard/mcp`) conecta IAs externas às tarefas da conta por um servidor MCP remoto (Streamable HTTP, sem estado), publicado como Edge Function do Supabase em `supabase/functions/mcp`. O front continua estático: a IA fala direto com a função.
+
+- **Token**: um por conta, gerado no painel e salvo em `mcp_tokens`. "Gerar novo token" substitui o atual, que para de valer na hora; "Revogar acesso" apaga o token. Clientes com header enviam `Authorization: Bearer <token>`; conectores que só aceitam URL (claude.ai, ChatGPT) usam `?token=<token>`.
+- **Identificação da IA**: o `initialize` entrega instruções fixas, e toda ferramenta exige o argumento `ia` (`claude`, `chatgpt`, `gemini`...) e aceita `modelo`. O nome do cliente MCP informado no `initialize` também é registrado e serve de reserva quando a IA não se identifica.
+- **Ferramentas**: `contexto_tarefas` (colunas, flags, clientes e data de hoje), `listar_tarefas`, `ver_tarefa`, `criar_tarefa`, `editar_tarefa` (inclusive mover de coluna e trocar flags) e `excluir_tarefa` (exige `confirmado=true`). Schemas estritos; colunas, clientes e flags são validados contra a conta.
+- **Log**: cada requisição JSON-RPC vai para `mcp_logs` com IA, modelo, cliente MCP, sessão, ferramenta, argumentos, resposta, status, duração, IP e user agent. A aba mostra o resumo por IA, filtros, o detalhe de cada chamada e permite apagar o histórico. Logs com mais de 90 dias são removidos a cada nova conexão.
+
+A função usa a chave secreta do projeto e filtra `user_id` em todas as consultas. Para ativar, rode [`supabase/sql/mcp-tarefas.sql`](supabase/sql/mcp-tarefas.sql) no SQL Editor e publique a função com `supabase functions deploy mcp` (`verify_jwt = false` já está em `supabase/config.toml`, porque a autenticação é pelo token do MCP).
+
 ## Rotas
 
 | Rota                  | Descrição                                  |
@@ -44,6 +56,7 @@ Modelos consultados em 21/10/2026 nas documentações de [OpenAI](https://develo
 | `/dashboard`          | Visão geral da área autenticada            |
 | `/dashboard/clients`  | Gerenciamento de clientes                  |
 | `/dashboard/tasks`    | Board Kanban para gerenciamento de tarefas |
+| `/dashboard/mcp`      | Token e log do MCP remoto de tarefas       |
 | `/dashboard/settings` | Configurações da conta                     |
 
 ## Stack

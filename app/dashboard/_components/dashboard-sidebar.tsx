@@ -16,6 +16,7 @@ import {
   KanbanSquare,
   LayoutDashboard,
   LogOut,
+  Plug,
   Settings,
   UsersRound,
   Wallet,
@@ -34,6 +35,7 @@ const navigation = [
   { href: "/dashboard/financeiro", label: "Financeiro", icon: Wallet },
   { href: "/dashboard/agenda", label: "Agenda", icon: CalendarDays },
   { href: "/dashboard/system-health", label: "Saúde de sistemas", icon: HeartPulse },
+  { href: "/dashboard/mcp", label: "MCP / IA", icon: Plug },
   { href: "/dashboard/settings", label: "Configurações", icon: Settings },
 ];
 
