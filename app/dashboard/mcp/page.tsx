@@ -2,6 +2,7 @@
 
 //* Components Imports
 import Button from "@/components/ui/button";
+import { TabsContent, TabsList, TabsRoot, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   McpAgentSummary,
@@ -10,6 +11,7 @@ import {
   McpLogDetailDialog,
   McpLogsTable,
 } from "./_components";
+import { CustomMcpPanel } from "./_components/custom-mcp-panel";
 
 //* Libraries Imports
 import { useState } from "react";
@@ -28,6 +30,23 @@ import { getMcpEndpoint } from "@/lib/mcp-logs";
 import { cn } from "@/lib/utils";
 
 export default function McpPage() {
+  return (
+    <TabsRoot defaultValue="tasks" className="gap-5">
+      <TabsList aria-label="Integrações MCP">
+        <TabsTrigger value="tasks">MCP de tarefas</TabsTrigger>
+        <TabsTrigger value="custom">MCPs personalizados</TabsTrigger>
+      </TabsList>
+      <TabsContent value="tasks" keepMounted>
+        <TaskMcpPanel />
+      </TabsContent>
+      <TabsContent value="custom">
+        <CustomMcpPanel />
+      </TabsContent>
+    </TabsRoot>
+  );
+}
+
+function TaskMcpPanel() {
   const {
     token,
     isLoading: isTokenLoading,

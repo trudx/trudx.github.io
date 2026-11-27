@@ -10,12 +10,16 @@ import { notifyAppDataChanged } from "@/hooks/use-app-data-refresh";
 //* Services Imports
 import * as api from "@/services/api-service";
 import { getAuthenticatedUserId } from "@/services/auth-service";
+import { listCustomMcpServers } from "@/services/custom-mcp-service";
 
 //* Types Imports
 import type { AiMessage, ChatEntry, ToolActivity } from "@/lib/ai/types";
 
 //* Utils Imports
 import { createInternalMcp, MCP_TOOLS } from "@/lib/ai/mcp";
+import { connectCustomMcpServers } from "@/lib/ai/custom-mcp-client";
+import { isJsonObject } from "@/lib/ai/custom-mcp-config";
+import { HttpError } from "@/lib/http";
 import { runAiTurn } from "@/lib/ai/agent";
 import {
   deleteAiChat,
@@ -164,12 +168,38 @@ export function useAiChat() {
       ...(images.length ? { images } : {}),
     });
     let lastText = "";
+    let custom: Awaited<ReturnType<typeof connectCustomMcpServers>> | undefined;
     try {
+      try {
+        const servers = await listCustomMcpServers(userId);
+        abort.signal.throwIfAborted();
+        if ((await getAuthenticatedUserId()) !== userId) throw new Error("Sua conta mudou.");
+        custom = await connectCustomMcpServers(servers, abort.signal);
+        if (custom.failures && !abort.signal.aborted)
+          log({
+            level: "warn",
+            source: "ai.tool",
+            message: `Falha ao conectar a ${custom.failures} servidor(es) MCP personalizado(s).`,
+          });
+      } catch (error) {
+        if (abort.signal.aborted) throw error;
+        if (!(error instanceof HttpError && error.code === "PGRST205"))
+          log({ level: "warn", source: "ai.tool", message: "Não foi possível carregar os MCPs personalizados." });
+      }
       await runAiTurn({
         settings,
         messages: history.current,
-        tools: MCP_TOOLS,
-        dispatch,
+        tools: [...MCP_TOOLS, ...(custom?.tools ?? [])],
+        dispatch: async (request) => {
+          if (isJsonObject(request) && request.method === "tools/call" && isJsonObject(request.params)) {
+            const { name, arguments: args } = request.params;
+            if (typeof name === "string" && isJsonObject(args)) {
+              const call = custom?.call(name, args);
+              if (call) return { jsonrpc: "2.0", id: request.id, result: await call };
+            }
+          }
+          return dispatch(request);
+        },
         signal: abort.signal,
         assertSession: async () => {
           if ((await getAuthenticatedUserId()) !== userId)
@@ -221,6 +251,7 @@ export function useAiChat() {
         error: !abort.signal.aborted,
       });
     } finally {
+      custom?.close();
       if (controller.current === abort) controller.current = null;
       if (mounted.current) setIsRunning(false);
     }

@@ -23,7 +23,8 @@ function compatibleParameters(tool: McpTool, settings: AiSettings) {
     if (properties && Object.keys(properties).length === 0) return undefined;
     // O Gemini não representa dicionários abertos de forma consistente em function declarations.
     // O MCP continua recebendo objetos: o agente decodifica estes dois campos na fronteira da API.
-    for (const key of ["data", "filters"]) {
+    const fields = tool.name.startsWith("mcp_") ? [] : ["data", "filters"];
+    for (const key of fields) {
       if (properties?.[key])
         properties[key] = {
           type: "string",
